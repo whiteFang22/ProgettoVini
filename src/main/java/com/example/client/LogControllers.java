@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class LogControllers {
     @FXML
@@ -39,6 +40,14 @@ public class LogControllers {
         BorderPane parent = (BorderPane) registrationVBox.getParent().getParent();
         parent.setCenter(view);
         parent.getScene().getWindow().sizeToScene();
+    }
+
+    @FXML
+    protected void aceesso(){
+        System.out.println("Login");
+        Stage stage = (Stage) loginVBox.getScene().getWindow();
+        GetStage obj = new GetStage();
+        obj.set(stage);
     }
 
 }

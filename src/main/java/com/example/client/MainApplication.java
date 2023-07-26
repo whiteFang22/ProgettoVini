@@ -17,7 +17,7 @@ public class MainApplication extends Application {
         AnchorPane root = (AnchorPane) fxmlLoader.load();
 
         BorderPane bp = (BorderPane) root.lookup("#mainPaneLog");
-        fxmlLoader = new FXMLLoader(MainApplication.class.getResource("client-registration.fxml"));
+        fxmlLoader = new FXMLLoader(MainApplication.class.getResource("login-form.fxml"));
         Pane view = (Pane) fxmlLoader.load();
         bp.setCenter(view);
 
@@ -25,7 +25,6 @@ public class MainApplication extends Application {
         stage.setScene(scene);
         stage.sizeToScene();
         stage.show();
-
     }
 
     public static void main(String[] args) {
