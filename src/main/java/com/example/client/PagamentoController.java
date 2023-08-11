@@ -15,7 +15,7 @@ public class PagamentoController {
         BorderPane parent = (BorderPane) VboxPagamento.getParent().getParent();
 
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("scheda-bonifico");
+        Pane view = object.getPage("cliente/scheda-bonifico");
         parent.setCenter(view);
     }
 
@@ -25,7 +25,7 @@ public class PagamentoController {
         BorderPane parent = (BorderPane) VboxPagamento.getParent().getParent();
 
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("scheda-cartaDiCredito");
+        Pane view = object.getPage("cliente/scheda-cartaDiCredito");
         parent.setCenter(view);
     }
 
@@ -35,11 +35,11 @@ public class PagamentoController {
         BorderPane parent = (BorderPane) VboxPagamento.getParent().getParent();
 
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("left-ricerca");
+        Pane view = object.getPage("cliente/left-ricerca");
         parent.setLeft(view);
 
         object = new FxmlLoader();
-        view = object.getPage("scheda-vini-client");
+        view = object.getPage("cliente/scheda-vini-client");
         parent.setCenter(view);
     }
 }

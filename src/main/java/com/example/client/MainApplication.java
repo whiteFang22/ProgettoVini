@@ -13,17 +13,17 @@ import java.io.IOException;
 public class MainApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("log.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("general/log.fxml"));
         AnchorPane root = (AnchorPane) fxmlLoader.load();
 
-        BorderPane bp = (BorderPane) root.lookup("#mainPaneLog");
-        fxmlLoader = new FXMLLoader(MainApplication.class.getResource("login-form.fxml"));
-        Pane view = (Pane) fxmlLoader.load();
-        bp.setCenter(view);
+        //problema è questo per il nullPointerException
+//        BorderPane bp = (BorderPane) root.lookup("#mainPaneLog");
+//        fxmlLoader = new FXMLLoader(MainApplication.class.getResource("login-form.fxml"));
+//        Pane view = (Pane) fxmlLoader.load();
+//        bp.setCenter(view);
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.sizeToScene();
         stage.show();
     }
 

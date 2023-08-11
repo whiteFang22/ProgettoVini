@@ -15,13 +15,13 @@ public class RicercaController {
     protected void onAcquistaButton(){
         System.out.println("Acquista");
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("scheda-bonifico");
+        Pane view = object.getPage("cliente/scheda-bonifico");
 
         BorderPane parent = (BorderPane) VboxRevisione.getParent().getParent();
         parent.setCenter(view);
 
         object = new FxmlLoader();
-        view = object.getPage("left-pagamento");
+        view = object.getPage("cliente/left-pagamento");
         parent.setLeft(view);
 
     }

@@ -1,53 +1,41 @@
 package com.example.client;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-public class LogControllers {
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class LogControllers implements Initializable{
     @FXML
-    private Button loginButton;
+    private BorderPane mainPaneLog;
 
     @FXML
-    BorderPane mainPaneLog;
+    public ChoiceBox<String> UserChoiceBox;
 
-    @FXML
-    VBox loginVBox;
+    private String[] userTypes = {"cliente", "amministratore", "impiegato"};
 
-    @FXML
-    VBox registrationVBox;
 
-    @FXML
-    protected void onRegistrationButtonClick() {
-        System.out.println("Registration");
+    // called to inizialize a controller after its root elemnt has been processed
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle)  {
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("client-registration");
-//      RECUPERO IL mainPaneLog
-        BorderPane parent = (BorderPane) loginVBox.getParent().getParent();
-        parent.setCenter(view);
-//      AGGIUSTO LE DIMENSIONI DELLA WINDOW
-        parent.getScene().getWindow().sizeToScene();
+        Pane view = object.getPage("general/login-form");
+        mainPaneLog.setCenter(view);
+        UserChoiceBox.getItems().addAll(userTypes);
+        UserChoiceBox.setOnAction(this::getChoice);
     }
 
-    @FXML
-    protected void onLoginButtonClick() {
-        System.out.println("Login");
-        FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("login-form");
-        BorderPane parent = (BorderPane) registrationVBox.getParent().getParent();
-        parent.setCenter(view);
-        parent.getScene().getWindow().sizeToScene();
+    public void getChoice(ActionEvent event){
+        String choice = UserChoiceBox.getValue();
+        //System.out.println(choice);
+        SharedData.getInstance().setSharedValue(choice);
     }
-
-    @FXML
-    protected void aceesso(){
-        System.out.println("Login");
-        Stage stage = (Stage) loginVBox.getScene().getWindow();
-        GetStage obj = new GetStage();
-        obj.set(stage);
-    }
-
 }

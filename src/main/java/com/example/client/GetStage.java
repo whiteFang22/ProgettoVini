@@ -9,12 +9,34 @@ import javafx.stage.Stage;
 
 public class GetStage {
 
-    public void set(Stage stage){
-        FxmlLoader object = new FxmlLoader();
-        Pane root = object.getPage("client-initial-page");
-        BorderPane bp = (BorderPane) root.lookup("#mainPaneInitialClient");
 
-        Pane view = object.getPage("scheda-vini-client");
+
+    public void set(Stage stage, String userType){
+        String path1="";
+        String parentPath="";
+        String path2="";
+        switch (userType){
+            case "cliente":
+                path1 = "cliente/client-initial-page";
+                parentPath = "#mainPaneInitialClient";
+                path2 = "cliente/scheda-vini-client";
+                break;
+            case "impiegato":
+                path1 = "impiegato/emp-initial-page";
+                parentPath = "#mainBorderImpiegati";
+                path2 = "impiegato/center-clienti-registrati";
+                break;
+            case "amministratore":
+                break;
+        }
+
+        FxmlLoader object = new FxmlLoader();
+        Pane root = object.getPage(path1);
+        BorderPane bp = (BorderPane) root.lookup(parentPath);
+
+        System.out.println("value: "+ userType);
+
+        Pane view = object.getPage(path2);
         bp.setCenter(view);
 
         Scene scene = new Scene(root);
