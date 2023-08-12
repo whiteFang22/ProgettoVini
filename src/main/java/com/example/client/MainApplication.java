@@ -16,12 +16,6 @@ public class MainApplication extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("general/log.fxml"));
         AnchorPane root = (AnchorPane) fxmlLoader.load();
 
-        //problema è questo per il nullPointerException
-//        BorderPane bp = (BorderPane) root.lookup("#mainPaneLog");
-//        fxmlLoader = new FXMLLoader(MainApplication.class.getResource("login-form.fxml"));
-//        Pane view = (Pane) fxmlLoader.load();
-//        bp.setCenter(view);
-
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.show();

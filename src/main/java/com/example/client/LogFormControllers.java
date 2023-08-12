@@ -19,7 +19,6 @@ public class LogFormControllers {
     @FXML
     private VBox registrationVBox;
 
-
     @FXML
     protected void onRegistrationButtonClick() throws IOException {
         System.out.println("Registration");
@@ -51,7 +50,6 @@ public class LogFormControllers {
         String userType = SharedData.getInstance().getSharedValue();
 
         // RESTITUISCE LA SCHERMATA HOME DEL SOFTWARE
-        // implementa la possibilità di passare un parametro per stabilire il tipo di schermata da restituire
         GetStage obj = new GetStage();
         obj.set(stage, userType);
     }

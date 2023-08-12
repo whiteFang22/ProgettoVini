@@ -1,29 +1,35 @@
 package com.example.client;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class FiltroController {
     @FXML
     Button ordiniProposteButton;
-
     @FXML
     Button clientiButton;
+    @FXML
+    Button registraButton;
+    @FXML
+    Button reportButton;
+    @FXML
+    Button esciButton;
 
     @FXML
     Label centerTitle;
 
     @FXML
     ToggleGroup filtroRicerca;
-
-    @FXML
-    VBox VboxOrdiniProposte;
 
     @FXML
     private void ShowLeftOriniProposte(){
@@ -72,5 +78,39 @@ public class FiltroController {
                 centerTitle.setText("PROPOSTE DI ACQUISTO");
                 break;
         }
+    }
+    @FXML
+    private void registraImpiegato(){
+        System.out.println("registra impiegato");
+        BorderPane parent = (BorderPane) registraButton.getParent().getParent();
+
+        FxmlLoader object = new FxmlLoader();
+        Pane view = object.getPage("amministratore/registrationForm");
+        parent.setCenter(view);
+    }
+    @FXML
+    private void showRecordPage(){
+        System.out.println("registra impiegato");
+        BorderPane parent = (BorderPane) reportButton.getParent().getParent();
+
+        FxmlLoader object = new FxmlLoader();
+        Pane view = object.getPage("amministratore/report");
+        parent.setCenter(view);
+    }
+
+    @FXML
+    private void exit(){
+        System.out.println("exit");
+        Stage stage = (Stage) esciButton.getScene().getWindow();
+        System.out.println(stage);
+
+        FxmlLoader object = new FxmlLoader();
+        Pane root =  object.getPage("general/log");
+        Scene scene = new Scene(root);
+
+        stage.setScene(scene);
+        stage.setWidth(611);
+        stage.setHeight(523);
+
     }
 }

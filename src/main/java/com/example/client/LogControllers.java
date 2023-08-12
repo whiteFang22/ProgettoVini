@@ -30,6 +30,8 @@ public class LogControllers implements Initializable{
         Pane view = object.getPage("general/login-form");
         mainPaneLog.setCenter(view);
         UserChoiceBox.getItems().addAll(userTypes);
+        UserChoiceBox.setValue("cliente");
+        SharedData.getInstance().setSharedValue("cliente");
         UserChoiceBox.setOnAction(this::getChoice);
     }
 

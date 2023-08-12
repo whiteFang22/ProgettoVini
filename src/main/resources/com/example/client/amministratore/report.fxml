@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <VBox alignment="TOP_CENTER" layoutX="390.0" layoutY="47.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label text="INTROITI">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <TextField />
+            <Label text="SPESE">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <TextField />
+            <Label text="BOTTIGLIE VENDUTE">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <TextField />
+            <Label text="BOTTIGLIE DISPONIBILI">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <TextField />
+         </children>
+         <padding>
+            <Insets left="150.0" right="150.0" top="30.0" />
+         </padding>
+      </VBox>
+   </children>
+</AnchorPane>
