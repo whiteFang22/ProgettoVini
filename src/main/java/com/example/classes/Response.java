@@ -5,9 +5,11 @@ import java.util.List;
 public class Response {
     private List<Vino> vini;
     private String messaggio;
+    private boolean success;
     private List<OrdineVendita> ordiniVendita;
     private List<OrdineAcquisto> ordiniAcquisto;
     private List<PropostaAcquisto> proposteAcquisto;
+    private UtenteGenerico utente;
 
     public Response(List<Vino> vini, String messaggio, List<OrdineVendita> ordiniVendita,
                     List<OrdineAcquisto> ordiniAcquisto, List<PropostaAcquisto> proposteAcquisto) {
@@ -34,6 +36,14 @@ public class Response {
         this.messaggio = messaggio;
     }
 
+    public boolean getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
     public List<OrdineVendita> getOrdiniVendita() {
         return ordiniVendita;
     }
@@ -57,4 +67,8 @@ public class Response {
     public void setProposteAcquisto(List<PropostaAcquisto> proposteAcquisto) {
         this.proposteAcquisto = proposteAcquisto;
     }
+
+    public UtenteGenerico getUtente() { return utente; }
+
+    public void setUtente(UtenteGenerico utente) { this.utente = utente; }
 }

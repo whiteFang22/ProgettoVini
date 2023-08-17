@@ -1,5 +1,7 @@
 package com.example.classes;
 
+import com.example.client.SharedData;
+
 import java.util.List;
 
 public class UtenteGenerico {
@@ -8,6 +10,7 @@ public class UtenteGenerico {
     private String codiceFiscale;
     private String email;
     private String numeroTelefonico;
+    final Connettivity connettivity = new Connettivity("localhost", 12345);
 
     public UtenteGenerico(String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico) {
         this.nome = nome;
@@ -57,14 +60,27 @@ public class UtenteGenerico {
         this.numeroTelefonico = numeroTelefonico;
     }
 
-    public void login(String username, String password) {
-        // Implementazione del metodo login
+    /*
+        Il server dovrà verificare che l'utente esista e abbia inserito la password corretta.
+        Setta l'oggetto utente associato nell'oggetto della classe SharedData e restituisce
+        un boolean per specificare se il login è andato a buon fine o meno
+    */
+    public boolean login(String username, String password) {
         // Esempio: Verifica delle credenziali e autenticazione
+//        Object[] data = {username, password};
+//        Response res = connettivity.message("cercaVini", data);
+//        if (res.getSuccess()) SharedData.getInstance().setUser(res.getUtente());
+//        return res.getSuccess();
+        Cliente c = new Cliente("pippo","baudo","","","","");
+        SharedData.getInstance().setUser(c);
+        return true;
     }
 
     public List<Vino> cercaVini(String nome, int anno) {
         // Implementazione del metodo cercaVini
         // Esempio: Esegui una ricerca di vini per nome e anno e restituisci una lista di risultati
-        return null; // Modificare per restituire la lista effettiva
+        Object[] data = {nome, anno};
+        Response res = connettivity.message("cercaVini", data);
+        return res.getVini(); // Modificare per restituire la lista effettiva
     }
 }

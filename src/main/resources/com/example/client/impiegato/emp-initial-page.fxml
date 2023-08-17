@@ -19,9 +19,10 @@
                <children>
                   <Button fx:id="clientiButton" mnemonicParsing="false" onAction="#ShowLeftClienti" text="CLIENTI" />
                   <Button fx:id="ordiniProposteButton" mnemonicParsing="false" onAction="#ShowLeftOriniProposte" text="ORDINI E PROPOSTE" />
+                  <Button fx:id="esciButton" mnemonicParsing="false" onAction="#exit" text="Esci" />
                   <Label text="mario@mail.com">
                      <HBox.margin>
-                        <Insets left="228.0" />
+                        <Insets />
                      </HBox.margin>
                   </Label>
                </children>

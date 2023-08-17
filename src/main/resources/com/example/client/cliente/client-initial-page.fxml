@@ -15,6 +15,7 @@
          <top>
             <HBox alignment="CENTER_RIGHT" prefHeight="28.0" prefWidth="600.0" style="-fx-border-color: black; -fx-border-width: 0 0 1 0;" BorderPane.alignment="CENTER">
                <children>
+                  <Button fx:id="esciButton" mnemonicParsing="false" onAction="#exit" text="Esci" />
                   <Label text="mario@mail.com" />
                </children>
                <padding>

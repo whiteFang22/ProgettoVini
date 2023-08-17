@@ -111,6 +111,6 @@ public class FiltroController {
         stage.setScene(scene);
         stage.setWidth(611);
         stage.setHeight(523);
-
+        // azzera shared.user
     }
 }

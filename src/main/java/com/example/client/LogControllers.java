@@ -31,13 +31,13 @@ public class LogControllers implements Initializable{
         mainPaneLog.setCenter(view);
         UserChoiceBox.getItems().addAll(userTypes);
         UserChoiceBox.setValue("cliente");
-        SharedData.getInstance().setSharedValue("cliente");
+        SharedData.getInstance().setUserType("cliente");
         UserChoiceBox.setOnAction(this::getChoice);
     }
 
     public void getChoice(ActionEvent event){
         String choice = UserChoiceBox.getValue();
         //System.out.println(choice);
-        SharedData.getInstance().setSharedValue(choice);
+        SharedData.getInstance().setUserType(choice);
     }
 }

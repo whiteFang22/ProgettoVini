@@ -41,6 +41,5 @@ public class GetStage {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setWidth(757);
-
     }
 }

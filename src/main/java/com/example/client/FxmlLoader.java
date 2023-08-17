@@ -10,7 +10,7 @@ public class FxmlLoader {
 
     public Pane getPage(String fileName) {
         try {
-            URL fileURL = Prove.class.getResource(fileName +".fxml");
+            URL fileURL = MainApplication.class.getResource(fileName +".fxml");
             if (fileURL == null) {
                 throw new java.io.FileNotFoundException("FXML file can't be found");
             }
