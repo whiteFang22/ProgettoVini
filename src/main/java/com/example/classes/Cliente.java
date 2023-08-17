@@ -21,11 +21,12 @@ public class Cliente extends UtenteGenerico {
         this.indirizzoDiConsegna = indirizzoDiConsegna;
     }
 
-    public void registrazione(Cliente cliente, String password) {
-        // Implementazione del metodo registrazione
+    public boolean registrazione(String password) {
         // Esempio: Aggiungi il cliente al sistema o al database
-        Object[] data = {this, password};
-        connettivity.message("registrazione", data);
+//        Object[] data = {this, password};
+//        Response res = connettivity.message("registrazione", data);
+//        return res.getSuccess();
+        return false;
     }
 
     // DA DEFINIRE... non credo venga coinvolto il server

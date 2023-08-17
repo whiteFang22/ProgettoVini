@@ -12,12 +12,13 @@ public class Response {
     private UtenteGenerico utente;
 
     public Response(List<Vino> vini, String messaggio, List<OrdineVendita> ordiniVendita,
-                    List<OrdineAcquisto> ordiniAcquisto, List<PropostaAcquisto> proposteAcquisto) {
+                    List<OrdineAcquisto> ordiniAcquisto, List<PropostaAcquisto> proposteAcquisto, UtenteGenerico utente) {
         this.vini = vini;
         this.messaggio = messaggio;
         this.ordiniVendita = ordiniVendita;
         this.ordiniAcquisto = ordiniAcquisto;
         this.proposteAcquisto = proposteAcquisto;
+        this.utente = utente;
     }
 
     public List<Vino> getVini() {

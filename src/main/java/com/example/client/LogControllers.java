@@ -16,9 +16,10 @@ import java.util.ResourceBundle;
 public class LogControllers implements Initializable{
     @FXML
     private BorderPane mainPaneLog;
-
     @FXML
     public ChoiceBox<String> UserChoiceBox;
+    @FXML
+    private Button registrationButton;
 
     private String[] userTypes = {"cliente", "amministratore", "impiegato"};
 
@@ -39,5 +40,8 @@ public class LogControllers implements Initializable{
         String choice = UserChoiceBox.getValue();
         //System.out.println(choice);
         SharedData.getInstance().setUserType(choice);
+        BorderPane parent = (BorderPane) UserChoiceBox.getParent().getParent();
+        registrationButton = (Button) parent.lookup("#registrationButton");
+        registrationButton.setDisable(!choice.equals("cliente"));
     }
 }

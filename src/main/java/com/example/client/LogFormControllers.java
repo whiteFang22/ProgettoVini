@@ -1,11 +1,13 @@
 package com.example.client;
 
+import com.example.classes.Cliente;
 import com.example.classes.UtenteGenerico;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -22,6 +24,22 @@ public class LogFormControllers {
     private VBox registrationVBox;
     @FXML
     private Label loginMessageLable;
+    @FXML
+    private Label registrationMessage;
+    @FXML
+    private TextField email;
+    @FXML
+    private TextField password;
+    @FXML
+    private TextField nome;
+    @FXML
+    private TextField cognome;
+    @FXML
+    private TextField codiceFiscale;
+    @FXML
+    private TextField numTelefonico;
+    @FXML
+    private TextField indirizzo;
 
     @FXML
     protected void onRegistrationButtonClick() throws IOException {
@@ -51,14 +69,15 @@ public class LogFormControllers {
         chiamo il metodo di login dell'utente specifico
      */
     @FXML
-    protected void aceesso() throws IOException {
+    protected void aceesso() {
         System.out.println("Login");
         BorderPane parent = (BorderPane) loginVBox.getParent();
         Stage stage = (Stage) loginVBox.getScene().getWindow();
 
         String userType = SharedData.getInstance().getUserType();
         UtenteGenerico user = SharedData.getInstance().getUser();
-        boolean success = user.login("ashish", "pippo");
+        boolean success = user.login(email.getText(), password.getText());
+        System.out.println(email.getText() + password.getText());
         if (success)
         {
             // RESTITUISCE LA SCHERMATA HOME DEL SOFTWARE
@@ -70,6 +89,26 @@ public class LogFormControllers {
             //stampa un messaggio di errore a schermo
             System.out.println("errore di autenticazione");
             loginMessageLable.setText("errore di autenticazione");
+        }
+    }
+
+    @FXML
+    protected  void registrazione(){
+        System.out.println("Registrazione");
+        BorderPane parent = (BorderPane) registrationVBox.getParent().getParent();
+        Stage stage = (Stage) registrationVBox.getScene().getWindow();
+
+        Cliente c = new Cliente(nome.getText(), cognome.getText(), codiceFiscale.getText(), email.getText(), numTelefonico.getText(), indirizzo.getText());
+        SharedData.getInstance().setUser(c);
+        boolean success = c.registrazione(password.getText());
+
+        if (success){
+            GetStage obj = new GetStage();
+            obj.set(stage, "cliente");
+        }
+        else {
+            System.out.println("registration error");
+            registrationMessage.setText("prova con un'altra email");
         }
     }
 }

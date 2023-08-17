@@ -10,13 +10,13 @@
 <VBox fx:id="loginVBox" prefHeight="400.0" prefWidth="607.0" style="-fx-background-color: gainsboro;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.LogFormControllers">
    <children>
       <Label text="NOME UTENTE" />
-      <TextField />
+      <TextField fx:id="email" />
       <Label text="PASSWORD">
          <VBox.margin>
             <Insets top="20.0" />
          </VBox.margin>
       </Label>
-      <TextField />
+      <TextField fx:id="password" />
       <Button mnemonicParsing="false" onAction="#aceesso" prefHeight="25.0" prefWidth="136.0" text="Accedi">
          <VBox.margin>
             <Insets left="240.0" top="20.0" />

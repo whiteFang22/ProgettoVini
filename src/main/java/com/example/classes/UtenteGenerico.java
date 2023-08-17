@@ -61,7 +61,8 @@ public class UtenteGenerico {
     }
 
     /*
-        Il server dovrà verificare che l'utente esista e abbia inserito la password corretta.
+        Il server dovrà verificare che l'utente esista e abbia inserito la password corretta; infine mi
+        resituisce un oggetto utente (cliente|amministratore|impiegatp).
         Setta l'oggetto utente associato nell'oggetto della classe SharedData e restituisce
         un boolean per specificare se il login è andato a buon fine o meno
     */
