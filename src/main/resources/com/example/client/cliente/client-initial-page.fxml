@@ -38,14 +38,14 @@
                               <Insets top="15.0" />
                            </VBox.margin>
                         </Label>
-                        <TextField />
+                        <TextField fx:id="nomeVino" />
                         <Label text="anno di produzione">
                            <VBox.margin>
                               <Insets top="10.0" />
                            </VBox.margin>
                         </Label>
-                        <TextField />
-                        <Button mnemonicParsing="false" text="Ricerca">
+                        <TextField fx:id="annoProduzione" />
+                        <Button fx:id="RicercaViniButton" mnemonicParsing="false" onAction="#ricercaVini" text="Ricerca">
                            <VBox.margin>
                               <Insets top="10.0" />
                            </VBox.margin>

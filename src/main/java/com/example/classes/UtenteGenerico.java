@@ -2,6 +2,7 @@ package com.example.classes;
 
 import com.example.client.SharedData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UtenteGenerico {
@@ -78,10 +79,17 @@ public class UtenteGenerico {
     }
 
     public List<Vino> cercaVini(String nome, int anno) {
-        // Implementazione del metodo cercaVini
         // Esempio: Esegui una ricerca di vini per nome e anno e restituisci una lista di risultati
-        Object[] data = {nome, anno};
+        /*Object[] data = {nome, anno};
         Response res = connettivity.message("cercaVini", data);
-        return res.getVini(); // Modificare per restituire la lista effettiva
+        return res.getVini();*/
+        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,0,0,0, "1");
+        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,0,0,0, "2");
+        Vino v3 = new Vino("Martell Biberon",null,null,1944,null,null,0,0,0, "3");
+        List<Vino> vini = new ArrayList<>();
+        vini.add(v1);
+        vini.add(v2);
+        vini.add(v3);
+        return vini;
     }
 }

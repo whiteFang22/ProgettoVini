@@ -1,17 +1,29 @@
 package com.example.client;
 
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
 public class FindParent {
     private Pane parent;
     private Pane currentparent;
 
-    public Pane findParent(String id, Pane child){
-        currentparent = (Pane) child.getParent();
-        while (!currentparent.getId().equals(id)) {
-            currentparent = (Pane) child.getParent();
+    public BorderPane findBorderPane(Node child){
+        boolean found = false;
+        Parent current = child.getParent();
+        while (!found){
+            if (current instanceof BorderPane){
+                found = true;
+            }
+            else current = current.getParent();
         }
-        parent = currentparent;
-        return parent;
+
+        return (BorderPane) current;
+    }
+
+    public Stage findStage(Node child){
+        return (Stage) child.getScene().getWindow();
     }
 }

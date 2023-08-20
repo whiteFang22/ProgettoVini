@@ -52,4 +52,6 @@ public class CassaVino {
         float prezzoTotale = prezzoUnitario * quantita - sconto;
         return prezzoTotale;
     }
+
+
 }

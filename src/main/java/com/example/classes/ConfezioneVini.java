@@ -6,6 +6,8 @@ import java.util.Map;
 public class ConfezioneVini {
     private Map<Vino, Integer> vini;
     private float prezzo;
+    private int capacita = 5;
+    private boolean pieno = false;
 
     public ConfezioneVini() {
         this.vini = new HashMap<>();
@@ -13,19 +15,32 @@ public class ConfezioneVini {
     }
 
     // Capisci se pieno o no
-    public void aggiungiVino(Vino vino, int quantita) {
-        vini.put(vino, quantita);
-        calcolaPrezzo();
+    public boolean aggiungiVino(Vino vino, int quantita) {
+        if (capacita-quantita>=0){
+            vini.put(vino, quantita);
+            calcolaPrezzo();
+            capacita-=quantita;
+            if (capacita==0) pieno=true;
+        }
+        else pieno = true;
+        return pieno;
     }
 
-    public void rimuoviVino(Vino vino) {
-        vini.remove(vino);
-        calcolaPrezzo();
+    public boolean rimuoviVino(Vino vino) {
+        if (capacita<5){
+            vini.remove(vino);
+            calcolaPrezzo();
+            capacita++;
+        }
+        else pieno = false;
+        return pieno;
     }
 
     public float getPrezzo() {
         return prezzo;
     }
+
+    public int getCapacita(){return capacita;}
 
     private void calcolaPrezzo() {
         prezzo = 0;
@@ -33,6 +48,13 @@ public class ConfezioneVini {
             Vino vino = entry.getKey();
             int quantita = entry.getValue();
             prezzo += vino.getPrezzo() * quantita;
+        }
+    }
+
+    public void visualizza() {
+        for (Map.Entry<Vino, Integer> entry : vini.entrySet()) {
+            Vino vino = entry.getKey();
+            System.out.println(vino.getNome()+" - quantità: "+entry.getValue());
         }
     }
 }
