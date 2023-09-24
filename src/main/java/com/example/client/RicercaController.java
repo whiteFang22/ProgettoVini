@@ -38,7 +38,7 @@ public class RicercaController {
 
     final FindParent find = new FindParent();
     private static ListView<HBox> listView;
-    private static List<Object> contenitoriSelezionati = new ArrayList<>();
+
 
     @FXML
     protected void onAcquistaButton(){
@@ -56,6 +56,7 @@ public class RicercaController {
     }
     @FXML
     protected void exit(){
+
         System.out.println("exit");
         Stage stage = find.findStage(esciButton);
         System.out.println(stage);
@@ -68,12 +69,11 @@ public class RicercaController {
         stage.setWidth(611);
         stage.setHeight(523);
 
-        // azzera shared.user
-        UtenteGenerico u = new UtenteGenerico(null,null,null,null,null);
-        SharedData.getInstance().setUser(u);
-        //SharedData.getInstance().setUserType("");
+        // azzera l'istanza SharedData
+        SharedData.getInstance().resetInstance();
     }
 
+    // mostra a schermo la lista di vini richiesta dal client
     @FXML
     protected void ricercaVini(){
         UtenteGenerico user = SharedData.getInstance().getUser();
@@ -140,15 +140,12 @@ public class RicercaController {
         RadioButton selected = (RadioButton) TipologiaContenitore.getSelectedToggle();
         switch (selected.getText()) {
             case "RIEMPI CONFEZIONE" -> {
-                System.out.println("confezione");
                 addInConfezione();
             }
             case "RIEMPI CASSA DA 6" -> {
-                System.out.println("cassa da 6");
                 addInCassa(6);
             }
             case "RIEMPI CASSA DA 12" -> {
-                System.out.println("cassa da 12");
                 addInCassa(12);
             }
         }
@@ -160,22 +157,27 @@ public class RicercaController {
         int i=0, j=0, qnt, tot=0, capacita;
         boolean pieno = false;
         ConfezioneVini confezione = new ConfezioneVini();
+        List<Object> contenitoriSelezionati = SharedData.getInstance().getContenitori();
+        //contenitoriSelezionati = new ArrayList<>();
         Vino vino = null;
 
+        // inserisco i vini in confezioni e aggiungo il tutto a contenitoriSelezionati
         for (HBox riga:  listView.getItems()){
             i=0;
+            // itero sui componenti di ciascuna riga della listView
             for (Node node : riga.getChildren()){
+                // il primo elemento è il nome del vino
                 if (i==0){vino = (Vino) node.getUserData();}
                 else if (i==1) {
                     TextField elem = (TextField) node;
                     qnt = Integer.parseInt(elem.getText());
                     tot += qnt;
 
+                    // meccanismo per creare confezioni di vini
                     if (qnt>0) {
                         while (qnt > confezione.getCapacita()){
                             if (qnt>=6){
                                 CassaVino cassa = new CassaVino(vino, 6, 0);
-                                System.out.println(vino.getNome()+"-cassa");
                                 contenitoriSelezionati.add(cassa);
                                 qnt -= 6;
                             }
@@ -192,29 +194,83 @@ public class RicercaController {
                         }
                     }
                     if (j==listView.getItems().size()-1 && !pieno) contenitoriSelezionati.add(confezione);
-                    if (pieno) {
+                    else if (pieno) {
                         contenitoriSelezionati.add(confezione);
                         confezione = new ConfezioneVini();
                     }
                     break;
                 }
+                // incremento i per indicare che passo all'elemento successivo
                 i++;
             }
+            // incemento j per tenere traccia del numero di riga in listView
             j++;
         }
-        //if (confezione.getCapacita() != 5) viniSelezionati.add(confezione);
+        SharedData.getInstance().setContenitori(contenitoriSelezionati);
+        revisione();
+    }
 
-        for (Object ob : contenitoriSelezionati){
-            System.out.println("-------------");
-            if (ob instanceof ConfezioneVini) ((ConfezioneVini) ob).visualizza();
-            else if (ob instanceof CassaVino) {
-                System.out.println("cassa "+((CassaVino) ob).getVino().getNome() +" - quantità :"+((CassaVino) ob).getQuantita());
+    // crea delle casse da 6 o 12 in base al radioButton selezionata
+    private void addInCassa(int qnt){
+        int i=0, cassePerVino=0;
+        boolean pieno = false;
+        Vino vino = null;
+        List<Object> contenitoriSelezionati = SharedData.getInstance().getContenitori();
+
+        for (HBox riga:  listView.getItems()){
+            i=0;
+            for (Node node : riga.getChildren()){
+                if (i==0){vino = (Vino) node.getUserData();}
+                if (i==1) {
+                    TextField elem = (TextField) node;
+                    cassePerVino = Integer.parseInt(elem.getText());
+                    while (cassePerVino>0){
+                        CassaVino cassa = new CassaVino(vino, qnt, 0);
+                        contenitoriSelezionati.add(cassa);
+                        cassePerVino--;
+                    }
+                }
+                i++;
+            }
+        }
+        SharedData.getInstance().setContenitori(contenitoriSelezionati);
+        revisione();
+    }
+
+    // azzera le quantità selezionate quando si clicca CONTINUA
+    private void azzeraQuantita(){
+        for (HBox riga:  listView.getItems()){
+            for (Node node : riga.getChildren()){
+                if("quantita".equals(node.getId())){
+                    TextField elem = (TextField) node;
+                    elem.setText("0");
+                }
             }
         }
     }
-
-    private void addInCassa(int qnt){}
-
-
-
+    private void revisione(){
+        // REVISIONE ORDINE
+        azzeraQuantita();
+        System.out.println("-------------");
+        System.out.println("REVISIONE");
+        System.out.println(SharedData.getInstance().getUser().getEmail());
+        int confezioni = 0, casse = 0;
+        float prezzoTotale = 0;
+        List<Object> contenitoriSelezionati = SharedData.getInstance().getContenitori();
+        for (Object ob : contenitoriSelezionati){
+            if (ob instanceof ConfezioneVini) {
+                confezioni++;
+                prezzoTotale += ((ConfezioneVini) ob).getPrezzo();
+                ((ConfezioneVini) ob).visualizza();
+            }
+            else if (ob instanceof CassaVino) {
+                casse++;
+                prezzoTotale += ((CassaVino) ob).getPrezzo();
+                System.out.println("cassa "+((CassaVino) ob).getVino().getNome() +" - quantità :"+((CassaVino) ob).getQuantita());
+            }
+        }
+        System.out.println("prezzo: "+ prezzoTotale);
+        System.out.println("n° confezioni: "+ confezioni);
+        System.out.println("n° casse: "+ casse);
+    }
 }

@@ -73,7 +73,7 @@ public class UtenteGenerico {
 //        Response res = connettivity.message("cercaVini", data);
 //        if (res.getSuccess()) SharedData.getInstance().setUser(res.getUtente());
 //        return res.getSuccess();
-        Cliente c = new Cliente("pippo","baudo","","","","");
+        Cliente c = new Cliente("pippo","baudo","",username,"","");
         SharedData.getInstance().setUser(c);
         return true;
     }
@@ -83,9 +83,9 @@ public class UtenteGenerico {
         /*Object[] data = {nome, anno};
         Response res = connettivity.message("cercaVini", data);
         return res.getVini();*/
-        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,0,0,0, "1");
-        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,0,0,0, "2");
-        Vino v3 = new Vino("Martell Biberon",null,null,1944,null,null,0,0,0, "3");
+        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65,0,0, "1");
+        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6,0,0, "2");
+        Vino v3 = new Vino("Martell Biberon",null,null,1944,null,null,20,0,0, "3");
         List<Vino> vini = new ArrayList<>();
         vini.add(v1);
         vini.add(v2);

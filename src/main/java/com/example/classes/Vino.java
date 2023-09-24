@@ -9,14 +9,14 @@ public class Vino {
     private int anno;
     private String noteTecniche;
     private List<String> vitigni;
-    private float prezzo;
+    private double prezzo;
     private int numeroVendite;
     private int disponibilita;
     private String id;
 
 
     public Vino(String nome, String produttore, String provenienza, int anno, String noteTecniche,
-                List<String> vitigni, float prezzo, int numeroVendite, int disponibilita, String id) {
+                List<String> vitigni, double prezzo, int numeroVendite, int disponibilita, String id) {
         this.nome = nome;
         this.produttore = produttore;
         this.provenienza = provenienza;
@@ -65,7 +65,7 @@ public class Vino {
         this.vitigni = vitigni;
     }
 
-    public float getPrezzo() {return prezzo;}
+    public double getPrezzo() {return prezzo;}
 
     public void setPrezzo(float prezzo) {
         this.prezzo = prezzo;

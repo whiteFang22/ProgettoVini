@@ -40,7 +40,7 @@ public class ConfezioneVini {
         return prezzo;
     }
 
-    public int getCapacita(){return capacita;}
+    public int getCapacita() {return capacita;}
 
     private void calcolaPrezzo() {
         prezzo = 0;

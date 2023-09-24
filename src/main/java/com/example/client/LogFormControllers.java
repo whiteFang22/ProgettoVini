@@ -3,9 +3,6 @@ package com.example.client;
 import com.example.classes.Cliente;
 import com.example.classes.UtenteGenerico;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -80,7 +77,7 @@ public class LogFormControllers {
         System.out.println(email.getText() + password.getText());
         if (success)
         {
-            // RESTITUISCE LA SCHERMATA HOME DEL SOFTWARE
+            // RESTITUISCE LA SCHERMATA HOME DEL PROGRAMMA
             GetStage obj = new GetStage();
             obj.set(stage, userType);
         }

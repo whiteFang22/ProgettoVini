@@ -13,6 +13,7 @@ public class CassaVino {
         this.prezzo = calcolaPrezzo();
     }
 
+
     public Vino getVino() {
         return vino;
     }
@@ -39,18 +40,17 @@ public class CassaVino {
         //this.prezzo = calcolaPrezzo();
     }
 
-    public float getPrezzo() {
-        //this.prezzo = calcolaPrezzo();
+    public double getPrezzo() {
         return prezzo;
     }
 
     //controlla che siano già stati inseriti quantità e sconto
     //in realtà compilo un form quindi sempre di default
     private float calcolaPrezzo() {
-        float prezzoUnitario = vino.getPrezzo();
-        float sconto = (scontoPercentuale / 100) * prezzoUnitario;
-        float prezzoTotale = prezzoUnitario * quantita - sconto;
-        return prezzoTotale;
+        double prezzoUnitario = vino.getPrezzo();
+        double sconto = (scontoPercentuale / 100) * prezzoUnitario;
+        double prezzoTotale = prezzoUnitario * quantita - sconto;
+        return (float) prezzoTotale;
     }
 
 
