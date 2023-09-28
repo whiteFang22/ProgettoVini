@@ -6,7 +6,6 @@ public class Cliente extends UtenteGenerico {
     private String indirizzoDiConsegna;
 
     public Cliente(
-        String username,
         String passwordtohash,
         String nome, 
         String cognome, 
@@ -14,7 +13,7 @@ public class Cliente extends UtenteGenerico {
         String email, 
         String numeroTelefonico,
         String indirizzoDiConsegna) {
-        super(username,passwordtohash,nome, cognome, codiceFiscale, email, numeroTelefonico);
+        super(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico);
         this.indirizzoDiConsegna = indirizzoDiConsegna;
     }
 
@@ -26,12 +25,13 @@ public class Cliente extends UtenteGenerico {
         this.indirizzoDiConsegna = indirizzoDiConsegna;
     }
 
-    public void registrazione() {
+    public boolean registrazione() {
         //Request id for registration -> 0
        //hashing handled by setter method  !!may be unsafe!!
         Request request = new Request();
         request.set(0,this,null);
-        client.message(request);
+        Response res = client.message(request);
+        return res.isSuccess();
     }
 
     // DA DEFINIRE... non credo venga coinvolto il server

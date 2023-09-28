@@ -12,6 +12,7 @@ public class Response implements Serializable
   private int responseid;
   private String authCode;
   private Object data;
+  private boolean success = false;
   
   //Constructor
   public Response()
@@ -63,6 +64,21 @@ public class Response implements Serializable
   }
   public Object getData(){
     return this.data;
+  }
+  public int getResponseid() {
+    return responseid;
+  }
+
+  public void setResponseid(int responseid) {
+    this.responseid = responseid;
+  }
+
+  public boolean isSuccess() {
+    return success;
+  }
+
+  public void setSuccess() {
+    this.success = true;
   }
 
 }

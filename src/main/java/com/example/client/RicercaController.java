@@ -145,8 +145,8 @@ public class RicercaController implements Initializable{
 
         //crea manualmente lista di casse ma dopo dovrai recuperare da res
         List<CassaVino> casse = new ArrayList<>();
-        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65f,0,0, "1");
-        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6f,0,0, "2");
+        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65f,0,0);
+        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6f,0,0);
         CassaVino ca = new CassaVino(v1, 6, 0);
         casse.add(ca);
         ca = new CassaVino(v2, 12, 0);

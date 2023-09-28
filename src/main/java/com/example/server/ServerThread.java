@@ -59,8 +59,9 @@ public class ServerThread implements Runnable
   @Override
   /*
    * thread main code, handles client requests via Switch case statement switching request codes
-   * 0 - Client registration
+   * 0 - Client registration to db
    * 1 - Client Login
+   * 9 - Client wine search in db
   */
   public void run()
   {
@@ -104,10 +105,11 @@ public class ServerThread implements Runnable
                if(requestData != null && requestData instanceof Cliente){
                   Cliente user = (Cliente) requestData;
                   System.out.println("Request OK, contacting db");
-                  String dbquery = "INSERT INTO utenti (username, passwordhash, nome, cognome, codiceFiscale, email, numeroTelefonico) VALUES (?,?,?,?,?,?,?)";
-                  rowsAffected = db.executeUpdate(dbquery,user.getUsername(),user.getPasswordhash(),user.getNome(),user.getCognome(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico());
+                  String dbquery = "INSERT INTO utenti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico) VALUES (?,?,?,?,?,?)";
+                  rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico());
                   System.out.println("query Executed "+ rowsAffected + " rows Affected");
                   response.set(1,null,null);
+                  response.setSuccess();
                   message(response,os);
                }
               break;
@@ -116,8 +118,8 @@ public class ServerThread implements Runnable
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof UtenteGenerico){
                 UtenteGenerico user = (UtenteGenerico) requestData;
-                String dbquery = "SELECT * FROM utenti where username = ? ";
-                ResultSet resultset = db.executeQuery(dbquery, user.getUsername());
+                String dbquery = "SELECT * FROM utenti where  = ? ";
+                ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
                 if(resultset.next()){
                   System.out.println("User found, checking password");
                   String passwordhash = resultset.getString("passwordhash");
@@ -128,6 +130,7 @@ public class ServerThread implements Runnable
                     response.setId(1);
                     response.setAuthCode(authCode);
                     response.setData(user);
+                    response.setSuccess();
                     message(response, os);
                   }
                   else
@@ -165,6 +168,7 @@ public class ServerThread implements Runnable
                       e.printStackTrace();
                   }
                   response.set(1, wineList, this.connectionAuthCode);
+                  response.setSuccess();
                   message(response, os);
               }
 
