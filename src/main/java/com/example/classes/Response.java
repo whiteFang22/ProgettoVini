@@ -13,6 +13,7 @@ public class Response implements Serializable
   private String authCode;
   private Object data;
   private boolean success = false;
+
   
   //Constructor
   public Response()
