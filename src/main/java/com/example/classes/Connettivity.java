@@ -31,12 +31,12 @@ public class Connettivity {
      mertre i getter lato client, rispettivamente per inserire ed estrapolare da responde solo
      quello che mi serve nella/dalla oggetto della classe Response.
     */
-    public Response message(String route, Object[] objects) {
+    public Response message( Request req) {
         Response response = null;
         try (Socket socket = new Socket(serverAddress, serverPort)) {
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-            objectOutputStream.writeObject(route);
-            objectOutputStream.writeObject(objects);
+            objectOutputStream.writeObject(req.getMessaggio());
+            objectOutputStream.writeObject(req);
             objectOutputStream.flush();
 
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
@@ -55,6 +55,6 @@ public class Connettivity {
         String route = "/example-route";
         Object[] data = { "Hello", 42, true };
 
-        connettivity.message(route, data);
+        //connettivity.message(route, data);
     }
 }

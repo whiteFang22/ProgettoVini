@@ -6,15 +6,19 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="372.0" prefWidth="442.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="372.0" prefWidth="442.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.PagamentoController">
    <children>
-      <Label text="INSERISCI IBAN" />
+      <Label fx:id="risultatoPagamento" />
+      <Label text="INSERISCI IBAN">
+         <VBox.margin>
+            <Insets top="30.0" />
+         </VBox.margin></Label>
       <TextField>
          <VBox.margin>
             <Insets />
          </VBox.margin>
       </TextField>
-      <Button mnemonicParsing="false" text="CONFERMA">
+      <Button fx:id="button1" mnemonicParsing="false" onAction="#confermaPagamento" text="CONFERMA">
          <VBox.margin>
             <Insets top="20.0" />
          </VBox.margin>

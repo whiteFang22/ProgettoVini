@@ -78,14 +78,15 @@ public class UtenteGenerico {
         return true;
     }
 
-    public List<Vino> cercaVini(String nome, int anno) {
+    public List<Vino> cercaVini(String nome, FiltriRicerca filtri) {
         // Esempio: Esegui una ricerca di vini per nome e anno e restituisci una lista di risultati
-        /*Object[] data = {nome, anno};
-        Response res = connettivity.message("cercaVini", data);
+        /*Request req = new Request("cercaVini", this.codiceFiscale);
+        req.setFiltriRicerca(filtri);
+        Response res = connettivity.message(req);
         return res.getVini();*/
-        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65,0,0, "1");
-        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6,0,0, "2");
-        Vino v3 = new Vino("Martell Biberon",null,null,1944,null,null,20,0,0, "3");
+        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65f,0,0, "1");
+        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6f,0,0, "2");
+        Vino v3 = new Vino("Martell Biberon",null,null,1944,null,null,20f,0,0, "3");
         List<Vino> vini = new ArrayList<>();
         vini.add(v1);
         vini.add(v2);

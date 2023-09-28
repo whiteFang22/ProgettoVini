@@ -39,14 +39,27 @@ public class Cliente extends UtenteGenerico {
     public void modificaCredenziali(String password) {
         // Implementazione del metodo modificaCredenziali
         // Esempio: Modifica la password del cliente
-        Object[] data = {this.getCodiceFiscale(), password};
-        connettivity.message("modificaCredenziali", data);
+        Request req = new Request("acquista", this.getCodiceFiscale());
+        req.setPassword(password);
+        connettivity.message( req);
     }
 
     // Ha come parametro una lista di CassaVino e/o ConfezioneVini
-    public <T> void acquistaBottiglie(List<T> bottiglieList) {
-        Object[] data = {this.getCodiceFiscale(), bottiglieList};
-        connettivity.message("acquistaBottiglie", data);
+    public Response acquistaBottiglie(List<Vino> bottiglieList) {
+        Request req = new Request("acquista", this.getCodiceFiscale());
+        req.setVini(bottiglieList);
+        Response res = connettivity.message( req);
+
+        return res;
+    }
+
+    public boolean confermaPagamento(){
+        //invia al sistema la conferma dopo aver inserito le coordinarie bancarie
+        Request req = new Request("confermaPagamento", this.getCodiceFiscale());
+        req.setConferma(true);
+        Response res = connettivity.message( req);
+
+        return res.getSuccess();
     }
 
      /*
@@ -58,21 +71,10 @@ public class Cliente extends UtenteGenerico {
      2) Lato client: identifico le bottiglie mancanti e in quali quantità e le mando al server
         sotto forma di Map<Vino, quantità(int)> che avvierà direttamente la proposta di acquisto acquisterà
      */
-    public <T> void proponiAcquisto(T bottiglie) {
-        if (bottiglie instanceof ConfezioneVini confezioneVini) {
-            // Esempio: Proponi un acquisto al sistema o all'amministratore per la confezioneVini
-            Object[] data = {this.getCodiceFiscale(), confezioneVini};
-            connettivity.message("proponiAcquisto", data);
-        }
-        else if (bottiglie instanceof CassaVino cassaVino) {
-            // Esempio: Proponi un acquisto al sistema o all'amministratore per la cassaVino
-            Object[] data = {this.getCodiceFiscale(), cassaVino};
-            connettivity.message("proponiAcquisto", data);
-        }
-    }
-    public <T> void proponiAcquisto(List<T> bottiglieList) {
-        Object[] data = {this.getCodiceFiscale(), bottiglieList};
-        connettivity.message("proponiAcquisto", data);
+    public void proponiAcquisto(List<Vino> bottiglieList) {
+        Request req = new Request("proponiAcquisto", this.getCodiceFiscale());
+        req.setVini(bottiglieList);
+        connettivity.message( req);
     }
 
 

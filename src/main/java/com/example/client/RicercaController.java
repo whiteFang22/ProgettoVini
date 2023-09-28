@@ -1,9 +1,6 @@
 package com.example.client;
 
-import com.example.classes.CassaVino;
-import com.example.classes.ConfezioneVini;
-import com.example.classes.UtenteGenerico;
-import com.example.classes.Vino;
+import com.example.classes.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -18,7 +15,7 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.*;
 
-public class RicercaController {
+public class RicercaController implements Initializable{
     @FXML
     VBox VboxRevisione;
     @FXML
@@ -34,26 +31,158 @@ public class RicercaController {
     @FXML
     private HBox gridVini;
     @FXML
+    private VBox viniDisponibili;
+    @FXML
     private ToggleGroup TipologiaContenitore;
+    @FXML
+    private  Label nConfezioni;
+    @FXML
+    private Label nCasse;
+    @FXML
+    private Label prezzo;
+    @FXML
+    private Button propostaNo;
+    @FXML
+    private Button propostaSi;
+    @FXML
+    private BorderPane mainPaneInitialClient;
 
+    private boolean success=false;
     final FindParent find = new FindParent();
     private static ListView<HBox> listView;
 
 
     @FXML
     protected void onAcquistaButton(){
-        System.out.println("Acquista");
+        // usa metodo cliente che contatta il server per capire se c'è la disponibilità dei vini richiesti, se si
+        // procedi con il pagamento altrimenti schermata proposta di acquisto
+        /*Cliente user = (Cliente) SharedData.getInstance().getUser();
+        Response res = user.acquistaBottiglie(SharedData.getInstance().getContenitori());
+        OrdineVendita ordine = res.getOrdineVendita();
+
+        success = res.getSuccess();*/
+        success=true;
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
+        if (success) {
+            //visualizza l'ordine di vendita
+            visualizzaOrdine();
+
+            //visualizza(ordine);
+            visualizza();
+
+            // recupero le informazioni di revisione ordine e le inserisco nel nuovo layout
+            visualizzaLeft();
+        }
+        else {
+            // schermata proposta di acquisto
+            // res deve contenere i vini mancanti
+            System.out.println("Proposta");
+            FxmlLoader object = new FxmlLoader();
+            Pane view = object.getPage("cliente/proposta-acquisto-client");
+            parent.setCenter(view);
+        }
+    }
+    protected void visualizzaLeft(){
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
+
+        nConfezioni = (Label) parent.lookup("#nConfezioni");
+        nCasse = (Label) parent.lookup("#nCasse");
+        prezzo = (Label) parent.lookup("#prezzo");
+        String confezioni = nConfezioni.getText();
+        String casse = nCasse.getText();
+        String prezzoTotale = prezzo.getText();
+
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("cliente/scheda-bonifico");
-
-        BorderPane parent = find.findBorderPane(VboxRevisione);
-        parent.setCenter(view);
-
-        object = new FxmlLoader();
-        view = object.getPage("cliente/left-pagamento");
+        Pane view = object.getPage("cliente/left-pagamento");
         parent.setLeft(view);
 
+        nConfezioni = (Label) parent.lookup("#nConfezioni");
+        nCasse = (Label) parent.lookup("#nCasse");
+        prezzo = (Label) parent.lookup("#prezzo");
+        nConfezioni.setText(confezioni);
+        nCasse.setText(casse);
+        prezzo.setText(prezzoTotale);
     }
+
+    @FXML
+    protected void annullaProposta(){
+        SharedData.getInstance().resetInstance();
+
+        System.out.println("Ordine");
+        FxmlLoader object = new FxmlLoader();
+        Pane view = object.getPage("cliente/scheda-vini-client");
+        BorderPane parent = find.findBorderPane(propostaNo);
+        parent.setCenter(view);
+    }
+    @FXML
+    protected void accettaProposta(){
+        Cliente user = (Cliente) SharedData.getInstance().getUser();
+        //user.proponiAcquisto(SharedData.getInstance().getRes().getVini());
+        //success = true;
+        // crea prima l'ordine
+        visualizzaOrdine();
+        visualizza();
+        visualizzaLeft();
+
+    }
+    @FXML
+    protected void visualizzaOrdine(){
+        /*Cliente user = (Cliente) SharedData.getInstance().getUser();
+        Response res = user.acquistaBottiglie(SharedData.getInstance().getContenitori());
+        OrdineVendita ordine = res.getOrdineVendita();
+        */
+        System.out.println("Ordine");
+        FxmlLoader object = new FxmlLoader();
+        Pane view = object.getPage("cliente/ordine-di-vendita");
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
+        parent.setCenter(view);
+    }
+    // visualizza la lista dei vini in ordine
+    protected void visualizza(){
+        listView = new ListView<>();
+        listView.setId("listaViniOrdine");
+        ObservableList<HBox> items = FXCollections.observableArrayList();
+
+        //crea manualmente lista di casse ma dopo dovrai recuperare da res
+        List<CassaVino> casse = new ArrayList<>();
+        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65f,0,0, "1");
+        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6f,0,0, "2");
+        CassaVino ca = new CassaVino(v1, 6, 0);
+        casse.add(ca);
+        ca = new CassaVino(v2, 12, 0);
+        casse.add(ca);
+
+        int i = 0;
+        for (CassaVino cassa : casse) {
+            Vino vino = cassa.getVino();
+            Label nomeVino = new Label(vino.getNome()+" - "+vino.getAnno());
+            nomeVino.setUserData(vino);
+            nomeVino.setMinWidth(135);
+
+            String qnt = String.valueOf(cassa.getQuantita());
+            Label quantitaField = new Label("quantità: "+qnt);
+            quantitaField.setMinWidth(80);
+            quantitaField.setId("quantita");
+
+            Text costo = new Text("costo: "+String.format("%.2f", cassa.getPrezzo())+"€");
+            HBox riga = new HBox(nomeVino, quantitaField, costo);
+            riga.setSpacing(10);
+            items.add(riga);
+        }
+        listView.setItems(items);
+        listView.setMinWidth(350);
+        listView.setMinHeight(100);
+        listView.setSelectionModel(null);
+
+        //BorderPane main = find.findBorderPane(VboxRicerca);
+        BorderPane main = SharedData.getInstance().getCurrentParent();
+        gridVini = (HBox) main.lookup("#gridOrdine");
+        gridVini.getChildren().clear();
+        gridVini.getChildren().add(listView);
+    }
+
+    // ordine serve a verificare se la visualizzazione è da parte della ricerca o dell'ordine
+    // di vendita
     @FXML
     protected void exit(){
 
@@ -77,17 +206,24 @@ public class RicercaController {
     @FXML
     protected void ricercaVini(){
         UtenteGenerico user = SharedData.getInstance().getUser();
-        int anno = -1; //indica che non va effettuata una ricerca per anno ma per nome
+        String anno = "-1"; //indica che non va effettuata una ricerca per anno ma per nome
+        String nome = "";
         if (!annoProduzione.getText().equals("")){
-            anno = Integer.parseInt(annoProduzione.getText());
+            anno = annoProduzione.getText();
         }
-        List<Vino> listaVini = user.cercaVini(nomeVino.getText(), anno);
+        if (!nomeVino.getText().equals("")){
+            nome = nomeVino.getText();
+        }
+        FiltriRicerca filtri = new FiltriRicerca(null, null, anno, nome);
+        List<Vino> listaVini = user.cercaVini(nomeVino.getText(), filtri);
 
         // crea una tabella e per ogni riga aggiungi un vino
+        creaGrid(listaVini);
+    }
+    protected void creaGrid(List<Vino> listaVini){
         listView = new ListView<>();
         listView.setId("listaVini");
         ObservableList<HBox> items = FXCollections.observableArrayList();
-
         int i = 0;
         for (Vino vino : listaVini) {
             TextField nomeVinotext = new TextField(vino.getNome()+" - "+vino.getAnno());
@@ -100,7 +236,7 @@ public class RicercaController {
             quantitaTextField.setEditable(false);
             quantitaTextField.setPrefColumnCount(2);
 
-            Text prezoUnitario = new Text("prezzo unitario: "+Double.toString(vino.getPrezzo())+"€");
+            Text prezoUnitario = new Text("prezzo unitario: "+vino.getPrezzo()+"€");
 
             Button incrementaButton = new Button("+");
             incrementaButton.setOnAction(event -> {
@@ -115,8 +251,8 @@ public class RicercaController {
                     quantitaTextField.setText(String.valueOf(quantita - 1));
                 }
             });
-
             HBox riga = new HBox(nomeVinotext, quantitaTextField, incrementaButton, decrementaButton, prezoUnitario);
+
             riga.setSpacing(10);
             items.add(riga);
         }
@@ -207,7 +343,8 @@ public class RicercaController {
             j++;
         }
         SharedData.getInstance().setContenitori(contenitoriSelezionati);
-        revisione();
+        revisione(viniDisponibili);
+        azzeraQuantita();
     }
 
     // crea delle casse da 6 o 12 in base al radioButton selezionata
@@ -234,7 +371,8 @@ public class RicercaController {
             }
         }
         SharedData.getInstance().setContenitori(contenitoriSelezionati);
-        revisione();
+        revisione(viniDisponibili);
+        azzeraQuantita();
     }
 
     // azzera le quantità selezionate quando si clicca CONTINUA
@@ -248,9 +386,8 @@ public class RicercaController {
             }
         }
     }
-    private void revisione(){
+    private void revisione(Node n){
         // REVISIONE ORDINE
-        azzeraQuantita();
         System.out.println("-------------");
         System.out.println("REVISIONE");
         System.out.println(SharedData.getInstance().getUser().getEmail());
@@ -269,8 +406,23 @@ public class RicercaController {
                 System.out.println("cassa "+((CassaVino) ob).getVino().getNome() +" - quantità :"+((CassaVino) ob).getQuantita());
             }
         }
-        System.out.println("prezzo: "+ prezzoTotale);
-        System.out.println("n° confezioni: "+ confezioni);
-        System.out.println("n° casse: "+ casse);
+
+        BorderPane main = find.findBorderPane(n);
+        nConfezioni = (Label) main.lookup("#nConfezioni");
+        nCasse = (Label) main.lookup("#nCasse");
+        prezzo = (Label) main.lookup("#prezzo");
+
+        nConfezioni.setText(String.valueOf(confezioni));
+        nCasse.setText(String.valueOf(casse));
+        prezzo.setText(String.format("%.2f", prezzoTotale)+"€");
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        // evito che venga inizializzato due volte: più fxml hanno stesso controller
+        if (mainPaneInitialClient!=null) {
+            SharedData.getInstance().setCurrentParent(mainPaneInitialClient);
+        }
+        System.out.println("ciao");
     }
 }

@@ -10,14 +10,10 @@ public class Response {
     private List<OrdineAcquisto> ordiniAcquisto;
     private List<PropostaAcquisto> proposteAcquisto;
     private UtenteGenerico utente;
+    private OrdineVendita ordineVendita;
 
-    public Response(List<Vino> vini, String messaggio, List<OrdineVendita> ordiniVendita,
-                    List<OrdineAcquisto> ordiniAcquisto, List<PropostaAcquisto> proposteAcquisto, UtenteGenerico utente) {
-        this.vini = vini;
+    public Response(String messaggio, UtenteGenerico utente) {
         this.messaggio = messaggio;
-        this.ordiniVendita = ordiniVendita;
-        this.ordiniAcquisto = ordiniAcquisto;
-        this.proposteAcquisto = proposteAcquisto;
         this.utente = utente;
     }
 
@@ -45,7 +41,7 @@ public class Response {
         this.success = success;
     }
 
-    public List<OrdineVendita> getOrdiniVendita() {
+    public List<OrdineVendita> getOrdiniVenditaCliente() {
         return ordiniVendita;
     }
 
@@ -53,23 +49,31 @@ public class Response {
         this.ordiniVendita = ordiniVendita;
     }
 
-    public List<OrdineAcquisto> getOrdiniAcquisto() {
+    public List<OrdineAcquisto> getOrdiniAcquistoCliente() {
         return ordiniAcquisto;
     }
 
-    public void setOrdiniAcquisto(List<OrdineAcquisto> ordiniAcquisto) {
+    public void setOrdiniAcquistoCliente(List<OrdineAcquisto> ordiniAcquisto) {
         this.ordiniAcquisto = ordiniAcquisto;
     }
 
-    public List<PropostaAcquisto> getProposteAcquisto() {
+    public List<PropostaAcquisto> getProposteAcquistoCliente() {
         return proposteAcquisto;
     }
 
-    public void setProposteAcquisto(List<PropostaAcquisto> proposteAcquisto) {
+    public void setProposteAcquistoCliente(List<PropostaAcquisto> proposteAcquisto) {
         this.proposteAcquisto = proposteAcquisto;
     }
 
     public UtenteGenerico getUtente() { return utente; }
 
     public void setUtente(UtenteGenerico utente) { this.utente = utente; }
+
+    public OrdineVendita getOrdineVendita() {
+        return ordineVendita;
+    }
+
+    public void setOrdineVendita(OrdineVendita ordineVendita) {
+        this.ordineVendita = ordineVendita;
+    }
 }

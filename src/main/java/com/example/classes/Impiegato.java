@@ -23,25 +23,31 @@ public class Impiegato extends UtenteGenerico {
     }
 
     // estrai dal metodo message il risultato dell'operazione
-    public List<OrdineVendita> ricercaOrdiniVendita(Date dete1, Date dete2) {
+    public List<OrdineVendita> ricercaOrdiniVendita(Date data1, Date data2) {
         // Esempio: Esegui una ricerca degli ordini di vendita tra le date specificate
-        Object[] data = {dete1, dete2};
-        Response res = connettivity.message("ricercaOrdiniVendita", data);
-        return res.getOrdiniVendita();
+        Request req = new Request("ricercaOrdiniVendita", this.getCodiceFiscale());
+        FiltriRicerca filtri = new FiltriRicerca(data1, data2, null, null);
+        req.setFiltriRicerca(filtri);
+        Response res = connettivity.message( req);
+        return res.getOrdiniVenditaCliente();
     }
 
-    public List<OrdineAcquisto> ricercaOrdiniAcquisto(Date dete1, Date dete2) {
+    public List<OrdineAcquisto> ricercaOrdiniAcquisto(Date data1, Date data2) {
         // Esempio: Esegui una ricerca degli ordini di acquisto tra le date specificate
-        Object[] data = {dete1, dete2};
-        Response res = connettivity.message("ricercaOrdiniAcquisto", data);
-        return res.getOrdiniAcquisto();
+        Request req = new Request("ricercaOrdiniVendita", this.getCodiceFiscale());
+        FiltriRicerca filtri = new FiltriRicerca(data1, data2, null, null);
+        req.setFiltriRicerca(filtri);
+        Response res = connettivity.message( req);
+        return res.getOrdiniAcquistoCliente();
     }
 
-    public List<PropostaAcquisto> ricercaProposteAcquisto(Date dete1, Date dete2) {
+    public List<PropostaAcquisto> ricercaProposteAcquisto(Date data1, Date data2) {
         // Esempio: Esegui una ricerca delle proposte di acquisto tra le date specificate
-        Object[] data = {dete1, dete2};
-        Response res = connettivity.message("ricercaProposteAcquisto", data);
-        return res.getProposteAcquisto();
+        Request req = new Request("ricercaOrdiniVendita", this.getCodiceFiscale());
+        FiltriRicerca filtri = new FiltriRicerca(data1, data2, null, null);
+        req.setFiltriRicerca(filtri);
+        Response res = connettivity.message(req);
+        return res.getProposteAcquistoCliente();
     }
 
     // DA DEFINIRE...

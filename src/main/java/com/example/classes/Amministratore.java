@@ -22,15 +22,18 @@ public class Amministratore extends Impiegato {
     // Salva nel db l'impiegato passato
     public void registrazioneImpiegato(Impiegato impiegato, String password) {
         // Esempio: Registra un nuovo impiegato con la password specificata
-        Object[] data = {impiegato, password};
-        connettivity.message("registrazioneImpiegato", data);
+        Request req = new Request("registrazioneImpiegato", this.getCodiceFiscale());
+        req.setPassword(password);
+        connettivity.message(req);
     }
 
     // Salva nel db il report passato
     public void preparazioneReport(ReportMensile report) {
         // Esempio: Prepara un report mensile e lo gestisce
         Object[] data = {report};
-        connettivity.message("preparazioneReport", data);
+        Request req = new Request("preparazioneReport", this.getCodiceFiscale());
+        req.setReport(report);
+        connettivity.message(req);
     }
 
     /*
@@ -40,7 +43,9 @@ public class Amministratore extends Impiegato {
     */
     public void modificaCredenziali(String codiceFiscale, String password, boolean reset) {
         // Esempio: Modifica le credenziali di un utente (password e reset)
-        Object[] data = {codiceFiscale, password, reset};
-        connettivity.message("preparazioneReport", data);
+        Request req = new Request("modificaCredenziali", codiceFiscale);
+        req.setPassword(password);
+        req.setReset(reset);
+        connettivity.message(req);
     }
 }

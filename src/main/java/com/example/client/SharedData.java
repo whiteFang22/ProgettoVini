@@ -1,6 +1,8 @@
 package com.example.client;
 
+import com.example.classes.Response;
 import com.example.classes.UtenteGenerico;
+import javafx.scene.layout.BorderPane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +10,10 @@ import java.util.List;
 public class SharedData {
     private static SharedData instance = new SharedData();
     private UtenteGenerico user = new UtenteGenerico("","", "", "", "");
-    private static List<Object> contenitoriSelezionati = new ArrayList<>();
+    private List<Object> contenitoriSelezionati = new ArrayList<>();
+    private Response res;
     private String userType;
+    private BorderPane currentParent;
 
     private SharedData() {
         // Costruttore privato per impedire l'istanziazione diretta
@@ -35,5 +39,16 @@ public class SharedData {
 
     public void setContenitori(List<Object> contenitori){ this.contenitoriSelezionati = contenitori; }
     public List<Object> getContenitori(){ return contenitoriSelezionati; }
+
+    public void setRes(Response res){ this.res = res;}
+    public Response getRes(){ return res;}
+
+    public void setCurrentParent(BorderPane currentParent) {
+        this.currentParent = currentParent;
+    }
+
+    public BorderPane getCurrentParent() {
+        return currentParent;
+    }
 }
 
