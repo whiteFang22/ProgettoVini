@@ -1,79 +1,68 @@
 package com.example.classes;
+import java.io.Serializable;
 
-import java.util.List;
+/**
+*
+* The class {@code Response} provides a simplified model of a response message.
+*
+**/
+public class Response implements Serializable
+{
+  private static final long serialVersionUID = 1L;
+  private int responseid;
+  private String authCode;
+  private Object data;
+  
+  //Constructor
+  public Response()
+  {
+  }
+  
+  public String getAuthCode() {
+    return authCode;
+  }
 
-public class Response {
-    private List<Vino> vini;
-    private String messaggio;
-    private boolean success;
-    private List<OrdineVendita> ordiniVendita;
-    private List<OrdineAcquisto> ordiniAcquisto;
-    private List<PropostaAcquisto> proposteAcquisto;
-    private UtenteGenerico utente;
-    private OrdineVendita ordineVendita;
+  public void setAuthCode(String authCode) {
+    this.authCode = authCode;
+  }
 
-    public Response(String messaggio, UtenteGenerico utente) {
-        this.messaggio = messaggio;
-        this.utente = utente;
+  public int setId(final int responseidIn){
+    try{
+    this.responseid = responseidIn;
     }
-
-    public List<Vino> getVini() {
-        return vini;
+    catch(Exception e){
+      e.printStackTrace();
+      return 0;
     }
-
-    public void setVini(List<Vino> vini) {
-        this.vini = vini;
+    return 1;
+  }
+  public int setData(final Object dataIn){
+    try{
+    this.data = dataIn;
     }
-
-    public String getMessaggio() {
-        return messaggio;
+    catch(Exception e){
+      e.printStackTrace();
+      return 0;
     }
-
-    public void setMessaggio(String messaggio) {
-        this.messaggio = messaggio;
+    return 1;
+  }
+  public int set(final int responseidIn, final Object dataIn, final String authCode){
+    try{
+      this.responseid = responseidIn;
+      this.data = dataIn;
+      this.authCode = authCode;
     }
-
-    public boolean getSuccess() {
-        return success;
+    catch(Exception e){
+      e.printStackTrace();
+      return 0;
     }
+    return 1;
+  }
+  public int getId(){
+    return this.responseid;
+  }
+  public Object getData(){
+    return this.data;
+  }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public List<OrdineVendita> getOrdiniVenditaCliente() {
-        return ordiniVendita;
-    }
-
-    public void setOrdiniVendita(List<OrdineVendita> ordiniVendita) {
-        this.ordiniVendita = ordiniVendita;
-    }
-
-    public List<OrdineAcquisto> getOrdiniAcquistoCliente() {
-        return ordiniAcquisto;
-    }
-
-    public void setOrdiniAcquistoCliente(List<OrdineAcquisto> ordiniAcquisto) {
-        this.ordiniAcquisto = ordiniAcquisto;
-    }
-
-    public List<PropostaAcquisto> getProposteAcquistoCliente() {
-        return proposteAcquisto;
-    }
-
-    public void setProposteAcquistoCliente(List<PropostaAcquisto> proposteAcquisto) {
-        this.proposteAcquisto = proposteAcquisto;
-    }
-
-    public UtenteGenerico getUtente() { return utente; }
-
-    public void setUtente(UtenteGenerico utente) { this.utente = utente; }
-
-    public OrdineVendita getOrdineVendita() {
-        return ordineVendita;
-    }
-
-    public void setOrdineVendita(OrdineVendita ordineVendita) {
-        this.ordineVendita = ordineVendita;
-    }
 }
