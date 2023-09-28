@@ -13,7 +13,6 @@ public class CassaVino {
         this.prezzo = calcolaPrezzo();
     }
 
-
     public Vino getVino() {
         return vino;
     }
@@ -41,6 +40,7 @@ public class CassaVino {
     }
 
     public float getPrezzo() {
+        //this.prezzo = calcolaPrezzo();
         return prezzo;
     }
 
@@ -49,8 +49,7 @@ public class CassaVino {
     private float calcolaPrezzo() {
         float prezzoUnitario = vino.getPrezzo();
         float sconto = (scontoPercentuale / 100) * prezzoUnitario;
-        return (prezzoUnitario * quantita - sconto);
+        float prezzoTotale = prezzoUnitario * quantita - sconto;
+        return prezzoTotale;
     }
-
-
 }

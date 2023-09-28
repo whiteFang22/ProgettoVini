@@ -7,55 +7,48 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="606.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.LogFormControllers">
-   <VBox fx:id="registrationVBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="454.0" prefWidth="606.0" style="-fx-background-color: gainsboro;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<AnchorPane prefHeight="454.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.LogFormControllers">
+   <VBox fx:id="registrationVBox" layoutX="-2.0" layoutY="-2.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="454.0" prefWidth="606.0" style="-fx-background-color: gainsboro;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
       <padding>
          <Insets left="150.0" right="150.0" top="50.0" />
       </padding>
       <Label text="NOME" />
-      <TextField fx:id="nome" prefHeight="16.0" prefWidth="374.0" />
+      <TextField prefHeight="16.0" prefWidth="374.0" />
       <Label text="COGNOME">
          <VBox.margin>
-            <Insets />
+            <Insets top="15.0" />
          </VBox.margin>
       </Label>
-      <TextField fx:id="cognome" />
+      <TextField />
       <Label text="CODICE FISCALE">
          <VBox.margin>
-            <Insets />
+            <Insets top="15.0" />
          </VBox.margin>
       </Label>
-      <TextField fx:id="codiceFiscale" prefHeight="26.0" prefWidth="470.0" />
+      <TextField prefHeight="26.0" prefWidth="470.0" />
       <Label text="NUMEROTELEFONICO">
          <VBox.margin>
-            <Insets />
+            <Insets top="15.0" />
          </VBox.margin>
       </Label>
-      <TextField fx:id="numTelefonico" />
+      <TextField />
       <Label text="EMAIL">
          <VBox.margin>
-            <Insets />
+            <Insets top="15.0" />
          </VBox.margin>
       </Label>
-      <TextField fx:id="email" />
+      <TextField />
       <Label text="INDIRIZZO DI CONSEGNA">
          <VBox.margin>
-            <Insets />
+            <Insets top="15.0" />
          </VBox.margin>
       </Label>
-      <TextField fx:id="indirizzo" />
-      <Label text="PASSWORD">
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-      </Label>
-      <TextField fx:id="password" />
-      <Label fx:id="registrationMessage" style="-fx-text-fill: red;" />
-      <Button mnemonicParsing="false" onAction="#registrazione" text="Fine">
+      <TextField />
+      <Button mnemonicParsing="false" text="Fine">
          <VBox.margin>
             <Insets left="257.0" top="15.0" />
          </VBox.margin>
       </Button>
-      <Button fx:id="loginButton" mnemonicParsing="false" onAction="#onLoginButtonClick" text="Hai già un account?" />
+      <Button fx:id="loginButton" mnemonicParsing="false" onAction="#onLoginButtonClick" text="Accedi" />
    </VBox>
 </AnchorPane>

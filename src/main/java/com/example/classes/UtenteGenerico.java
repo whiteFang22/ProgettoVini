@@ -1,26 +1,63 @@
 package com.example.classes;
 
-import com.example.client.SharedData;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class UtenteGenerico {
+import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class UtenteGenerico implements Serializable{
+    private static final long serialVersionUID = 1L;
+    private String username;
+    private String passwordhash;
     private String nome;
     private String cognome;
     private String codiceFiscale;
     private String email;
     private String numeroTelefonico;
-    final Connettivity connettivity = new Connettivity("localhost", 12345);
+    private String AuthCode;        //given from server when logged
 
-    public UtenteGenerico(String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico) {
+    protected final Client client = new Client("localhost", 4444);
+
+    public UtenteGenerico(String username, String passwordtohash,String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico) {
+        this.username = username;
+        setpasswordhash(passwordtohash);
         this.nome = nome;
         this.cognome = cognome;
         this.codiceFiscale = codiceFiscale;
         this.email = email;
         this.numeroTelefonico = numeroTelefonico;
-    }
 
+        //password hashing
+        try {
+            // Create a MessageDigest instance for SHA-256
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            
+            // Convert the password string into bytes
+            byte[] passwordBytes = passwordtohash.getBytes();
+            
+            // Update the digest with the password bytes
+            byte[] hashedBytes = md.digest(passwordBytes);
+            
+            // Convert the hashed bytes to a hexadecimal representation
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            
+            this.passwordhash = sb.toString(); // Return the hashed password as a hexadecimal string
+        } catch (NoSuchAlgorithmException e) {
+            // Handle the exception, e.g., by logging or throwing a custom exception
+            e.printStackTrace();
+            this.passwordhash = null; // Return null in case of an error
+        }
+    }
+    private void setAuthCode(String inAuthCode){
+        this.AuthCode = inAuthCode;
+    }
     public String getNome() {
         return nome;
     }
@@ -61,36 +98,87 @@ public class UtenteGenerico {
         this.numeroTelefonico = numeroTelefonico;
     }
 
-    /*
-        Il server dovrà verificare che l'utente esista e abbia inserito la password corretta; infine mi
-        resituisce un oggetto utente (cliente|amministratore|impiegatp).
-        Setta l'oggetto utente associato nell'oggetto della classe SharedData e restituisce
-        un boolean per specificare se il login è andato a buon fine o meno
-    */
-    public boolean login(String username, String password) {
+    public void login() {
+        // Implementazione del metodo login
         // Esempio: Verifica delle credenziali e autenticazione
-//        Object[] data = {username, password};
-//        Response res = connettivity.message("cercaVini", data);
-//        if (res.getSuccess()) SharedData.getInstance().setUser(res.getUtente());
-//        return res.getSuccess();
-        Cliente c = new Cliente("pippo","baudo","",username,"","");
-        SharedData.getInstance().setUser(c);
-        return true;
+        Request request = new Request();
+        request.setId(1);
+        request.setData(this);
+        Response res = client.message(request);
+        //response unpack
+        if(res.getId() == 1){
+            setAuthCode(res.getAuthCode());
+            System.out.println(res.getAuthCode());
+        }
+        else{
+            throw new UnknownError("Server error");
+        }
+
+        
+
     }
 
-    public List<Vino> cercaVini(String nome, FiltriRicerca filtri) {
+    public List<Vino> cercaVini(String nome, int anno) {
+        // Implementazione del metodo cercaVini
         // Esempio: Esegui una ricerca di vini per nome e anno e restituisci una lista di risultati
-        /*Request req = new Request("cercaVini", this.codiceFiscale);
-        req.setFiltriRicerca(filtri);
-        Response res = connettivity.message(req);
-        return res.getVini();*/
-        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65f,0,0, "1");
-        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6f,0,0, "2");
-        Vino v3 = new Vino("Martell Biberon",null,null,1944,null,null,20f,0,0, "3");
-        List<Vino> vini = new ArrayList<>();
-        vini.add(v1);
-        vini.add(v2);
-        vini.add(v3);
-        return vini;
+        Request request = new Request();
+        Vino wineToSearch = new Vino(nome,anno);
+        request.set(9,wineToSearch,this.AuthCode);
+
+        Response res = client.message(request);
+        //response unpack
+        // Create a list to hold the data
+        List<Vino> wineList = new ArrayList<>();
+        if(res.getId() == 1 && res.getAuthCode() == this.AuthCode){     //check response id and double check AuthCode
+            if (res.getData() != null){
+               wineList = (List<Vino>) res.getData();
+        }
+        }
+        else{
+            throw new UnknownError("Server error");
+        }
+        //Debug Only
+        for (Vino element : wineList) {
+            System.out.println(element.getNome());
+            System.out.println(element.getAnno());
+        }
+        return wineList;
+    }
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPasswordhash() {
+        return passwordhash;
+    }
+    /*
+     * Sets Password to sha256 hash of input password;
+     * 
+     * 
+     */
+    public void setpasswordhash(String passwordtohash){
+        //password hashing
+        try {
+            // Create a MessageDigest instance for SHA-256
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            
+            // Convert the password string into bytes
+            byte[] passwordBytes = passwordtohash.getBytes();
+            
+            // Update the digest with the password bytes
+            byte[] hashedBytes = md.digest(passwordBytes);
+            
+            // Convert the hashed bytes to a hexadecimal representation
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            
+            this.passwordhash = sb.toString(); // Return the hashed password as a hexadecimal string
+        } catch (NoSuchAlgorithmException e) {
+            // Handle the exception, e.g., by logging or throwing a custom exception
+            e.printStackTrace();
+            this.passwordhash = null; // Return null in case of an error
+        }
     }
 }
