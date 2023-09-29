@@ -35,4 +35,11 @@ public class ConfezioneVini {
             prezzo += vino.getPrezzo() * quantita;
         }
     }
+
+    public void visualizza() {
+        for (Map.Entry<Vino, Integer> entry : vini.entrySet()) {
+            Vino vino = entry.getKey();
+            System.out.println(vino.getNome()+" - quantità: "+entry.getValue());
+        }
+    }
 }

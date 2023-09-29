@@ -11,7 +11,6 @@ import java.sql.SQLException;
 
 public class UtenteGenerico implements Serializable{
     private static final long serialVersionUID = 1L;
-    private String username;
     private String passwordhash;
     private String nome;
     private String cognome;
@@ -22,8 +21,7 @@ public class UtenteGenerico implements Serializable{
 
     protected final Client client = new Client("localhost", 4444);
 
-    public UtenteGenerico(String username, String passwordtohash,String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico) {
-        this.username = username;
+    public UtenteGenerico(String nome, String cognome,String passwordtohash, String codiceFiscale, String email, String numeroTelefonico) {
         setpasswordhash(passwordtohash);
         this.nome = nome;
         this.cognome = cognome;
@@ -98,7 +96,7 @@ public class UtenteGenerico implements Serializable{
         this.numeroTelefonico = numeroTelefonico;
     }
 
-    public void login() {
+    public boolean login() {
         // Implementazione del metodo login
         // Esempio: Verifica delle credenziali e autenticazione
         Request request = new Request();
@@ -113,7 +111,7 @@ public class UtenteGenerico implements Serializable{
         else{
             throw new UnknownError("Server error");
         }
-
+        return res.isSuccess();
         
 
     }
@@ -143,9 +141,6 @@ public class UtenteGenerico implements Serializable{
             System.out.println(element.getAnno());
         }
         return wineList;
-    }
-    public String getUsername() {
-        return username;
     }
 
     public String getPasswordhash() {

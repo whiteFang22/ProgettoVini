@@ -9,7 +9,7 @@ import java.util.List;
 
 public class SharedData {
     private static SharedData instance = new SharedData();
-    private UtenteGenerico user = new UtenteGenerico("","", "", "", "");
+    private UtenteGenerico user = new UtenteGenerico("", "", "", "", "", "");
     private List<Object> contenitoriSelezionati = new ArrayList<>();
     private Response res;
     private String userType;

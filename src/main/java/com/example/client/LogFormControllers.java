@@ -73,7 +73,9 @@ public class LogFormControllers {
 
         String userType = SharedData.getInstance().getUserType();
         UtenteGenerico user = SharedData.getInstance().getUser();
-        boolean success = user.login(email.getText(), password.getText());
+        user.setEmail(email.getText());
+        user.setpasswordhash(password.getText());
+        boolean success = user.login();
         System.out.println(email.getText() + password.getText());
         if (success)
         {
@@ -95,9 +97,11 @@ public class LogFormControllers {
         BorderPane parent = (BorderPane) registrationVBox.getParent().getParent();
         Stage stage = (Stage) registrationVBox.getScene().getWindow();
 
-        Cliente c = new Cliente(nome.getText(), cognome.getText(), codiceFiscale.getText(), email.getText(), numTelefonico.getText(), indirizzo.getText());
+        //Ho aggiunto il campo password.getText() per istanziare gia l'utente con la password in modo che poi sia sufficiente
+        //chiamare c.registrazione(), credo sia da implementare in front end 
+        Cliente c = new Cliente(nome.getText(), cognome.getText(),password.getText(), codiceFiscale.getText(), email.getText(), numTelefonico.getText(), indirizzo.getText());
         SharedData.getInstance().setUser(c);
-        boolean success = c.registrazione(password.getText());
+        boolean success = c.registrazione();
 
         if (success){
             GetStage obj = new GetStage();
