@@ -49,7 +49,6 @@ public class CassaVino {
     private float calcolaPrezzo() {
         float prezzoUnitario = vino.getPrezzo();
         float sconto = (scontoPercentuale / 100) * prezzoUnitario;
-        float prezzoTotale = prezzoUnitario * quantita - sconto;
-        return prezzoTotale;
+        return (prezzoUnitario * quantita - sconto);
     }
 }

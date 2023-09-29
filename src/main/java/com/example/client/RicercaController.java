@@ -206,16 +206,16 @@ public class RicercaController implements Initializable{
     @FXML
     protected void ricercaVini(){
         UtenteGenerico user = SharedData.getInstance().getUser();
-        String anno = "-1"; //indica che non va effettuata una ricerca per anno ma per nome
+        int anno = -1; //indica che non va effettuata una ricerca per anno ma per nome
         String nome = "";
         if (!annoProduzione.getText().equals("")){
-            anno = annoProduzione.getText();
+            anno = Integer.parseInt(annoProduzione.getText());
         }
         if (!nomeVino.getText().equals("")){
             nome = nomeVino.getText();
         }
-        FiltriRicerca filtri = new FiltriRicerca(null, null, anno, nome);
-        List<Vino> listaVini = user.cercaVini(nomeVino.getText(), filtri);
+        FiltriRicerca filtri = new FiltriRicerca(null, null, nome, anno);
+        List<Vino> listaVini = user.cercaVini(filtri);
 
         // crea una tabella e per ogni riga aggiungi un vino
         creaGrid(listaVini);

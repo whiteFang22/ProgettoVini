@@ -41,17 +41,29 @@ public class Cliente extends UtenteGenerico {
         return null; // Modificare per restituire un vino effettivo
     }
 
-    public void modificaCredenziali(String password) {
+    public void ClientModificaCredenziali(String password) {
         // Implementazione del metodo modificaCredenziali
         // Esempio: Modifica la password del cliente
-        Object[] data = {this.getCodiceFiscale(), password};
-        //client.message("modificaCredenziali", data);
+        Request req = new Request();
+        req.set(0, password, null);
+        client.message( req);
     }
 
     // Ha come parametro una lista di CassaVino e/o ConfezioneVini
-    public <T> void acquistaBottiglie(List<T> bottiglieList) {
-        Object[] data = {this.getCodiceFiscale(), bottiglieList};
-        //client.message("acquistaBottiglie", data);
+    public Response acquistaBottiglie(List<Vino> bottiglieList) {
+        Request req = new Request();
+        req.set(0, bottiglieList, null);
+
+        return client.message( req);
+    }
+
+    public boolean confermaPagamento(){
+        //invia al sistema la conferma dopo aver inserito le coordinarie bancarie
+        Request req = new Request();
+        req.set(0,true, null);
+        Response res = client.message( req);
+
+        return res.isSuccess();
     }
 
      /*
@@ -63,21 +75,10 @@ public class Cliente extends UtenteGenerico {
      2) Lato client: identifico le bottiglie mancanti e in quali quantità e le mando al server
         sotto forma di Map<Vino, quantità(int)> che avvierà direttamente la proposta di acquisto acquisterà
      */
-    public <T> void proponiAcquisto(T bottiglie) {
-        if (bottiglie instanceof ConfezioneVini confezioneVini) {
-            // Esempio: Proponi un acquisto al sistema o all'amministratore per la confezioneVini
-            Object[] data = {this.getCodiceFiscale(), confezioneVini};
-            //client.message("proponiAcquisto", data);
-        }
-        else if (bottiglie instanceof CassaVino cassaVino) {
-            // Esempio: Proponi un acquisto al sistema o all'amministratore per la cassaVino
-            Object[] data = {this.getCodiceFiscale(), cassaVino};
-            //client.message("proponiAcquisto", data);
-        }
-    }
-    public <T> void proponiAcquisto(List<T> bottiglieList) {
-        Object[] data = {this.getCodiceFiscale(), bottiglieList};
-        //client.message("proponiAcquisto", data);
+    public void proponiAcquisto(List<Vino> bottiglieList) {
+        Request req = new Request();
+        req.set(0, bottiglieList, null);
+        client.message( req);
     }
 
 

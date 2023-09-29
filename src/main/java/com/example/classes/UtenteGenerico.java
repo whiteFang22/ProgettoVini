@@ -116,11 +116,11 @@ public class UtenteGenerico implements Serializable{
 
     }
 
-    public List<Vino> cercaVini(String nome, int anno) {
+    public List<Vino> cercaVini(FiltriRicerca filtri) {
         // Implementazione del metodo cercaVini
         // Esempio: Esegui una ricerca di vini per nome e anno e restituisci una lista di risultati
         Request request = new Request();
-        Vino wineToSearch = new Vino(nome,anno);
+        Vino wineToSearch = new Vino(nome,filtri.annoProduzione());
         request.set(9,wineToSearch,this.AuthCode);
 
         Response res = client.message(request);
