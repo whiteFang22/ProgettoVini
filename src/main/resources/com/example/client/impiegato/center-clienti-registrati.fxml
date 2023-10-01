@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -16,26 +13,10 @@
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <GridPane gridLinesVisible="true">
-        <columnConstraints>
-            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Label text="Nome cliente" />
-            <Label text="acquisti effettuati" GridPane.columnIndex="1" />
-            <Button fx:id="vediScheda" mnemonicParsing="false" onAction="#ManageSchede" text="VEDI SCHEDA" GridPane.columnIndex="2" />
-         </children>
+      <HBox fx:id="listaClienti" alignment="CENTER" prefHeight="220.0" prefWidth="560.0">
          <VBox.margin>
-            <Insets top="50.0" />
-         </VBox.margin>
-      </GridPane>
+            <Insets top="30.0" />
+         </VBox.margin></HBox>
    </children>
    <padding>
       <Insets left="20.0" right="20.0" />

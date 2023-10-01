@@ -1,7 +1,6 @@
 package com.example.client;
 
-import com.example.classes.Cliente;
-import com.example.classes.UtenteGenerico;
+import com.example.classes.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -71,16 +70,26 @@ public class LogFormControllers {
         BorderPane parent = (BorderPane) loginVBox.getParent();
         Stage stage = (Stage) loginVBox.getScene().getWindow();
 
-        String userType = SharedData.getInstance().getUserType();
         UtenteGenerico user = SharedData.getInstance().getUser();
+        String userType = SharedData.getInstance().getUserType();
+
         user.setEmail(email.getText());
         user.setpasswordhash(password.getText());
-        //boolean success = user.login();
-        boolean success = true;
+        Response res = user.login();
+        switch (userType) {
+            case "cliente" -> user = (Cliente) res.getData();
+            case "impiegato" -> user = (Impiegato) res.getData();
+            case "amministratore" -> user = (Amministratore) res.getData();
+        }
+        boolean success = res.isSuccess();
+
         System.out.println(email.getText() + password.getText());
         if (success)
         {
             // RESTITUISCE LA SCHERMATA HOME DEL PROGRAMMA
+            //SharedData.getInstance().setUser(user);
+            Impiegato imp = new Impiegato(null, "", null,null,null,null,null,null);
+            SharedData.getInstance().setUser(imp);
             GetStage obj = new GetStage();
             obj.set(stage, userType);
         }

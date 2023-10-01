@@ -17,7 +17,7 @@ public class UtenteGenerico implements Serializable{
     private String codiceFiscale;
     private String email;
     private String numeroTelefonico;
-    private String AuthCode;        //given from server when logged
+    protected String AuthCode;        //given from server when logged
 
     protected final Client client = new Client("localhost", 4444);
 
@@ -96,7 +96,8 @@ public class UtenteGenerico implements Serializable{
         this.numeroTelefonico = numeroTelefonico;
     }
 
-    public boolean login() {
+    //deve ritornarmi Response contenente l'utente
+    public Response login() {
         // Implementazione del metodo login
         // Esempio: Verifica delle credenziali e autenticazione
         Request request = new Request();
@@ -111,17 +112,14 @@ public class UtenteGenerico implements Serializable{
         else{
             throw new UnknownError("Server error");
         }
-        return res.isSuccess();
-        
-
+        return res;
     }
 
     public List<Vino> cercaVini(FiltriRicerca filtri) {
         // Implementazione del metodo cercaVini
         // Esempio: Esegui una ricerca di vini per nome e anno e restituisci una lista di risultati
         Request request = new Request();
-        Vino wineToSearch = new Vino(nome,filtri.annoProduzione());
-        request.set(9,wineToSearch,this.AuthCode);
+        request.set(9,filtri,this.AuthCode);
 
         Response res = client.message(request);
         //response unpack

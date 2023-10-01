@@ -64,8 +64,7 @@ public class PagamentoController {
     @FXML
     protected void confermaPagamento(){
         Cliente user = (Cliente) SharedData.getInstance().getUser();
-        //boolean success = user.confermaPagamento();
-        boolean success = true;
+        boolean success = user.confermaPagamento(true);
         BorderPane parent = SharedData.getInstance().getCurrentParent();
 
         if(success){

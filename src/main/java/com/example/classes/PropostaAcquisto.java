@@ -6,14 +6,15 @@ public class PropostaAcquisto {
     private Cliente cliente;
     private List<ConfezioneVini> confezioniVini;
     private List<CassaVino> casseVino;
+    private List<Vino> viniMancanti;
     private String indirizzoConsegna;
+    private OrdineVendita ordineCorrispondente; //
 
-    public PropostaAcquisto(Cliente cliente, List<ConfezioneVini> confezioniVini, List<CassaVino> casseVino,
-                            String indirizzoConsegna) {
+    public PropostaAcquisto(Cliente cliente, List<Vino> viniMancanti, String indirizzoConsegna, OrdineVendita ordineCorrispondente) {
         this.cliente = cliente;
-        this.confezioniVini = confezioniVini;
-        this.casseVino = casseVino;
+        this.viniMancanti = viniMancanti;
         this.indirizzoConsegna = indirizzoConsegna;
+        this.ordineCorrispondente = ordineCorrispondente;
     }
 
     public Cliente getCliente() {
@@ -24,20 +25,12 @@ public class PropostaAcquisto {
         this.cliente = cliente;
     }
 
-    public List<ConfezioneVini> getConfezioniVini() {
-        return confezioniVini;
+    public List<Vino> getVini() {
+        return viniMancanti;
     }
 
-    public void setConfezioniVini(List<ConfezioneVini> confezioniVini) {
-        this.confezioniVini = confezioniVini;
-    }
-
-    public List<CassaVino> getCasseVino() {
-        return casseVino;
-    }
-
-    public void setCasseVino(List<CassaVino> casseVino) {
-        this.casseVino = casseVino;
+    public void setVini(List<Vino> viniMancanti) {
+        this.viniMancanti = viniMancanti;
     }
 
     public String getIndirizzoConsegna() {
@@ -46,6 +39,14 @@ public class PropostaAcquisto {
 
     public void setIndirizzoConsegna(String indirizzoConsegna) {
         this.indirizzoConsegna = indirizzoConsegna;
+    }
+
+    public OrdineVendita getOrdineCorrispondente() {
+        return ordineCorrispondente;
+    }
+
+    public void setOrdineCorrispondente(OrdineVendita ordineCorrispondente) {
+        this.ordineCorrispondente = ordineCorrispondente;
     }
 }
 

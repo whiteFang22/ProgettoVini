@@ -38,7 +38,7 @@ public class SharedData {
     public void setUser(UtenteGenerico user) { this.user = user; }
 
     public void setContenitori(List<Object> contenitori){ this.contenitoriSelezionati = contenitori; }
-    public List<Object> getContenitori(){ return contenitoriSelezionati; }
+    public List<Object> getContenitori(){ return contenitoriSelezionati; } // contiene casse e confezioni
 
     public void setRes(Response res){ this.res = res;}
     public Response getRes(){ return res;}

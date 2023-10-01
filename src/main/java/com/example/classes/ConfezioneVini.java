@@ -25,7 +25,6 @@ public class ConfezioneVini {
         else pieno = true;
         return pieno;
     }
-
     public boolean rimuoviVino(Vino vino) {
         if (capacita<5){
             vini.remove(vino);
@@ -35,6 +34,7 @@ public class ConfezioneVini {
         else pieno = false;
         return pieno;
     }
+    public Map<Vino,Integer> getVini(){ return vini; }
 
     public int getCapacita() {return capacita;}
     public float getPrezzo() {
