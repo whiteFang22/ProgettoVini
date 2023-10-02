@@ -147,6 +147,19 @@ public class ServerThread implements Runnable
                 }
               }
               break;
+            case 2:
+               System.out.println("Got from client request id: " + requestId);
+               //Modifica password 
+               if(requestData != null && requestData instanceof Cliente && clientAuthCode == connectionAuthCode){
+                Cliente cliente = (Cliente) requestData;
+                String query = "UPDATE users SET password = ? WHERE codiceFiscale = ?;";
+                rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
+                System.out.println("query Executed "+ rowsAffected + " rows Affected");
+                response.set(1,null,null);
+                response.setSuccess();
+                message(response,os);
+              }
+              break;
             case 9:
               System.out.println("Got from client request id: " + requestId);
               //Ricerca Vino nel database
