@@ -2,7 +2,7 @@ package com.example.classes;
 
 public class CassaVino {
     private Vino vino;
-    private int quantita;//6 o 12å
+    private int quantita;//6 o 12
     private float scontoPercentuale;
     private float prezzo;
 

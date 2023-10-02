@@ -59,9 +59,11 @@ public class ServerThread implements Runnable
   @Override
   /*
    * thread main code, handles client requests via Switch case statement switching request codes
-   * 0 - Client registration to db
-   * 1 - Client Login
-   * 9 - Client wine search in db
+   * 0 - Cliente, registrazione
+   * 1 - UtenteGenerico, Login
+   * 2 - Cliente, modifica credenziali
+   * 3 - Cliente, acquistabottiglie
+   * 9 - Cliente, ricercaVino
   */
   public void run()
   {
@@ -118,18 +120,24 @@ public class ServerThread implements Runnable
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof UtenteGenerico){
                 UtenteGenerico user = (UtenteGenerico) requestData;
-                String dbquery = "SELECT * FROM utenti where  = ? ";
+                String dbquery = "SELECT * FROM utenti where email = ?; ";
                 ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
                 if(resultset.next()){
                   System.out.println("User found, checking password");
                   String passwordhash = resultset.getString("passwordhash");
+                  System.out.println(user.getPasswordhash());
+                  System.out.println(passwordhash);
                   if(passwordhash.equals(user.getPasswordhash())){
                     System.out.println("password match");
+                    UtenteGenerico loggeduser = new UtenteGenerico(resultset.getString("nome"), resultset.getString("cognome"),
+                      resultset.getString("passwordhash"), resultset.getString("codiceFiscale"),
+                      resultset.getString("email"), resultset.getString("numeroTelefonico"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
+                    System.out.println(authCode);
                     response.setId(1);
                     response.setAuthCode(authCode);
-                    response.setData(user);
+                    response.setData(loggeduser);
                     response.setSuccess();
                     message(response, os);
                   }
@@ -143,6 +151,10 @@ public class ServerThread implements Runnable
                   }
                 }
                 else{
+                    response.setId(0);
+                    response.setAuthCode(null);
+                    response.setData(user);
+                    message(response, os);
                   System.out.println("User not found");
                 }
               }
@@ -152,11 +164,16 @@ public class ServerThread implements Runnable
                //Modifica password 
                if(requestData != null && requestData instanceof Cliente && clientAuthCode == connectionAuthCode){
                 Cliente cliente = (Cliente) requestData;
-                String query = "UPDATE users SET password = ? WHERE codiceFiscale = ?;";
+                String query = "UPDATE utenti SET passwordhash = ? WHERE codiceFiscale = ?;";
                 rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
                 System.out.println("query Executed "+ rowsAffected + " rows Affected");
                 response.set(1,null,null);
                 response.setSuccess();
+                message(response,os);
+              }
+              else {
+                System.out.println("Something went wrong");
+                response.set(0,null,null);
                 message(response,os);
               }
               break;
@@ -199,6 +216,12 @@ public class ServerThread implements Runnable
       }
       catch (EOFException e){
         System.out.println("Thread exiting due to client closing connection");
+        //System.exit(0);
+        try{
+        Thread.sleep(SLEEPTIME);
+        } catch (Exception f){
+          e.printStackTrace();
+        }
         stop();
       }
       catch (Exception e)
@@ -219,9 +242,6 @@ public class ServerThread implements Runnable
         }
         catch (Exception e) {
           e.printStackTrace();
-        }
-        finally{
-           System.exit(0);
         }
   }
   private int message(Response response, ObjectOutputStream os){

@@ -7,9 +7,9 @@ public class Cliente extends UtenteGenerico {
     private String indirizzoDiConsegna;
 
     public Cliente(
-        String passwordtohash,
         String nome, 
-        String cognome, 
+        String cognome,
+        String passwordtohash,
         String codiceFiscale, 
         String email, 
         String numeroTelefonico,
@@ -27,7 +27,6 @@ public class Cliente extends UtenteGenerico {
     }
 
     public boolean registrazione() {
-    public boolean registrazione() {
         //Request id for registration -> 0
        //hashing handled by setter method  !!may be unsafe!!
         Request request = new Request();
@@ -43,12 +42,14 @@ public class Cliente extends UtenteGenerico {
         return null; // Modificare per restituire un vino effettivo
     }
 
-    public void ClientModificaCredenziali(String password) {
+    public boolean ClientModificaCredenziali(String password) {
         // Implementazione del metodo modificaCredenziali
         // Esempio: Modifica la password del cliente
         Request req = new Request();
-        req.set(0, password, this.AuthCode);
-        client.message(req);
+        this.setpasswordhash(password);
+        req.set(2, this, this.AuthCode);
+        Response res=client.message(req);
+        return res.isSuccess();
     }
 
     // Ha come parametro una lista di CassaVino e/o ConfezioneVini
@@ -61,7 +62,7 @@ public class Cliente extends UtenteGenerico {
         Request req = new Request();
         req.set(0, bottiglieList, this.AuthCode);
 
-        return client.message( req);
+        return client.message(req);
     }
 
     /* SERVER: recupera l'ultimo ordine di vendita associato al cliente nel DB che avrà
