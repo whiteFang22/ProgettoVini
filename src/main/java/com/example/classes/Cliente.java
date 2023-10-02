@@ -68,6 +68,10 @@ public class Cliente extends UtenteGenerico {
                il campo "completato"==false.
                Se conferma==true allora setta il campo "completo" dell'ordine nel DB a ture
                così come, se presente, per l'ultima proposta di Acquisto con "completato"==false
+               Devono essere aggiornate le disponibilità dei vini in magazzino ma la data
+               di consegna viene generata da un metodo di Impiegato; per questo bisogna associare
+               agli ordini di vendita il campo "firmato" di default false per indicare che
+               la data non è stata ancora inserita
 
                Altrimenti elimina l'ordine dal DB in quanto l'utente ha scelto di non
                acquistare le bottiglie ed elimina anche, se presente, l'ultima proposta di Acquisto con
@@ -86,10 +90,10 @@ public class Cliente extends UtenteGenerico {
      SERVER: Se conferma==true viene creato l'ordine di Acquisto che verrà utilizzato nelle fasi successive per il rifornimento del magazzino
              Viene restituito al cliente una copia dell'ordine di Vendita aggiunto in precedenza nel DB
 
-             L'ultimo ordine di vendita presente nel DB associato al cliente viene modificato in modo che
-             vengano eliminati da esso i vini presenti nell'ulitma proposta di acquisto effettuata.
              Se conferma==false viene eliminata la proposta di acquisto presente nel DB associata all'utente
              sopra citata.
+             L'ultimo ordine di vendita presente nel DB associato al cliente viene modificato in modo che
+             vengano eliminati da esso i vini presenti nell'ulitma proposta di acquisto effettuata.
              Infine invio al cliente il nuovo ordine di vendita modificato, che deciderà in seguito se
              acquistare oppure no in confermaPagamento.
      */
