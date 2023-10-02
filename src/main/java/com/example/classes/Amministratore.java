@@ -1,5 +1,8 @@
 package com.example.classes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Amministratore extends Impiegato {
     private String indirizzoResidenza;
 
@@ -32,13 +35,21 @@ public class Amministratore extends Impiegato {
     }
 
     /*
-    Ha come parametri codiceFiscale dell'impiegato, la nuova password da associare
+    Ha come parametri email dell'impiegato, la nuova password da associare
     a tale impiegato ed il parametro reset. Quest'ultimo se "true" cancella tutti i
     dati dell'impiegato (lo elimina dal sistema/db)
     */
-    public void modificaCredenziali(String codiceFiscale, String password, boolean reset) {
+    public boolean AdminModificaCredenziali(String email, String password, boolean reset) {
         // Esempio: Modifica le credenziali di un utente (password e reset)
-        Object[] data = {codiceFiscale, password, reset};
-        //client.message("preparazioneReport", data);
+        Request req = new Request();
+
+        ArrayList<Object> data = new ArrayList<>();
+        data.add(email);
+        data.add(password);
+        data.add(reset);
+        req.set(0, data, null);
+
+        Response res = client.message(req);
+        return res.isSuccess();
     }
 }

@@ -8,7 +8,7 @@ public class Impiegato extends UtenteGenerico {
 
     public Impiegato(String username, String passwordtohash, String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico,
                      String indirizzoResidenza) {
-        super(username, passwordtohash, nome, cognome, codiceFiscale, email, numeroTelefonico);
+        super(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico);
         this.indirizzoResidenza = indirizzoResidenza;
     }
 
@@ -24,25 +24,32 @@ public class Impiegato extends UtenteGenerico {
     public List<OrdineVendita> ricercaOrdiniVendita(Date dete1, Date dete2) {
         // Esempio: Esegui una ricerca degli ordini di vendita tra le date specificate
         Object[] data = {dete1, dete2};
-        Response1 res;
-        //res = client.message("ricercaOrdiniVendita", data);
-        return res.getOrdiniVendita();
+        Request req = new Request();
+        req.set(0, data, null);
+
+        Response res = client.message(req);
+        return (List<OrdineVendita>) res.getData();
     }
 
     public List<OrdineAcquisto> ricercaOrdiniAcquisto(Date dete1, Date dete2) {
         // Esempio: Esegui una ricerca degli ordini di acquisto tra le date specificate
         Object[] data = {dete1, dete2};
-        Response1 res;
-        //res = client.message("ricercaOrdiniAcquisto", data);
-        return res.getOrdiniAcquisto();
+        Request req = new Request();
+        req.set(0, data, null);
+
+        Response res = client.message(req);
+        return (List<OrdineAcquisto>) res.getData();
     }
 
     public List<PropostaAcquisto> ricercaProposteAcquisto(Date dete1, Date dete2) {
         // Esempio: Esegui una ricerca delle proposte di acquisto tra le date specificate
         Object[] data = {dete1, dete2};
-        Response1 res;
+        Request req = new Request();
+        req.set(0, data, null);
+
+        Response res = client.message(req);
         //res = client.message("ricercaProposteAcquisto", data);
-        return res.getProposteAcquisto();
+        return (List<PropostaAcquisto>) res.getData();
     }
 
     // DA DEFINIRE...

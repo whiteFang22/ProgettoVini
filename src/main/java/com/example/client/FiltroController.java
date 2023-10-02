@@ -1,19 +1,31 @@
 package com.example.client;
 
+import com.example.classes.Cliente;
+import com.example.classes.Impiegato;
+import com.example.classes.OrdineAcquisto;
+import com.example.classes.OrdineVendita;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-public class FiltroController {
+import java.io.IOException;
+import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.ResourceBundle;
+
+public class FiltroController implements Initializable {
     @FXML
     Button ordiniProposteButton;
     @FXML
@@ -23,6 +35,8 @@ public class FiltroController {
     @FXML
     Button reportButton;
     @FXML
+    Button viniButton;
+    @FXML
     Button esciButton;
 
     @FXML
@@ -30,11 +44,17 @@ public class FiltroController {
 
     @FXML
     ToggleGroup filtroRicerca;
+    @FXML
+    BorderPane mainBorderImpiegati;
+    @FXML
+    HBox listaClienti;
+    final FindParent find = new FindParent();
+    private static ListView<HBox> listView;
 
     @FXML
     private void ShowLeftOriniProposte(){
         System.out.println("left-ordini-proposte");
-        BorderPane parent = (BorderPane) ordiniProposteButton.getParent().getParent();
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
 
         FxmlLoader object = new FxmlLoader();
         Pane view = object.getPage("impiegato/left-ordini-proposte");
@@ -46,7 +66,7 @@ public class FiltroController {
     }
 
     @FXML
-    private void ShowLeftClienti(){
+    private void ShowLeftClienti() throws IOException {
         System.out.println("left-clienti");
         BorderPane parent = (BorderPane) clientiButton.getParent().getParent();
 
@@ -57,28 +77,23 @@ public class FiltroController {
         object = new FxmlLoader();
         view = object.getPage("impiegato/center-clienti-registrati");
         parent.setCenter(view);
+
+        cercaClienti();
     }
 
     @FXML
-    private void ChangeCenter() {
-        System.out.println("change-center");
-        RadioButton btn = (RadioButton) filtroRicerca.getSelectedToggle();
+    private void showLeftVini(){
+        System.out.println("left-ordini-proposte");
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
 
-        BorderPane parent = (BorderPane) btn.getParent().getParent().getParent();
-        centerTitle = (Label) parent.lookup("#centerTitle");
+        FxmlLoader object = new FxmlLoader();
+        Pane view = object.getPage("impiegato/left-vini");
+        parent.setLeft(view);
 
-        switch (btn.getText()) {
-            case "Ordini Acquisto":
-                centerTitle.setText("ORDINI DI ACQUISTO");
-                break;
-            case "Ordini Vendita":
-                centerTitle.setText("ORDINI DI VENDITA");
-                break;
-            case "Proposte Acquisto":
-                centerTitle.setText("PROPOSTE DI ACQUISTO");
-                break;
-        }
+        RicercaController controller = new RicercaController();
+        controller.ricercaVini();
     }
+
     @FXML
     private void registraImpiegato(){
         System.out.println("registra impiegato");
@@ -112,5 +127,174 @@ public class FiltroController {
         stage.setWidth(611);
         stage.setHeight(523);
         // azzera shared.user
+        SharedData.getInstance().resetInstance();
+
     }
+
+    @FXML
+    private void ChangeCenter() throws IOException, ParseException {
+        System.out.println("change-center");
+        RadioButton btn = (RadioButton) filtroRicerca.getSelectedToggle();
+
+        BorderPane parent = (BorderPane) btn.getParent().getParent().getParent();
+        centerTitle = (Label) parent.lookup("#centerTitle");
+
+        switch (btn.getText()) {
+            case "Ordini Acquisto" -> {
+                centerTitle.setText("ORDINI DI ACQUISTO");
+                cercaOrdiniAcquisto();
+            }
+            case "Ordini Vendita" -> {
+                centerTitle.setText("ORDINI DI VENDITA");
+                cercaOrdiniVendita();
+            }
+            case "Proposte Acquisto" -> centerTitle.setText("PROPOSTE DI ACQUISTO");
+        }
+    }
+
+    @FXML
+    protected void cercaClienti() throws IOException {
+        listView = new ListView<>();
+        listView.setId("listaViniOrdine");
+        ObservableList<HBox> items = FXCollections.observableArrayList();
+
+        List<Cliente> list = new ArrayList<>();
+        Cliente c = new Cliente("mario","rossi","1234", "mrss019hfj","MROSSI@GMAIL.COM", "123321","Via mrosii");
+        list.add(c);
+        c = new Cliente("giovanni","rossi","1234", "mrss019hfj","MROSSI@GMAIL.COM", "123321","Via mrosii");
+        list.add(c);
+
+
+        SchedeController sch = new SchedeController();
+
+        int i=0;
+        for (Cliente cliente : list){
+            Text cognome = new Text(cliente.getCognome());
+            Button schedaAcquisti = new Button("ACQUISTI");
+            schedaAcquisti.setOnAction(actionEvent -> {
+
+            });
+
+            Button schedaCiente = new Button("VEDI SCHEDA");
+            schedaCiente.setUserData(cliente);
+            schedaCiente.setOnAction(event ->{
+                Cliente data = (Cliente) schedaCiente.getUserData();
+                sch.manageSchede(data);
+            });
+
+            HBox riga = new HBox(cognome, schedaAcquisti, schedaCiente);
+            riga.setSpacing(10);
+            items.add(riga);
+        }
+        listView.setItems(items);
+        listView.setMinWidth(350);
+        listView.setMinHeight(100);
+        listView.setSelectionModel(null);
+
+        BorderPane main = SharedData.getInstance().getCurrentParent();
+        listaClienti = (HBox) main.lookup("#listaClienti");
+        listaClienti.getChildren().clear();
+        listaClienti.getChildren().add(listView);
+    }
+
+    @FXML
+    protected void cercaOrdiniVendita() throws IOException, ParseException {
+        listView = new ListView<>();
+        listView.setId("listaViniOrdine");
+        ObservableList<HBox> items = FXCollections.observableArrayList();
+
+        SchedeController sch = new SchedeController();
+        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
+        Date data = formatoData.parse("22/09/2205");
+
+        Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
+        //List<OrdineVendita> ordini = imp.ricercaOrdiniVendita(data, data);
+
+        List<OrdineVendita> ordini = null;
+
+        for (OrdineVendita ordine : ordini){
+            Text dataCreazione = new Text(formatoData.format(ordine.getDataCreazione()));
+
+            Button cliente = new Button(ordine.getCliente().getEmail());
+            cliente.setUserData(ordine.getCliente());
+            cliente.setOnAction(event ->{
+                Cliente obj = (Cliente) cliente.getUserData();
+                sch.VediSchedaCliente(SharedData.getInstance().getCurrentParent(), obj);
+            });
+
+            Button schedaOrdine = new Button("VEDI SCHEDA");
+            schedaOrdine.setUserData(ordine);
+            schedaOrdine.setOnAction(actionEvent -> {
+                sch.manageSchede(ordine);
+            });
+
+            HBox riga = new HBox(dataCreazione, cliente, schedaOrdine);
+            riga.setSpacing(10);
+            items.add(riga);
+        }
+        listView.setItems(items);
+        listView.setMinWidth(350);
+        listView.setMinHeight(100);
+        listView.setSelectionModel(null);
+
+        BorderPane main = SharedData.getInstance().getCurrentParent();
+        listaClienti = (HBox) main.lookup("#lista");
+        listaClienti.getChildren().clear();
+        listaClienti.getChildren().add(listView);
+    }
+    @FXML
+    protected void cercaOrdiniAcquisto() throws IOException, ParseException {
+        listView = new ListView<>();
+        listView.setId("listaViniOrdine");
+        ObservableList<HBox> items = FXCollections.observableArrayList();
+
+        SchedeController sch = new SchedeController();
+        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
+        Date data = formatoData.parse("22/09/2205");
+
+        Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
+        //List<OrdineVendita> ordini = imp.ricercaOrdiniVendita(data, data);
+
+        List<OrdineAcquisto> ordini = null;
+
+        for (OrdineAcquisto ordine : ordini){
+            Text dataCreazione = new Text(formatoData.format(ordine.getDataCreazione()));
+
+            Button cliente = new Button(ordine.getCliente().getEmail());
+            cliente.setUserData(ordine.getCliente());
+            cliente.setOnAction(event ->{
+                Cliente obj = (Cliente) cliente.getUserData();
+                sch.VediSchedaCliente(SharedData.getInstance().getCurrentParent(), obj);
+            });
+
+            Button schedaOrdine = new Button("VEDI SCHEDA");
+            schedaOrdine.setUserData(ordine);
+            schedaOrdine.setOnAction(actionEvent -> {
+                sch.manageSchede(ordine);
+            });
+
+            HBox riga = new HBox(dataCreazione, cliente, schedaOrdine);
+            riga.setSpacing(10);
+            items.add(riga);
+        }
+        listView.setItems(items);
+        listView.setMinWidth(350);
+        listView.setMinHeight(100);
+        listView.setSelectionModel(null);
+
+        BorderPane main = SharedData.getInstance().getCurrentParent();
+        listaClienti = (HBox) main.lookup("#lista");
+        listaClienti.getChildren().clear();
+        listaClienti.getChildren().add(listView);
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        // evito che venga inizializzato due volte: più fxml hanno stesso controller
+        if (mainBorderImpiegati!=null) {
+            SharedData.getInstance().setCurrentParent(mainBorderImpiegati);
+        }
+        System.out.println("ciao");
+    }
+
 }

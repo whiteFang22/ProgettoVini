@@ -9,14 +9,16 @@ public class OrdineVendita {
     private List<CassaVino> casseVino;
     private String indirizzoConsegna;
     private Date dataConsegna;
+    private Date dataCreazione;
 
     public OrdineVendita(Cliente cliente, List<ConfezioneVini> confezioniVini, List<CassaVino> casseVino,
-                         String indirizzoConsegna, Date dataConsegna) {
+                         String indirizzoConsegna, Date dataConsegna, Date dataCreazione) {
         this.cliente = cliente;
         this.confezioniVini = confezioniVini;
         this.casseVino = casseVino;
         this.indirizzoConsegna = indirizzoConsegna;
         this.dataConsegna = dataConsegna;
+        this.dataCreazione = dataCreazione;
     }
 
     public Cliente getCliente() {
@@ -68,5 +70,13 @@ public class OrdineVendita {
             totale += cassa.getPrezzo();
         }
         return totale;
+    }
+
+    public Date getDataCreazione() {
+        return dataCreazione;
+    }
+
+    public void setDataCreazione(Date dataCreazione) {
+        this.dataCreazione = dataCreazione;
     }
 }

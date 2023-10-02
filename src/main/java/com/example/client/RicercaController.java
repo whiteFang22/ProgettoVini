@@ -56,27 +56,24 @@ public class RicercaController implements Initializable{
     protected void onAcquistaButton(){
         // usa metodo cliente che contatta il server per capire se c'è la disponibilità dei vini richiesti, se si
         // procedi con il pagamento altrimenti schermata proposta di acquisto
-        /*Cliente user = (Cliente) SharedData.getInstance().getUser();
+        Cliente user = (Cliente) SharedData.getInstance().getUser();
         Response res = user.acquistaBottiglie(SharedData.getInstance().getContenitori());
-        OrdineVendita ordine = res.getOrdineVendita();
-
-        success = res.getSuccess();*/
-        success=true;
-        BorderPane parent = SharedData.getInstance().getCurrentParent();
+        success = res.isSuccess();
+        // se true visualizzo l'ordine di vendita
         if (success) {
+            OrdineVendita ordine = (OrdineVendita) res.getData(); // deve restituirmi l'oridne di vendita creato sulla base dell'acquisto
             //visualizza l'ordine di vendita
-            visualizzaOrdine();
-
-            //visualizza(ordine);
-            visualizza();
-
+            visualizzaPaginaOrdine();
+            visualizzaListaOrdini(ordine);
             // recupero le informazioni di revisione ordine e le inserisco nel nuovo layout
             visualizzaLeft();
         }
+        // se false chiedo se si vuole effettuare una proposta di acquisto: i vini non ci sono in magazzino
         else {
             // schermata proposta di acquisto
-            // res deve contenere i vini mancanti
             System.out.println("Proposta");
+            SharedData.getInstance().setRes(res); // salvo la res in modo che dopo possa accedere alla proposta di acquisto restituita dal server in precedenza
+            BorderPane parent = SharedData.getInstance().getCurrentParent();
             FxmlLoader object = new FxmlLoader();
             Pane view = object.getPage("cliente/proposta-acquisto-client");
             parent.setCenter(view);
@@ -109,6 +106,9 @@ public class RicercaController implements Initializable{
         SharedData.getInstance().resetInstance();
 
         System.out.println("Ordine");
+        Cliente user = (Cliente) SharedData.getInstance().getUser();
+        user.proponiAcquisto(false);
+
         FxmlLoader object = new FxmlLoader();
         Pane view = object.getPage("cliente/scheda-vini-client");
         BorderPane parent = find.findBorderPane(propostaNo);
@@ -117,16 +117,17 @@ public class RicercaController implements Initializable{
     @FXML
     protected void accettaProposta(){
         Cliente user = (Cliente) SharedData.getInstance().getUser();
-        //user.proponiAcquisto(SharedData.getInstance().getRes().getVini());
-        //success = true;
-        // crea prima l'ordine
-        visualizzaOrdine();
-        visualizza();
-        visualizzaLeft();
-
+        PropostaAcquisto proposta = (PropostaAcquisto) SharedData.getInstance().getRes().getData();
+        Response res = user.proponiAcquisto(true);
+        if ( res.isSuccess() ){
+            OrdineVendita ordine = (OrdineVendita) res.getData();
+            visualizzaPaginaOrdine();
+            visualizzaListaOrdini(ordine);
+            visualizzaLeft();
+        }
     }
     @FXML
-    protected void visualizzaOrdine(){
+    protected void visualizzaPaginaOrdine(){
         /*Cliente user = (Cliente) SharedData.getInstance().getUser();
         Response res = user.acquistaBottiglie(SharedData.getInstance().getContenitori());
         OrdineVendita ordine = res.getOrdineVendita();
@@ -138,19 +139,22 @@ public class RicercaController implements Initializable{
         parent.setCenter(view);
     }
     // visualizza la lista dei vini in ordine
-    protected void visualizza(){
+    protected void visualizzaListaOrdini(OrdineVendita ordine){
         listView = new ListView<>();
         listView.setId("listaViniOrdine");
         ObservableList<HBox> items = FXCollections.observableArrayList();
 
         //crea manualmente lista di casse ma dopo dovrai recuperare da res
-        List<CassaVino> casse = new ArrayList<>();
+        /*List<CassaVino> casse = new ArrayList<>();
         Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65f,0,0);
         Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6f,0,0);
         CassaVino ca = new CassaVino(v1, 6, 0);
         casse.add(ca);
         ca = new CassaVino(v2, 12, 0);
-        casse.add(ca);
+        casse.add(ca);*/
+
+        List<CassaVino> casse = ordine.getCasseVino();
+        List<ConfezioneVini> confezioni = ordine.getconfezioniVini();
 
         int i = 0;
         for (CassaVino cassa : casse) {
@@ -168,6 +172,26 @@ public class RicercaController implements Initializable{
             HBox riga = new HBox(nomeVino, quantitaField, costo);
             riga.setSpacing(10);
             items.add(riga);
+        }
+        // per ogni confezione scorri i vini contenuti
+        for (ConfezioneVini confezione : confezioni) {
+            Map<Vino,Integer> vini = confezione.getVini();
+            for (Map.Entry<Vino, Integer> entry : vini.entrySet()){
+                Vino vino = entry.getKey();
+                Label nomeVino = new Label(vino.getNome()+" - "+vino.getAnno());
+                nomeVino.setUserData(vino);
+                nomeVino.setMinWidth(135);
+
+                int quantita = entry.getValue();
+                Label quantitaField = new Label("quantità: "+quantita);
+                quantitaField.setMinWidth(80);
+                quantitaField.setId("quantita");
+
+                Text costo = new Text("costo: "+String.format("%.2f", vino.getPrezzo()*quantita )+"€");
+                HBox riga = new HBox(nomeVino, quantitaField, costo);
+                riga.setSpacing(10);
+                items.add(riga);
+            }
         }
         listView.setItems(items);
         listView.setMinWidth(350);
@@ -206,16 +230,16 @@ public class RicercaController implements Initializable{
     @FXML
     protected void ricercaVini(){
         UtenteGenerico user = SharedData.getInstance().getUser();
-        String anno = "-1"; //indica che non va effettuata una ricerca per anno ma per nome
+        int anno = -1; //indica che non va effettuata una ricerca per anno ma per nome
         String nome = "";
         if (!annoProduzione.getText().equals("")){
-            anno = annoProduzione.getText();
+            anno = Integer.parseInt(annoProduzione.getText());
         }
         if (!nomeVino.getText().equals("")){
             nome = nomeVino.getText();
         }
-        FiltriRicerca filtri = new FiltriRicerca(null, null, anno, nome);
-        List<Vino> listaVini = user.cercaVini(nomeVino.getText(), filtri);
+        FiltriRicerca filtri = new FiltriRicerca(null, null, nome, anno);
+        List<Vino> listaVini = user.cercaVini(filtri);
 
         // crea una tabella e per ogni riga aggiungi un vino
         creaGrid(listaVini);

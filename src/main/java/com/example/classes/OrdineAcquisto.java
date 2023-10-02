@@ -1,16 +1,19 @@
 package com.example.classes;
 
+import java.util.Date;
 import java.util.Map;
 
 public class OrdineAcquisto {
     private Cliente cliente;
     private Map<Vino, Integer> viniMancanti;
     private String indirizzoAzienda;
+    private Date dataCreazione;
 
-    public OrdineAcquisto(Cliente cliente, Map<Vino, Integer> viniMancanti, String indirizzoAzienda) {
+    public OrdineAcquisto(Cliente cliente, Map<Vino, Integer> viniMancanti, String indirizzoAzienda, Date dataCreazione) {
         this.cliente = cliente;
         this.viniMancanti = viniMancanti;
         this.indirizzoAzienda = indirizzoAzienda;
+        this.dataCreazione = dataCreazione;
     }
 
     public Cliente getCliente() {
@@ -45,6 +48,14 @@ public class OrdineAcquisto {
             totale += vino.getPrezzo() * quantita;
         }
         return totale;
+    }
+
+    public Date getDataCreazione() {
+        return dataCreazione;
+    }
+
+    public void setDataCreazione(Date dataCreazione) {
+        this.dataCreazione = dataCreazione;
     }
 }
 

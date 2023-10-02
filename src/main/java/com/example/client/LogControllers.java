@@ -1,5 +1,6 @@
 package com.example.client;
 
+import com.example.classes.Impiegato;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -40,6 +41,7 @@ public class LogControllers implements Initializable{
         String choice = UserChoiceBox.getValue();
         //System.out.println(choice);
         SharedData.getInstance().setUserType(choice);
+
         BorderPane parent = (BorderPane) UserChoiceBox.getParent().getParent();
         registrationButton = (Button) parent.lookup("#registrationButton");
         registrationButton.setDisable(!choice.equals("cliente"));
