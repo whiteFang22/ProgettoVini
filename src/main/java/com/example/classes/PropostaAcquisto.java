@@ -8,7 +8,7 @@ public class PropostaAcquisto {
     private List<CassaVino> casseVino;
     private List<Vino> viniMancanti;
     private String indirizzoConsegna;
-    private OrdineVendita ordineCorrispondente; //
+    private OrdineVendita ordineCorrispondente;
 
     public PropostaAcquisto(Cliente cliente, List<Vino> viniMancanti, String indirizzoConsegna, OrdineVendita ordineCorrispondente) {
         this.cliente = cliente;

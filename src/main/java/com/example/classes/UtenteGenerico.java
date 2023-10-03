@@ -6,8 +6,6 @@ import java.util.List;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class UtenteGenerico implements Serializable{
     private static final long serialVersionUID = 1L;
@@ -97,6 +95,8 @@ public class UtenteGenerico implements Serializable{
     }
 
     //deve ritornarmi Response contenente l'utente
+    //F: Fatto, in res.getData()
+    
     public Response login() {
         // Implementazione del metodo login
         // Esempio: Verifica delle credenziali e autenticazione

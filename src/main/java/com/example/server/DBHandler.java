@@ -12,7 +12,7 @@ import java.sql.SQLException;
 *
 **/
 public class DBHandler {
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/WineShop?useSSL=false";
+    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/wineshop?useSSL=false";
     private static final String USERNAME = "fedecardelli";
     private static final String PASSWORD = "CRDFRC01@g!";
 
@@ -26,6 +26,7 @@ public class DBHandler {
             connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            System.out.println("DB Initialization error");
         }
     }
     /*

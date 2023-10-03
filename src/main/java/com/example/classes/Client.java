@@ -53,10 +53,9 @@ public class Client implements Serializable {
     }
 
     public static void main(String[] args) {
-        Cliente examplecliente = new Cliente("mario","rossi","1234", "mrss019hfj","MROSSI@GMAIL.COM", "123321","Via mrosii");
+        Cliente examplecliente = new Cliente("mario","rossi","1234", "mmmrrsss019hfj","mrossi@gmail.com", "123321","Via mrosii");
         //examplecliente.registrazione();
         //examplecliente.login();
-        FiltriRicerca filtri = new FiltriRicerca(null, null,  "Wine1", 2020);
-        examplecliente.cercaVini(filtri);
+        examplecliente.ClientModificaCredenziali("1111");
     }
 }
