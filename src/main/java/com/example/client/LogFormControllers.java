@@ -73,7 +73,7 @@ public class LogFormControllers {
         UtenteGenerico user = SharedData.getInstance().getUser();
         String userType = SharedData.getInstance().getUserType();
 
-        /*user.setEmail(email.getText());
+        user.setEmail(email.getText());
         user.setpasswordhash(password.getText());
         Response res = user.login();
         switch (userType) {
@@ -81,8 +81,8 @@ public class LogFormControllers {
             case "impiegato" -> user = (Impiegato) res.getData();
             case "amministratore" -> user = (Amministratore) res.getData();
         }
-        boolean success = res.isSuccess();*/
-        boolean success = true;
+        boolean success = res.isSuccess();
+
         System.out.println(email.getText() + password.getText());
         if (success)
         {

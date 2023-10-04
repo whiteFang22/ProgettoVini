@@ -6,6 +6,7 @@ import javafx.scene.layout.BorderPane;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SharedData {
     private static SharedData instance = new SharedData();
@@ -14,6 +15,7 @@ public class SharedData {
     private Response res;
     private String userType;
     private BorderPane currentParent;
+    private Map<String, Integer> viniSelezionati;
 
     private SharedData() {
         // Costruttore privato per impedire l'istanziazione diretta
@@ -39,6 +41,8 @@ public class SharedData {
 
     public void setContenitori(List<Object> contenitori){ this.contenitoriSelezionati = contenitori; }
     public List<Object> getContenitori(){ return contenitoriSelezionati; } // contiene casse e confezioni
+
+    public Map<String, Integer> getVini(){ return viniSelezionati; }
 
     public void setRes(Response res){ this.res = res;}
     public Response getRes(){ return res;}

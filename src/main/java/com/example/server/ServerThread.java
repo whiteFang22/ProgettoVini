@@ -107,8 +107,8 @@ public class ServerThread implements Runnable
                if(requestData != null && requestData instanceof Cliente){
                   Cliente user = (Cliente) requestData;
                   System.out.println("Request OK, contacting db");
-                  String dbquery = "INSERT INTO utenti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico) VALUES (?,?,?,?,?,?)";
-                  rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico());
+                  String dbquery = "INSERT INTO clienti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
+                  rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico(), user.getIndirizzoDiConsegna());
                   System.out.println("query Executed "+ rowsAffected + " rows Affected");
                   response.set(1,null,null);
                   response.setSuccess();
@@ -120,7 +120,7 @@ public class ServerThread implements Runnable
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof UtenteGenerico){
                 UtenteGenerico user = (UtenteGenerico) requestData;
-                String dbquery = "SELECT * FROM utenti where email = ?; ";
+                String dbquery = "SELECT * FROM clienti where email = ?; ";
                 ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
                 if(resultset.next()){
                   System.out.println("User found, checking password");
@@ -164,7 +164,7 @@ public class ServerThread implements Runnable
                //Modifica password 
                if(requestData != null && requestData instanceof Cliente && clientAuthCode == connectionAuthCode){
                 Cliente cliente = (Cliente) requestData;
-                String query = "UPDATE utenti SET passwordhash = ? WHERE codiceFiscale = ?;";
+                String query = "UPDATE clienti SET passwordhash = ? WHERE codiceFiscale = ?;";
                 rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
                 System.out.println("query Executed "+ rowsAffected + " rows Affected");
                 response.set(1,null,null);

@@ -2,6 +2,7 @@ package com.example.classes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Cliente extends UtenteGenerico {
     private String indirizzoDiConsegna;
@@ -58,7 +59,7 @@ public class Cliente extends UtenteGenerico {
     //         Se non ci sono abbastanza vini in magazzino crea un oggetto PropostaAcquisto contenente
     //         i vini mancanti con le rispettive quantità, e restituiscila al client
     //         (Se il cliente deciderà di proseguire lo stessi, chiamerà il metodo proponiAcquisto)
-    public Response acquistaBottiglie(List<Object> bottiglieList) {
+    public Response acquistaBottiglie(Map<String, Integer> bottiglieList) {
         Request req = new Request();
         req.set(0, bottiglieList, this.AuthCode);
 
