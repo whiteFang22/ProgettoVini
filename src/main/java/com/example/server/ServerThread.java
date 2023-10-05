@@ -129,9 +129,9 @@ public class ServerThread implements Runnable
                   System.out.println(passwordhash);
                   if(passwordhash.equals(user.getPasswordhash())){
                     System.out.println("password match");
-                    UtenteGenerico loggeduser = new UtenteGenerico(resultset.getString("nome"), resultset.getString("cognome"),
+                    Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),
                       resultset.getString("passwordhash"), resultset.getString("codiceFiscale"),
-                      resultset.getString("email"), resultset.getString("numeroTelefonico"));
+                      resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
                     System.out.println(authCode);

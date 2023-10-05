@@ -5,13 +5,15 @@ import java.util.Map;
 
 public class OrdineAcquisto {
     private Cliente cliente;
-    private Map<Vino, Integer> viniMancanti;
+    private PropostaAcquisto propostaAssociata;
     private String indirizzoAzienda;
     private Date dataCreazione;
+    private Impiegato impiegato;
 
-    public OrdineAcquisto(Cliente cliente, Map<Vino, Integer> viniMancanti, String indirizzoAzienda, Date dataCreazione) {
+    public OrdineAcquisto(Cliente cliente, Impiegato impiegato, PropostaAcquisto propostaAssociata, String indirizzoAzienda, Date dataCreazione) {
         this.cliente = cliente;
-        this.viniMancanti = viniMancanti;
+        this.impiegato = impiegato;
+        this.propostaAssociata = propostaAssociata;
         this.indirizzoAzienda = indirizzoAzienda;
         this.dataCreazione = dataCreazione;
     }
@@ -25,11 +27,7 @@ public class OrdineAcquisto {
     }
 
     public Map<Vino, Integer> getViniMancanti() {
-        return viniMancanti;
-    }
-
-    public void setViniMancanti(Map<Vino, Integer> viniMancanti) {
-        this.viniMancanti = viniMancanti;
+        return propostaAssociata.getVini();
     }
 
     public String getIndirizzoAzienda() {
@@ -42,7 +40,7 @@ public class OrdineAcquisto {
 
     public float calcolaTotale() {
         float totale = 0;
-        for (Map.Entry<Vino, Integer> entry : viniMancanti.entrySet()) {
+        for (Map.Entry<Vino, Integer> entry : propostaAssociata.getVini().entrySet()) {
             Vino vino = entry.getKey();
             int quantita = entry.getValue();
             totale += vino.getPrezzo() * quantita;
@@ -56,6 +54,22 @@ public class OrdineAcquisto {
 
     public void setDataCreazione(Date dataCreazione) {
         this.dataCreazione = dataCreazione;
+    }
+
+    public Impiegato getImpiegato() {
+        return impiegato;
+    }
+
+    public void setImpiegato(Impiegato impiegato) {
+        this.impiegato = impiegato;
+    }
+
+    public PropostaAcquisto getPropostaAssociata() {
+        return propostaAssociata;
+    }
+
+    public void setPropostaAssociata(PropostaAcquisto propostaAssociata) {
+        this.propostaAssociata = propostaAssociata;
     }
 }
 

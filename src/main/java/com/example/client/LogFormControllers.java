@@ -76,6 +76,7 @@ public class LogFormControllers {
         user.setEmail(email.getText());
         user.setpasswordhash(password.getText());
         Response res = user.login();
+        System.out.println(res.isSuccess());
         switch (userType) {
             case "cliente" -> user = (Cliente) res.getData();
             case "impiegato" -> user = (Impiegato) res.getData();
@@ -88,7 +89,7 @@ public class LogFormControllers {
         {
             // RESTITUISCE LA SCHERMATA HOME DEL PROGRAMMA
             //SharedData.getInstance().setUser(user);
-            Impiegato imp = new Impiegato(null, "", null,null,null,null,null,null);
+            Impiegato imp = new Impiegato( null, null,null,null,null,null,null);
             SharedData.getInstance().setUser(imp);
             GetStage obj = new GetStage();
             obj.set(stage, userType);
