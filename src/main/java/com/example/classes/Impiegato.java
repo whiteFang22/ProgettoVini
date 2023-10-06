@@ -6,8 +6,8 @@ import java.util.List;
 public class Impiegato extends UtenteGenerico {
     private String indirizzoResidenza;
 
-    public Impiegato(String username, String passwordtohash, String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico,
-                     String indirizzoResidenza) {
+    public Impiegato(String passwordtohash, String nome, String cognome, String codiceFiscale, String email,
+                     String numeroTelefonico, String indirizzoResidenza) {
         super(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico);
         this.indirizzoResidenza = indirizzoResidenza;
     }

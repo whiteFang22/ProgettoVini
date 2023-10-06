@@ -57,7 +57,7 @@ public class RicercaController implements Initializable{
         // usa metodo cliente che contatta il server per capire se c'è la disponibilità dei vini richiesti, se si
         // procedi con il pagamento altrimenti schermata proposta di acquisto
         Cliente user = (Cliente) SharedData.getInstance().getUser();
-        Response res = user.acquistaBottiglie(SharedData.getInstance().getContenitori());
+        Response res = user.acquistaBottiglie(SharedData.getInstance().getVini());
         success = res.isSuccess();
         // se true visualizzo l'ordine di vendita
         if (success) {

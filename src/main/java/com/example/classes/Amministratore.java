@@ -4,20 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Amministratore extends Impiegato {
-    private String indirizzoResidenza;
-
-
-    public Amministratore(String username, String passwordtohash, String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico,
+    public Amministratore(String passwordtohash, String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico,
                           String indirizzoResidenza) {
-        super(username, passwordtohash, nome, cognome, codiceFiscale, email, numeroTelefonico, indirizzoResidenza);
-    }
-
-    public String getIndirizzoResidenza() {
-        return indirizzoResidenza;
-    }
-
-    public void setIndirizzoResidenza(String indirizzoResidenza) {
-        this.indirizzoResidenza = indirizzoResidenza;
+        super(passwordtohash, nome, cognome, codiceFiscale, email, numeroTelefonico, indirizzoResidenza);
     }
 
     // Salva nel db l'impiegato passato

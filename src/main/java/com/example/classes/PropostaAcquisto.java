@@ -1,16 +1,15 @@
 package com.example.classes;
 
 import java.util.List;
+import java.util.Map;
 
 public class PropostaAcquisto {
     private Cliente cliente;
-    private List<ConfezioneVini> confezioniVini;
-    private List<CassaVino> casseVino;
-    private List<Vino> viniMancanti;
+    private Map<Vino, Integer> viniMancanti;
     private String indirizzoConsegna;
     private OrdineVendita ordineCorrispondente;
 
-    public PropostaAcquisto(Cliente cliente, List<Vino> viniMancanti, String indirizzoConsegna, OrdineVendita ordineCorrispondente) {
+    public PropostaAcquisto(Cliente cliente, Map<Vino, Integer> viniMancanti, String indirizzoConsegna, OrdineVendita ordineCorrispondente) {
         this.cliente = cliente;
         this.viniMancanti = viniMancanti;
         this.indirizzoConsegna = indirizzoConsegna;
@@ -25,11 +24,11 @@ public class PropostaAcquisto {
         this.cliente = cliente;
     }
 
-    public List<Vino> getVini() {
+    public Map<Vino, Integer> getVini() {
         return viniMancanti;
     }
 
-    public void setVini(List<Vino> viniMancanti) {
+    public void setVini(Map<Vino, Integer> viniMancanti) {
         this.viniMancanti = viniMancanti;
     }
 

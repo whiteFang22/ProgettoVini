@@ -2,20 +2,19 @@ package com.example.classes;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class OrdineVendita {
     private Cliente cliente;
+    private Map<Vino, Integer> viniAcquistati;
     private List<ConfezioneVini> confezioniVini;
     private List<CassaVino> casseVino;
     private String indirizzoConsegna;
     private Date dataConsegna;
     private Date dataCreazione;
 
-    public OrdineVendita(Cliente cliente, List<ConfezioneVini> confezioniVini, List<CassaVino> casseVino,
-                         String indirizzoConsegna, Date dataConsegna, Date dataCreazione) {
+    public OrdineVendita(Cliente cliente, String indirizzoConsegna, Date dataConsegna, Date dataCreazione) {
         this.cliente = cliente;
-        this.confezioniVini = confezioniVini;
-        this.casseVino = casseVino;
         this.indirizzoConsegna = indirizzoConsegna;
         this.dataConsegna = dataConsegna;
         this.dataCreazione = dataCreazione;
@@ -61,6 +60,22 @@ public class OrdineVendita {
         this.dataConsegna = dataConsegna;
     }
 
+    /*
+       nel server dopo aver Calcolato il Map va inserito nell'ordine
+       così che una volta restituito al client, esso possa accedere
+       a tutte le informazioni senza dover contattare nuovamente il server
+   */
+    public void setViniAcquistati(Map<Vino, Integer> vini){
+        this.viniAcquistati = vini;
+    }
+    /*
+        Dato il Map viniAquistati calcola il numero di casse e di confezioni
+    */
+    public void creaContenitori(){
+
+    }
+
+    // retituisce il prezzo senza però applicare gli sconti, poi lo completo
     public float calcolaTotale() {
         float totale = 0;
         for (ConfezioneVini confezione : confezioniVini) {
