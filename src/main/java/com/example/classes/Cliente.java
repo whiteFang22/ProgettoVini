@@ -59,9 +59,9 @@ public class Cliente extends UtenteGenerico {
     //         Se non ci sono abbastanza vini in magazzino crea un oggetto PropostaAcquisto contenente
     //         i vini mancanti con le rispettive quantità, e restituiscila al client
     //         (Se il cliente deciderà di proseguire lo stessi, chiamerà il metodo proponiAcquisto)
-    public Response acquistaBottiglie(Map<String, Integer> bottiglieList) {
+    public Response acquistaBottiglie(Map<Integer, Integer> bottiglieList) {
         Request req = new Request();
-        req.set(0, bottiglieList, this.AuthCode);
+        req.set(3, bottiglieList, this.AuthCode);
 
         return client.message(req);
     }
@@ -79,11 +79,13 @@ public class Cliente extends UtenteGenerico {
                acquistare le bottiglie ed elimina anche, se presente, l'ultima proposta di Acquisto con
                "completato"==false
      */
+
+    //Lato server mi serve sapere che pagamento il cliente vuole confermare
     public boolean confermaPagamento(Boolean conferma){
         //invio al sistema la conferma dopo aver inserito le coordinarie bancarie
         Request req = new Request();
         req.set(0,conferma, this.AuthCode);
-        Response res = client.message( req);
+        Response res = client.message(req);
 
         return res.isSuccess();
     }

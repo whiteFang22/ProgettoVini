@@ -29,8 +29,8 @@ public class Server
 
   //DB access variables
   private static final String jdbcUrl = "jdbc:mysql://localhost:3306";
-  private static final String username = "root";
-  private static final String password = "qezxeZ-8nevwy-kofnah"
+  private static final String username = "fedecardelli";
+  private static final String password = "CRDFRC01@g!"
   ;
   private ServerSocket socket;
   private ThreadPoolExecutor pool;

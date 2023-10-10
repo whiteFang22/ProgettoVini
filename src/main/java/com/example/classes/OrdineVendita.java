@@ -1,6 +1,7 @@
 package com.example.classes;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,12 +13,37 @@ public class OrdineVendita {
     private String indirizzoConsegna;
     private Date dataConsegna;
     private Date dataCreazione;
+    private boolean completato;
+    public boolean isCompletato() {
+        return completato;
+    }
+    public void setCompletato(boolean completato) {
+        this.completato = completato;
+    }
 
-    public OrdineVendita(Cliente cliente, String indirizzoConsegna, Date dataConsegna, Date dataCreazione) {
+    private boolean firmato;
+
+    //Ridondante il campo indirizzo di consegna, ses ha gia il cliente è sufficiente fare cliente.getIndirizzodiConsegna()
+    public boolean isFirmato() {
+        return firmato;
+    }
+    public void setFirmato(boolean firmato) {
+        this.firmato = firmato;
+    }
+    public OrdineVendita(Cliente cliente, Date dataConsegna, Date dataCreazione) {
         this.cliente = cliente;
-        this.indirizzoConsegna = indirizzoConsegna;
+        //QUA
+        this.indirizzoConsegna = cliente.getIndirizzoDiConsegna();
         this.dataConsegna = dataConsegna;
         this.dataCreazione = dataCreazione;
+    }
+    public OrdineVendita(Cliente cliente,Map<Vino, Integer> viniAcquistati, Date dataConsegna, Date dataCreazione) {
+        this.cliente = cliente;
+        //QUA
+        this.indirizzoConsegna = cliente.getIndirizzoDiConsegna();
+        this.dataConsegna = dataConsegna;
+        this.dataCreazione = dataCreazione;
+        this.viniAcquistati = viniAcquistati;
     }
 
     public Cliente getCliente() {
@@ -59,6 +85,9 @@ public class OrdineVendita {
     public void setDataConsegna(Date dataConsegna) {
         this.dataConsegna = dataConsegna;
     }
+    public Map<Vino,Integer> getViniAcquistati(){
+        return this.viniAcquistati;
+    }
 
     /*
        nel server dopo aver Calcolato il Map va inserito nell'ordine
@@ -71,9 +100,7 @@ public class OrdineVendita {
     /*
         Dato il Map viniAquistati calcola il numero di casse e di confezioni
     */
-    public void creaContenitori(){
 
-    }
 
     // retituisce il prezzo senza però applicare gli sconti, poi lo completo
     public float calcolaTotale() {
@@ -85,6 +112,49 @@ public class OrdineVendita {
             totale += cassa.getPrezzo();
         }
         return totale;
+    }
+
+    public void ottimizza(){
+        Map<Vino,Integer> rimanenti = new HashMap();
+        for (Map.Entry<Vino, Integer> line : this.viniAcquistati.entrySet()){
+            Vino vino = line.getKey();
+            int quantita = line.getValue();
+            //dividi i vini in casse e confezione
+
+            //casse da 12
+            for(int casse12 = quantita / 12; casse12>0; casse12--){
+                //aggiungi casse da 12
+                this.casseVino.add(new CassaVino(vino, 12 , 0));        //INSERIRE QUI VALORE SCONTI
+            }
+            int rimanenti12 = quantita % 12;
+            //casse da 6
+            for(int casse6 = rimanenti12 / 6; casse6>0; casse6--){
+                //aggiungi casse da 6
+                this.casseVino.add(new CassaVino(vino, 6, 0));          //ANCHE QUI
+            }
+            //rimanenti in confezione
+            int bottiglieRimaste = rimanenti12 % 6;
+            //lista dei rimanenti da inserire in confezioni
+            rimanenti.put(vino,bottiglieRimaste);
+        }
+
+        ConfezioneVini confezione = new ConfezioneVini();
+
+        for (Map.Entry<Vino, Integer> entry : rimanenti.entrySet()) {
+            Vino vino = entry.getKey();
+            int quantita = entry.getValue();
+
+            for (int i = 0; i < quantita; i++) {
+                if (confezione.getCapacita() >= 1) {
+                    confezione.aggiungiVino(vino, 1);
+                } else {
+                    //Confezione piena, aggiungi all'ordine e creane una nuova
+                    this.confezioniVini.add(confezione);
+                    confezione = new ConfezioneVini();
+                    confezione.aggiungiVino(vino, 1);
+                }
+            }
+        }
     }
 
     public Date getDataCreazione() {
