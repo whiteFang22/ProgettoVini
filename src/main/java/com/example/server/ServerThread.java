@@ -143,9 +143,7 @@ public class ServerThread implements Runnable
                   System.out.println(passwordhash);
                   if(passwordhash.equals(user.getPasswordhash())){
                     System.out.println("password match");
-                    Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),
-                      resultset.getString("passwordhash"), resultset.getString("codiceFiscale"),
-                      resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
+                    Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),resultset.getString("password_hash"), resultset.getString("codice_fiscale"), resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_di_consegna"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
                     System.out.println(authCode);
@@ -176,7 +174,7 @@ public class ServerThread implements Runnable
               else if(requestData != null && requestData instanceof Impiegato){
                 //Login Impiegato
                 Impiegato user = (Impiegato)requestData;
-                String dbquery = "SELECT * FROM clienti where email = ?; ";
+                String dbquery = "SELECT * FROM impiegati where email = ?; ";
                 ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
                 if(resultset.next()){
                   System.out.println("User found, checking password");
@@ -185,9 +183,9 @@ public class ServerThread implements Runnable
                   System.out.println(passwordhash);
                   if(passwordhash.equals(user.getPasswordhash())){
                     System.out.println("password match");
-                    Impiegato loggeduser = new Impiegato(resultset.getString("nome"), resultset.getString("cognome"),
-                      resultset.getString("passwordhash"), resultset.getString("codiceFiscale"),
-                      resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
+                    Impiegato loggeduser = new Impiegato(resultset.getString("password_hash"), resultset.getString("nome"),
+                      resultset.getString("cognome"), resultset.getString("codice_fiscale"),
+                      resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
                     System.out.println(authCode);
@@ -218,7 +216,7 @@ public class ServerThread implements Runnable
               }else if(requestData != null && requestData instanceof Amministratore){
                 //Login Amministratore
                 Amministratore user = (Amministratore)requestData;
-                String dbquery = "SELECT * FROM clienti where email = ?; ";
+                String dbquery = "SELECT * FROM impiegati where email = ? AND isAdmin = true; ";
                 ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
                 if(resultset.next()){
                   System.out.println("User found, checking password");
@@ -227,9 +225,9 @@ public class ServerThread implements Runnable
                   System.out.println(passwordhash);
                   if(passwordhash.equals(user.getPasswordhash())){
                     System.out.println("password match");
-                    Amministratore loggeduser = new Amministratore(resultset.getString("nome"), resultset.getString("cognome"),
-                      resultset.getString("passwordhash"), resultset.getString("codiceFiscale"),
-                      resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
+                    Amministratore loggeduser = new Amministratore(resultset.getString("passwordtohash"), resultset.getString("nome"),
+                      resultset.getString("cognome"), resultset.getString("codice_fiscale"),
+                      resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
                     System.out.println(authCode);
@@ -276,104 +274,6 @@ public class ServerThread implements Runnable
                 message(response,os);
               }
               break;
-            case 3:
-
-              System.out.println("Got from client request id: " + requestId);
-              //Acquista Bottiglie 
-              if(requestData != null && requestData instanceof Map<?,?> && clientAuthCode == connectionAuthCode){
-                  Map<Integer, Integer> bottiglieList = (Map<Integer, Integer>) requestData;
-                  Map<Vino, Integer> viniPresenti = new HashMap();
-                  Map<Vino,Integer> viniMancanti = new HashMap();
-                  Boolean allInStock = true;
-                  
-                  //Initialize OrdineVendita
-                  OrdineVendita ordineVendita = new OrdineVendita(loggedCliente, null,new Date());
-
-                  for (Map.Entry<Integer, Integer> line : bottiglieList.entrySet()){
-                    Integer idVino = line.getKey();
-                    Integer quantitaRichiesta = line.getValue();
-                    String dbquery = "SELECT * FROM vino where id = ?";
-                    ResultSet resultSet = db.executeQuery(dbquery,idVino);
-                    if(resultSet.next()){
-
-                        //Build vino object from resultSet
-                        int id = resultSet.getInt("id");
-                        String nome = resultSet.getString("nome");
-                        String produttore = resultSet.getString("produttore");
-                        String provenienza = resultSet.getString("provenienza");
-                        int anno = resultSet.getInt("anno");
-                        String noteTecniche = resultSet.getString("note_tecniche");
-                        String vitigniJson = resultSet.getString("vitigni");
-                        List<String> vitigni = new Gson().fromJson(vitigniJson, new TypeToken<List<String>>() {}.getType());
-                        float prezzo = resultSet.getFloat("prezzo");
-                        int numeroVendite = resultSet.getInt("numero_vendite");
-                        int disponibilita = resultSet.getInt("disponibilita");
-                        Vino vino = new Vino(id, nome, produttore, provenienza, anno, noteTecniche,vitigni, prezzo, numeroVendite, disponibilita);
-
-                      if(disponibilita >= quantitaRichiesta){
-                        //vino disponibile, aggiungi a OrdineVendita
-                        viniPresenti.put(vino,quantitaRichiesta);
-                      }
-                      else{
-                        //vino non disponibile o non abbastanza bottiglie in magazzino, creo Map viniMancanti
-                        viniMancanti.put(vino, quantitaRichiesta - disponibilita);
-                        allInStock = false;
-                      }
-                    }
-                  }
-                  if(allInStock){
-                    //tutti i vini disponibili, finalizza OrdineVendita e salva in db
-                    ordineVendita.setViniAcquistati(viniPresenti);
-                    ordineVendita.setCompletato(true);
-                    //db Store
-                    String dbquery = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    Gson gson = new Gson();
-                    String lista_quantita = gson.toJson(ordineVendita.getViniAcquistati());
-                    db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
-                    
-                    //response code 1, data empty
-                    response.set(1,null,this.connectionAuthCode);
-                    response.setSuccess();
-                  }
-                  else{
-                    //Non tutti i vini sono disponibili in quantita sufficienti, creo proposta di acquisto
-                    ordineVendita.setViniAcquistati(viniPresenti);
-                    ordineVendita.setCompletato(false);
-                    PropostaAcquisto propostaAcquisto = new PropostaAcquisto(this.loggedCliente, viniMancanti, this.loggedCliente.getIndirizzoDiConsegna(), ordineVendita);
-                    //db Store
-                    String dbquery1 = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    Gson gson = new Gson();
-                    String lista_quantita = gson.toJson(ordineVendita.getViniAcquistati());
-                    db.executeUpdate(dbquery1,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
-
-                    String dbquery2 = "SELECT id FROM ordini_vendita WHERE cliente_id = ? AND lista_quantita = ? AND indirizzo_consegna = ? AND data_consegna = ? AND data_creazione = ?";
-                    ResultSet resultSet = db.executeQuery(dbquery2,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione());
-                    int id = 0;
-                    if(resultSet.next()){
-                      id = resultSet.getInt("id");
-                    }
-                    String dbquery3 = "INSERT INTO proposte_di_acquisto (cliente_id, lista_quantita, ordine_id) " +
-                    "VALUES (?, ?, ?)";
-                    gson = new Gson();
-                    String lista_quantita_mancanti = gson.toJson(propostaAcquisto.getVini());
-                    db.executeUpdate(dbquery3,propostaAcquisto.getCliente().getEmail(),lista_quantita_mancanti,id);
-
-                    //response code 2, data: PropostaAcquisto
-                    response.set(2,propostaAcquisto,this.connectionAuthCode);
-                    response.setSuccess();
-                  }
-              }
-              else{
-                response.set(0, null, this.connectionAuthCode);
-              }
-              message(response, os);
-
-            break;
-            case 4:
-
-            break;
             case 9:
               System.out.println("Got from client request id: " + requestId);
               //Ricerca Vino nel database
