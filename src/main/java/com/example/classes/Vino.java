@@ -4,6 +4,7 @@ import java.util.List;
 import java.io.Serializable;
 
 public class Vino implements Serializable{
+    private int id;
     private String nome;
     private String produttore;
     private String provenienza;
@@ -29,6 +30,19 @@ public class Vino implements Serializable{
     public Vino(String nome,int anno){
         this.nome = nome;
         this.anno = anno;
+    }
+    public Vino(int id, String nome, String produttore, String provenienza, int anno, String noteTecniche,
+                List<String> vitigni, float prezzo, int numeroVendite, int disponibilita) {
+        this.id = id;
+        this.nome = nome;
+        this.produttore = produttore;
+        this.provenienza = provenienza;
+        this.anno = anno;
+        this.noteTecniche = noteTecniche;
+        this.vitigni = vitigni;
+        this.prezzo = prezzo;
+        this.numeroVendite = numeroVendite;
+        this.disponibilita = disponibilita;
     }
 
     public String getNome() {

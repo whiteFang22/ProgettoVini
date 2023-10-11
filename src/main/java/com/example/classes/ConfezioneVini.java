@@ -16,8 +16,17 @@ public class ConfezioneVini {
 
     // Capisci se pieno o no
     public boolean aggiungiVino(Vino vino, int quantita) {
+        //se la quantità di vino sta nella confezione
         if (capacita-quantita>=0){
-            vini.put(vino, quantita);
+            //se dentro alla confezione c'è gia un vino uguale aggiungo alla sua quantità
+            if(this.vini.containsKey(vino)){
+                int oldqty = vini.get(vino);
+                vini.put(vino,oldqty+quantita);
+            }
+            //altrimenti aggiungo il nuovo vino
+            else{
+                vini.put(vino, quantita);
+            }
             calcolaPrezzo();
             capacita-=quantita;
             if (capacita==0) pieno=true;

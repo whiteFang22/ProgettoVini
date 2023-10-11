@@ -1,4 +1,5 @@
 module com.example.client {
+    requires com.google.gson;
     requires javafx.controls;
     requires java.sql;
     requires javafx.fxml;

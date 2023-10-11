@@ -1,9 +1,10 @@
 package com.example.classes;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-public class OrdineAcquisto {
+public class OrdineAcquisto implements Serializable{
     private Cliente cliente;
     private PropostaAcquisto propostaAssociata;
     private String indirizzoAzienda;

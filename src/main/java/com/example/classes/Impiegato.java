@@ -1,5 +1,6 @@
 package com.example.classes;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,18 +25,19 @@ public class Impiegato extends UtenteGenerico {
         // restituisce i clienti nel DB con il cognome indicato
         // se cognome=="" allora restituisci tutti i clienti nel db
         Request req = new Request();
-        req.set(0,cognome,this.AuthCode);
+        req.set(10,cognome,this.AuthCode);
 
         Response res = client.message(req);
+        //Server returns a List<Cliente>, if there is no cliente found returns an empty list
         return (List<Cliente>) res.getData();
     }
 
     // estrai dal metodo message il risultato dell'operazione
     public List<OrdineVendita> ricercaOrdiniVendita(Date dete1, Date dete2) {
-        // Esempio: Esegui una ricerca degli ordini di vendita tra le date specificate
-        Object[] data = {dete1, dete2};
+        // Esempio: Esegui una ricerca degli ordini di vendita (CREATI?) tra le date specificate
+        FiltriRicerca data = new FiltriRicerca(dete1, dete2,null,0);
         Request req = new Request();
-        req.set(0, data, this.AuthCode);
+        req.set(11, data, this.AuthCode);
 
         Response res = client.message(req);
         return (List<OrdineVendita>) res.getData();
@@ -43,9 +45,9 @@ public class Impiegato extends UtenteGenerico {
 
     public List<OrdineAcquisto> ricercaOrdiniAcquisto(Date dete1, Date dete2) {
         // Esempio: Esegui una ricerca degli ordini di acquisto tra le date specificate
-        Object[] data = {dete1, dete2};
+        FiltriRicerca data = new FiltriRicerca(dete1, dete2, null, 0);
         Request req = new Request();
-        req.set(0, data, this.AuthCode);
+        req.set(12, data, this.AuthCode);
 
         Response res = client.message(req);
         return (List<OrdineAcquisto>) res.getData();

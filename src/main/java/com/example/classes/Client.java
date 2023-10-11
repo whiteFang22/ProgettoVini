@@ -5,7 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.io.Serializable;
 
 public class Client implements Serializable {
@@ -53,9 +54,12 @@ public class Client implements Serializable {
     }
 
     public static void main(String[] args) {
-        Cliente examplecliente = new Cliente("mario","rossi","1234", "mmmrrsss019hfj","mrossi@gmail.com", "123321","Via mrosii");
+        Cliente examplecliente = new Cliente("andrea","verdi","1111", "ndrvrd87g12f463x","averdi@gmail.com", "123321","Via averdi");
         //examplecliente.registrazione();
         //examplecliente.login();
-        examplecliente.ClientModificaCredenziali("1111");
+        //examplecliente.ClientModificaCredenziali("1111");
+        Map<Integer,Integer> bottiglielist = new HashMap();
+        bottiglielist.put(6,2);
+        examplecliente.acquistaBottiglie(bottiglielist);
     }
 }
