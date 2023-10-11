@@ -59,7 +59,7 @@ public class Client implements Serializable {
         //examplecliente.login();
         //examplecliente.ClientModificaCredenziali("1111");
         Map<Integer,Integer> bottiglielist = new HashMap();
-        bottiglielist.put(3,5);
+        bottiglielist.put(6,2);
         examplecliente.acquistaBottiglie(bottiglielist);
     }
 }

@@ -48,7 +48,7 @@ public class ServerThread implements Runnable
   private Socket socket;
   private DBHandler db;
   private String connectionAuthCode = null;
-  private Cliente loggedCliente = null;
+  private Cliente loggedCliente = new Cliente("andrea","verdi","1111", "ndrvrd87g12f463x","averdi@gmail.com", "123321","Via averdi");
   private Impiegato loggedImpiegato = null;
   private Amministratore loggedAmministratore = null;
 
@@ -290,7 +290,7 @@ public class ServerThread implements Runnable
                   for (Map.Entry<Integer, Integer> line : bottiglieList.entrySet()){
                     Integer idVino = line.getKey();
                     Integer quantitaRichiesta = line.getValue();
-                    String dbquery = "SELECT * FROM vino where id = ?";
+                    String dbquery = "SELECT * FROM vini where id = ?";
                     ResultSet resultSet = db.executeQuery(dbquery,idVino);
                     if(resultSet.next()){
 
@@ -329,7 +329,6 @@ public class ServerThread implements Runnable
                     Gson gson = new Gson();
                     String lista_quantita = gson.toJson(ordineVendita.getViniAcquistati());
                     db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
-                    
                     //response code 1, data empty
                     response.set(1,null,this.connectionAuthCode);
                     response.setSuccess();
@@ -346,8 +345,8 @@ public class ServerThread implements Runnable
                     String lista_quantita = gson.toJson(ordineVendita.getViniAcquistati());
                     db.executeUpdate(dbquery1,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
 
-                    String dbquery2 = "SELECT id FROM ordini_vendita WHERE cliente_id = ? AND lista_quantita = ? AND indirizzo_consegna = ? AND data_consegna = ? AND data_creazione = ?";
-                    ResultSet resultSet = db.executeQuery(dbquery2,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione());
+                    String dbquery2 = "SELECT * FROM ordini_vendita WHERE cliente_id = ?";
+                    ResultSet resultSet = db.executeQuery(dbquery2,ordineVendita.getCliente().getEmail());
                     int id = 0;
                     if(resultSet.next()){
                       id = resultSet.getInt("id");

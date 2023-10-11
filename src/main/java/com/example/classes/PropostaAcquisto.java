@@ -1,9 +1,10 @@
 package com.example.classes;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-public class PropostaAcquisto {
+public class PropostaAcquisto implements Serializable {
     private Cliente cliente;
     private Map<Vino, Integer> viniMancanti;
     private String indirizzoConsegna;

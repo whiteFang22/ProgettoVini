@@ -1,11 +1,12 @@
 package com.example.classes;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class OrdineVendita {
+public class OrdineVendita implements Serializable{
     private Cliente cliente;
     private Map<Vino, Integer> viniAcquistati;
     private List<ConfezioneVini> confezioniVini;
