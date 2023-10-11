@@ -48,7 +48,7 @@ public class ServerThread implements Runnable
   private Socket socket;
   private DBHandler db;
   private String connectionAuthCode = null;
-  private Cliente loggedCliente = new Cliente("andrea","verdi","1111", "ndrvrd87g12f463x","averdi@gmail.com", "123321","Via averdi");
+  private Cliente loggedCliente = null;
   private Impiegato loggedImpiegato = null;
   private Amministratore loggedAmministratore = null;
 
