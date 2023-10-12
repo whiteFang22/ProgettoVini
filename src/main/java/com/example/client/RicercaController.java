@@ -240,6 +240,7 @@ public class RicercaController implements Initializable{
         }
         FiltriRicerca filtri = new FiltriRicerca(null, null, nome, anno);
         List<Vino> listaVini = user.cercaVini(filtri);
+        System.out.println("ok"+listaVini);
 
         // crea una tabella e per ogni riga aggiungi un vino
         creaGrid(listaVini);

@@ -131,9 +131,9 @@ public class ServerThread implements Runnable
             case 1:
               // Login Utente, requestData instance of Cliente/Impiegato/Amministratore 
               System.out.println("Got from client request id: " + requestId);
-              if(requestData != null && requestData instanceof Cliente){
+              if(requestData != null && requestData instanceof UtenteGenerico){
                 //Login Cliente
-                Cliente user = (Cliente)requestData;
+                UtenteGenerico user = (UtenteGenerico) requestData;
                 String dbquery = "SELECT * FROM clienti where email = ?; ";
                 ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
                 if(resultset.next()){
@@ -143,6 +143,10 @@ public class ServerThread implements Runnable
                   System.out.println(passwordhash);
                   if(passwordhash.equals(user.getPasswordhash())){
                     System.out.println("password match");
+                    /* bisogna fare distinzione se chi chiama il metodo è cliente, impiegato o amministratore
+                       per farlo senza dover modificare ulterirmente il nostro codice scorri nella tabella
+                       clienti e se non trovi scorri in impiegati. Se trovi in impiegati verifica il campo isAdmin
+                       per capire se creare un impiegato o un amministratore */
                     Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),resultset.getString("passwordhash"), resultset.getString("codiceFiscale"), resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
@@ -369,12 +373,15 @@ public class ServerThread implements Runnable
 
             break;
             case 9:
+              // non ti passo vino ma FiltriRicerca
               System.out.println("Got from client request id: " + requestId);
               //Ricerca Vino nel database
-               if(requestData != null && requestData instanceof Vino && clientAuthCode == connectionAuthCode){
-                  Vino wineToSearch = (Vino) requestData;
-                  String dbquery = "SELECT * FROM vino where nome = ? and anno = ?";
-                  ResultSet resultSet = db.executeQuery(dbquery,wineToSearch.getNome(), wineToSearch.getAnno());
+               if(requestData != null && requestData instanceof FiltriRicerca && clientAuthCode == connectionAuthCode){
+                  FiltriRicerca wineToSearch = (FiltriRicerca) requestData;
+                  // non sempre i campi nome e annoProduzione sono pieni, alcune volte sono "" e a seconda di queso
+                  // bisogna fare la query corrispondente
+                  String dbquery = "SELECT * FROM vini where nome = ? and anno = ?";
+                  ResultSet resultSet = db.executeQuery(dbquery,wineToSearch.nome(), wineToSearch.annoProduzione());
                   // Iterate through the result set
                   List<Vino> wineList = new ArrayList<>();
                   try {

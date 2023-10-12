@@ -110,7 +110,7 @@ public class UtenteGenerico implements Serializable{
             System.out.println(res.getAuthCode());
         }
         else{
-            throw new UnknownError("Server error");
+            //throw new UnknownError("Server error");
         }
         return res;
     }
