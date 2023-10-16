@@ -77,6 +77,7 @@ public class ServerThread implements Runnable
    * 9 - Cliente, ricercaVino
    * 10 - Impiegato, ricercaCliente
    * 11 - Impiegato, ricercaOrdineVendita
+   * 12 - Impiegato, ricercaOrdineAcquisto
   */
   public void run()
   {
@@ -131,11 +132,13 @@ public class ServerThread implements Runnable
             case 1:
               // Login Utente, requestData instance of Cliente/Impiegato/Amministratore 
               System.out.println("Got from client request id: " + requestId);
+
               if(requestData != null && requestData instanceof UtenteGenerico){
                 //Login Cliente
                 UtenteGenerico user = (UtenteGenerico) requestData;
                 String dbquery = "SELECT * FROM clienti where email = ?; ";
                 ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
+
                 if(resultset.next()){
                   System.out.println("User found, checking password");
                   String passwordhash = resultset.getString("passwordhash");
@@ -146,7 +149,9 @@ public class ServerThread implements Runnable
                     /* bisogna fare distinzione se chi chiama il metodo è cliente, impiegato o amministratore
                        per farlo senza dover modificare ulterirmente il nostro codice scorri nella tabella
                        clienti e se non trovi scorri in impiegati. Se trovi in impiegati verifica il campo isAdmin
-                       per capire se creare un impiegato o un amministratore */
+                       per capire se creare un impiegato o un amministratore 
+                       RISOLTO
+                       */
                     Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),resultset.getString("passwordhash"), resultset.getString("codiceFiscale"), resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
@@ -156,109 +161,87 @@ public class ServerThread implements Runnable
                     response.setAuthCode(authCode);
                     response.setData(loggeduser);
                     response.setSuccess();
-                    message(response, os);
                   }
                   else
                   {
+                    //Found but wrong password
                     response.setId(0);
                     response.setAuthCode(null);
                     response.setData(user);
-                    message(response, os);
                     System.out.println("wrong password");
                   }
                 }
-                else{
-                    response.setId(0);
-                    response.setAuthCode(null);
-                    response.setData(user);
-                    message(response, os);
-                  System.out.println("User not found");
-                }
-              }
-              else if(requestData != null && requestData instanceof Impiegato){
-                //Login Impiegato
-                Impiegato user = (Impiegato)requestData;
-                String dbquery = "SELECT * FROM impiegati where email = ?; ";
-                ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
-                if(resultset.next()){
-                  System.out.println("User found, checking password");
-                  String passwordhash = resultset.getString("passwordhash");
-                  System.out.println(user.getPasswordhash());
-                  System.out.println(passwordhash);
-                  if(passwordhash.equals(user.getPasswordhash())){
-                    System.out.println("password match");
-                    Impiegato loggeduser = new Impiegato(resultset.getString("password_hash"), resultset.getString("nome"),
-                      resultset.getString("cognome"), resultset.getString("codice_fiscale"),
-                      resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
-                    final String authCode = AuthCodeGenerator.generateAuthCode();
-                    this.connectionAuthCode = authCode;
-                    System.out.println(authCode);
-                    this.loggedImpiegato = loggeduser;
-                    response.setId(1);
-                    response.setAuthCode(authCode);
-                    response.setData(loggeduser);
-                    response.setSuccess();
-                    message(response, os);
-                  }
-                  else
-                  {
-                    response.setId(0);
-                    response.setAuthCode(null);
-                    response.setData(user);
-                    message(response, os);
-                    System.out.println("wrong password");
-                  }
-                }
-                else{
-                    response.setId(0);
-                    response.setAuthCode(null);
-                    response.setData(user);
-                    message(response, os);
-                  System.out.println("User not found");
-                }
+                else
+                {
+                    //Not Found in Clienti look in impiegati
+                    System.out.println("User not found in table clienti");
+                    
+                    dbquery = "SELECT * FROM impiegati where email = ?; ";
+                    resultset = db.executeQuery(dbquery, user.getEmail());
 
-              }else if(requestData != null && requestData instanceof Amministratore){
-                //Login Amministratore
-                Amministratore user = (Amministratore)requestData;
-                String dbquery = "SELECT * FROM impiegati where email = ? AND isAdmin = true; ";
-                ResultSet resultset = db.executeQuery(dbquery, user.getEmail());
-                if(resultset.next()){
-                  System.out.println("User found, checking password");
-                  String passwordhash = resultset.getString("passwordhash");
-                  System.out.println(user.getPasswordhash());
-                  System.out.println(passwordhash);
-                  if(passwordhash.equals(user.getPasswordhash())){
-                    System.out.println("password match");
-                    Amministratore loggeduser = new Amministratore(resultset.getString("passwordtohash"), resultset.getString("nome"),
-                      resultset.getString("cognome"), resultset.getString("codice_fiscale"),
-                      resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
-                    final String authCode = AuthCodeGenerator.generateAuthCode();
-                    this.connectionAuthCode = authCode;
-                    System.out.println(authCode);
-                    this.loggedAmministratore = loggeduser;
-                    response.setId(1);
-                    response.setAuthCode(authCode);
-                    response.setData(loggeduser);
-                    response.setSuccess();
-                    message(response, os);
+                    if(resultset.next()){
+                      System.out.println("User found, checking password");
+                      String passwordhash = resultset.getString("passwordhash");
+                      System.out.println(user.getPasswordhash());
+                      System.out.println(passwordhash);
+
+                      if(passwordhash.equals(user.getPasswordhash())){
+                        System.out.println("password match");
+                        Boolean isAdmin = resultset.getBoolean("isAdmin");
+                        if(isAdmin){
+                          //Amministratore
+                          Amministratore loggeduser = new Amministratore(resultset.getString("passwordtohash"), resultset.getString("nome"),
+                          resultset.getString("cognome"), resultset.getString("codice_fiscale"),
+                          resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
+                          final String authCode = AuthCodeGenerator.generateAuthCode();
+                          this.connectionAuthCode = authCode;
+                          System.out.println(authCode);
+                          this.loggedAmministratore = loggeduser;
+                          response.setId(1);
+                          response.setAuthCode(authCode);
+                          response.setData(loggeduser);
+                          response.setSuccess();
+                         }
+                        else{
+                          //Impiegato
+                          Impiegato loggeduser = new Impiegato(resultset.getString("password_hash"), resultset.getString("nome"),
+                          resultset.getString("cognome"), resultset.getString("codice_fiscale"),
+                          resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
+                          final String authCode = AuthCodeGenerator.generateAuthCode();
+                          this.connectionAuthCode = authCode;
+                          System.out.println(authCode);
+                          this.loggedImpiegato = loggeduser;
+                          response.setId(1);
+                          response.setAuthCode(authCode);
+                          response.setData(loggeduser);
+                          response.setSuccess();
+                          }
+                      }
+                      else{
+                        //wrong password
+                        response.setId(0);
+                        response.setAuthCode(null);
+                        response.setData(user);
+                        System.out.println("wrong password");
+                      }
+                    }
+                    else{
+                      //Not Found
+                      response.setId(0);
+                      response.setAuthCode(null);
+                      response.setData(user);
+                      System.out.println("User not Found");
+                    }
                   }
-                  else
-                  {
-                    response.setId(0);
-                    response.setAuthCode(null);
-                    response.setData(user);
-                    message(response, os);
-                    System.out.println("wrong password");
-                  }
-                }
-                else{
-                    response.setId(0);
-                    response.setAuthCode(null);
-                    response.setData(user);
-                    message(response, os);
-                  System.out.println("User not found");
-                }
               }
+            else{
+              //Invalid Request
+              response.setId(0);
+              response.setAuthCode(null);
+              response.setData(null);
+              }
+
+              message(response, os);
               break;
             case 2:
                System.out.println("Got from client request id: " + requestId);
@@ -380,8 +363,26 @@ public class ServerThread implements Runnable
                   FiltriRicerca wineToSearch = (FiltriRicerca) requestData;
                   // non sempre i campi nome e annoProduzione sono pieni, alcune volte sono "" e a seconda di queso
                   // bisogna fare la query corrispondente
-                  String dbquery = "SELECT * FROM vini where nome = ? and anno = ?";
-                  ResultSet resultSet = db.executeQuery(dbquery,wineToSearch.nome(), wineToSearch.annoProduzione());
+                  // RISOLTO
+                  ResultSet resultSet;
+
+                  if(wineToSearch.nome() != null && wineToSearch.annoProduzione() != null){
+                    String dbquery = "SELECT * FROM vini where nome = ? and anno = ?";
+                    resultSet = db.executeQuery(dbquery,wineToSearch.nome(), wineToSearch.annoProduzione());
+                  }
+                  else if(wineToSearch.nome() == null && wineToSearch.annoProduzione() != null){
+                    String dbquery = "SELECT * FROM vini where anno = ?";
+                    resultSet = db.executeQuery(dbquery,wineToSearch.annoProduzione());
+                  }
+                  else if(wineToSearch.nome() != null && wineToSearch.annoProduzione() == null){
+                    String dbquery = "SELECT * FROM vini where nome = ?";
+                    resultSet = db.executeQuery(dbquery,wineToSearch.nome());
+                  }
+                  else{
+                    String dbquery = "SELECT * FROM vini";
+                    resultSet = db.executeQuery(dbquery);
+                  }
+                  
                   // Iterate through the result set
                   List<Vino> wineList = new ArrayList<>();
                   try {
