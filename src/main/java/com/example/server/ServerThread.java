@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
+import com.google.gson.Gson;
+import java.lang.reflect.Type;
+import com.google.gson.reflect.TypeToken;
 
 import com.example.classes.AuthCodeGenerator;
 import com.example.classes.Cliente;
@@ -74,10 +77,14 @@ public class ServerThread implements Runnable
    * 1 - UtenteGenerico, Login
    * 2 - Cliente, modifica credenziali
    * 3 - Cliente, acquistabottiglie
+   * 4 - Cliente, confermaPagamento
    * 9 - Cliente, ricercaVino
    * 10 - Impiegato, ricercaCliente
    * 11 - Impiegato, ricercaOrdineVendita
    * 12 - Impiegato, ricercaOrdineAcquisto
+   * 20 - Admin, registraImpiegato
+   * 21 - Admin, eliminaUtente
+   * 22 - Admin, modificaCredenzialiUtente
   */
   public void run()
   {
@@ -355,6 +362,64 @@ public class ServerThread implements Runnable
               message(response, os);
 
             break;
+            case 4:
+              System.out.println("Got from client request id: " + requestId);
+
+              if(requestData != null && requestData instanceof Boolean && clientAuthCode == connectionAuthCode){
+                Boolean conferma = (Boolean) requestData;
+                if(conferma){
+                  //Conferma = true
+                  //Aggiornamento quantità magazzino
+                  String dbquery = "SELECT * from ordini_vendita WHERE cliente_id = ? and completato = 0";
+                  ResultSet resultset = db.executeQuery(dbquery, this.loggedCliente.getEmail());
+                  if(resultset.next()){
+                    //Get lista_quantità from ordine_vendita and parse into Map
+                    Gson gson = new Gson();
+                    Type mapType = new TypeToken<Map<Vino, Integer>>() {}.getType();
+                    Map<Vino, Integer> wineList = gson.fromJson(resultset.getString("lista_quantita"), mapType);
+                    //Iterate through Map
+                    for (Map.Entry<Vino, Integer> row : wineList.entrySet()) {
+                      Vino wine = row.getKey();
+                      int quantity = row.getValue();
+                      dbquery = "SELECT disponibilita, numero_vendite FROM vini WHERE id = ?";
+                      resultset = db.executeQuery(dbquery, wine.getId());
+                      if(resultset.next()){
+                        Integer disponibilita = resultset.getInt("disponibilita");
+                        Integer numeroVendite = resultset.getInt("numero_vendite");
+                        disponibilita-=quantity;
+                        numeroVendite+=quantity;
+                        dbquery="UPDATE vini SET disponibilita = ?, numero_vendite = ? WHERE id = ?";
+                        db.executeUpdate(dbquery,disponibilita,numeroVendite,wine.getId());
+                      }
+                      else{
+                        //Errore, non ce il vino
+                        throw new Exception("ERROR: we haven't found the bottles you were looking for");
+                      }
+                    }
+                    //Modifica ordine e proposta acquisto
+                    dbquery = "UPDATE ordini_vendita SET completato = 1 WHERE cliente_id = ? AND completato = 0";
+                    db.executeQuery(dbquery, this.loggedCliente.getEmail());
+                    dbquery = "UPDATE proposte_di_acquisto SET completato = 1 WHERE cliente_id = ? AND completato = 0";
+                    db.executeUpdate(dbquery,this.loggedCliente.getEmail());
+                  }
+                  else{
+                    //ERRORE, non ce l'ordine
+                    response.set(0,null,this.connectionAuthCode);
+                  }
+                  
+                }
+                else{
+                  //conferma = false
+                  String dbquery = "DELETE FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
+                  db.executeQuery(dbquery, this.loggedCliente.getEmail());
+                  dbquery = "DELETE FROM proposte_di_acquisto WHERE cliente_id = ? AND completato = 0";
+                  db.executeUpdate(dbquery,this.loggedCliente.getEmail());
+                }
+                response.set(1, null, this.connectionAuthCode);
+                response.setSuccess();
+                message(response, os);
+              }
+            break;
             case 9:
               // non ti passo vino ma FiltriRicerca
               System.out.println("Got from client request id: " + requestId);
@@ -525,6 +590,59 @@ public class ServerThread implements Runnable
                 message(response, os);
               }
             break; 
+            case 20:
+              System.out.println("Got from client request id: " + requestId);
+              if(requestData != null && requestData instanceof Impiegato){
+                Impiegato impiegato = (Impiegato) requestData;
+                String dbquery = "INSERT INTO impiegati (email, nome, cognome, password_hash, codice_fiscale, numero_telefonico, indirizzo_residenza, isAdmin) VALUES "+
+                "(?,?,?,?,?,?,?,?)";
+                rowsAffected = db.executeUpdate(dbquery,impiegato.getEmail(),impiegato.getNome(),impiegato.getCognome(),impiegato.getPasswordhash(),impiegato.getCodiceFiscale(),impiegato.getNumeroTelefonico(),impiegato.getIndirizzoResidenza(),0);
+              }
+            break;
+            case 21:
+              //Delete user
+              System.out.println("Got from client request id: " + requestId);
+              if(requestData != null && requestData instanceof UtenteGenerico){
+                UtenteGenerico user = (UtenteGenerico) requestData;
+                String dbquery = "SELECT * FROM clienti WHERE email = ?";
+                ResultSet resultSet = db.executeQuery(dbquery, user.getEmail());
+                if(resultSet.next()){
+                  //it's in clienti
+                  dbquery = "DELETE FROM clienti WHERE email = ?";
+                  rowsAffected = db.executeUpdate(dbquery, user.getEmail());
+                }
+                else{
+                  //it's in impiegati or does not exist
+                  dbquery = "DELETE FROM clienti WHERE email = ?";
+                  rowsAffected = db.executeUpdate(dbquery, user.getEmail());
+                }
+              }
+              response.set(1,rowsAffected,this.connectionAuthCode);
+              if(rowsAffected == 1){ response.setSuccess();}
+              message(response, os);
+            break;
+            case 22:
+              //Modify password user
+              System.out.println("Got from client request id: " + requestId);
+              if(requestData != null && requestData instanceof UtenteGenerico){
+                UtenteGenerico user = (UtenteGenerico) requestData;
+                String dbquery = "SELECT * FROM clienti where email = ?";
+                ResultSet resultSet = db.executeQuery(dbquery, user.getEmail());
+                if(resultSet.next()){
+                  //it's in clienti
+                  dbquery = "UPDATE clienti SET passwordhash = ? WHERE email = ?";
+                  rowsAffected = db.executeUpdate(dbquery,user.getPasswordhash(), user.getEmail());
+                }
+                else{
+                  //it's in impiegati or does not exist
+                  dbquery = "UPDATE impiegati SET password_hash = ? WHERE email = ?";
+                  rowsAffected = db.executeUpdate(dbquery,user.getPasswordhash(), user.getEmail());
+                }
+              }
+              response.set(1,rowsAffected,this.connectionAuthCode);
+              if(rowsAffected == 1){ response.setSuccess();}
+              message(response, os);
+            break;
             default:
               throw new IOException("Invalid Request");
             
@@ -565,6 +683,7 @@ public class ServerThread implements Runnable
           e.printStackTrace();
         }
   }
+
   private int message(Response response, ObjectOutputStream os){
     try{
       os.writeObject(response);

@@ -52,7 +52,7 @@ public class Impiegato extends UtenteGenerico {
         Response res = client.message(req);
         return (List<OrdineAcquisto>) res.getData();
     }
-
+    //TODO: ricercaProposteAcquisto
     public List<PropostaAcquisto> ricercaProposteAcquisto(Date dete1, Date dete2) {
         // Esempio: Esegui una ricerca delle proposte di acquisto tra le date specificate
         Object[] data = {dete1, dete2};
@@ -72,6 +72,7 @@ public class Impiegato extends UtenteGenerico {
         la data di consegna. Il server dovrà aggiornare tale informazione nel db e impostare
         il campo "firmato" a true.
     */
+    //TODO: gestioneOrdineVendita
     public boolean gestioneOrdineVendita(OrdineVendita ordine) {
         Request req = new Request();
         req.set(0,ordine,this.AuthCode);
