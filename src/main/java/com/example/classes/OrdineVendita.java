@@ -15,14 +15,14 @@ public class OrdineVendita implements Serializable{
     private Date dataConsegna;
     private Date dataCreazione;
     private boolean completato;
+    private boolean firmato;
+
     public boolean isCompletato() {
         return completato;
     }
     public void setCompletato(boolean completato) {
         this.completato = completato;
     }
-
-    private boolean firmato;
 
     //Ridondante il campo indirizzo di consegna, ses ha gia il cliente è sufficiente fare cliente.getIndirizzodiConsegna()
     public boolean isFirmato() {

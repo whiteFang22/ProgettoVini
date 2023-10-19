@@ -53,7 +53,7 @@ public class Cliente extends UtenteGenerico {
         return res.isSuccess();
     }
 
-    // Ha come parametro una lista di CassaVino e/o ConfezioneVini
+    // Ha come parametro una lista di bottiglie (int,int) 1 - id, 2 - qtà
     // SERVER: crea l'ordine di Vendita sulla base di bottiglieList e inseriscilo nel DB. È importante
     //         che ad ogni ordine in DB sia associato il campo "completato" per la fase di confermaPagamento
     //         Se non ci sono abbastanza vini in magazzino crea un oggetto PropostaAcquisto contenente
@@ -68,29 +68,31 @@ public class Cliente extends UtenteGenerico {
 
     /* SERVER: recupera l'ultimo ordine di vendita associato al cliente nel DB che avrà
                il campo "completato"==false.
-               Se conferma==true allora setta il campo "completo" dell'ordine nel DB a ture
+
+               Se conferma==true allora setta il campo "completo" dell'ordine nel DB a true
                così come, se presente, per l'ultima proposta di Acquisto con "completato"==false
-               Devono essere aggiornate le disponibilità dei vini in magazzino ma la data
-               di consegna viene generata da un metodo di Impiegato; per questo bisogna associare
+
+               Devono essere aggiornate le disponibilità dei vini in magazzino
+
+               la data di consegna viene generata da un metodo di Impiegato per questo bisogna associare
                agli ordini di vendita il campo "firmato" di default false per indicare che
                la data non è stata ancora inserita
 
-               Altrimenti elimina l'ordine dal DB in quanto l'utente ha scelto di non
+               Se conferma = false elimina l'ordine dal DB in quanto l'utente ha scelto di non
                acquistare le bottiglie ed elimina anche, se presente, l'ultima proposta di Acquisto con
                "completato"==false
      */
-
-    //Lato server mi serve sapere che pagamento il cliente vuole confermare
     public boolean confermaPagamento(Boolean conferma){
         //invio al sistema la conferma dopo aver inserito le coordinarie bancarie
         Request req = new Request();
-        req.set(0,conferma, this.AuthCode);
+        req.set(4,conferma, this.AuthCode);
         Response res = client.message(req);
 
         return res.isSuccess();
     }
 
      /*
+     TODO: Cliente-proponiAcquisto
      SERVER: Se conferma==true viene creato l'ordine di Acquisto che verrà utilizzato nelle fasi successive per il rifornimento del magazzino
              Viene restituito al cliente una copia dell'ordine di Vendita aggiunto in precedenza nel DB
 

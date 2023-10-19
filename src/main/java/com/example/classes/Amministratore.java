@@ -12,31 +12,35 @@ public class Amministratore extends Impiegato {
     // Salva nel db l'impiegato passato
     public void registrazioneImpiegato(Impiegato impiegato, String password) {
         // Esempio: Registra un nuovo impiegato con la password specificata
-        Object[] data = {impiegato, password};
-        //client.message("registrazioneImpiegato", data);
+        Request req = new Request();
+        impiegato.setpasswordhash(password);
+        req.set(20,impiegato, this.AuthCode);
+        client.message(req);
     }
 
-    // Salva nel db il report passato
+    // TODO: Salva nel db il report passato
+    //S: è solo da salvare cosi? o va gestito? se va gestito cosa ci devo fare
     public void preparazioneReport(ReportMensile report) {
-        // Esempio: Prepara un report mensile e lo gestisce
+        // Esempio: Prepara un report mensile e lo gestisce <-
         Object[] data = {report};
         //client.message("preparazioneReport", data);
     }
 
     /*
     Ha come parametri email dell'impiegato, la nuova password da associare
-    a tale impiegato ed il parametro reset. Quest'ultimo se "true" cancella tutti i
+    a tale impiegato ed il parametro delete. Quest'ultimo se "true" cancella tutti i
     dati dell'impiegato (lo elimina dal sistema/db)
     */
-    public boolean AdminModificaCredenziali(String email, String password, boolean reset) {
+    public boolean AdminModificaCredenziali(String email, String password, boolean delete) {
         // Esempio: Modifica le credenziali di un utente (password e reset)
         Request req = new Request();
-
-        ArrayList<Object> data = new ArrayList<>();
-        data.add(email);
-        data.add(password);
-        data.add(reset);
-        req.set(0, data, null);
+        UtenteGenerico user = new UtenteGenerico(null, null, password, null, email, null);
+        if(delete){
+            req.set(21, user, null);
+        }
+        else{
+            req.set(22, user, null);
+        }
 
         Response res = client.message(req);
         return res.isSuccess();
