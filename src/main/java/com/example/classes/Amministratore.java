@@ -10,12 +10,13 @@ public class Amministratore extends Impiegato {
     }
 
     // Salva nel db l'impiegato passato
-    public void registrazioneImpiegato(Impiegato impiegato, String password) {
+    public boolean registrazioneImpiegato(Impiegato impiegato, String password) {
         // Esempio: Registra un nuovo impiegato con la password specificata
         Request req = new Request();
         impiegato.setpasswordhash(password);
         req.set(20,impiegato, this.AuthCode);
-        client.message(req);
+        Response res = client.message(req);
+        return res.isSuccess();
     }
 
     // TODO: Salva nel db il report passato

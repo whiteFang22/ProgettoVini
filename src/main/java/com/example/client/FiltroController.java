@@ -1,9 +1,6 @@
 package com.example.client;
 
-import com.example.classes.Cliente;
-import com.example.classes.Impiegato;
-import com.example.classes.OrdineAcquisto;
-import com.example.classes.OrdineVendita;
+import com.example.classes.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -38,6 +35,11 @@ public class FiltroController implements Initializable {
     Button viniButton;
     @FXML
     Button esciButton;
+
+    @FXML
+    DatePicker data1;
+    @FXML
+    DatePicker data2;
 
     @FXML
     Label centerTitle;
@@ -153,26 +155,30 @@ public class FiltroController implements Initializable {
     }
 
     @FXML
-    protected void cercaClienti() throws IOException {
+    protected void cercaClienti() {
         listView = new ListView<>();
         listView.setId("listaViniOrdine");
         ObservableList<HBox> items = FXCollections.observableArrayList();
 
-        List<Cliente> list = new ArrayList<>();
-        Cliente c = new Cliente("mario","rossi","1234", "mrss019hfj","MROSSI@GMAIL.COM", "123321","Via mrosii");
-        list.add(c);
-        c = new Cliente("giovanni","rossi","1234", "mrss019hfj","MROSSI@GMAIL.COM", "123321","Via mrosii");
-        list.add(c);
+        Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
+        TextField filtro_cognome = (TextField) parent.lookup("#filtro_cognome");
 
-
+        List<Cliente> clienti = imp.ricercaClienti(filtro_cognome.getText());
+        System.out.println("cognome is: "+filtro_cognome.getText());
+        System.out.println("size: "+clienti.size());
+        System.out.println(clienti.get(0).getCognome());
         SchedeController sch = new SchedeController();
 
         int i=0;
-        for (Cliente cliente : list){
-            Text cognome = new Text(cliente.getCognome());
+        for (Cliente cliente : clienti){
+            TextField cognome = new TextField(cliente.getCognome());
+            cognome.setMinWidth(100);
+
             Button schedaAcquisti = new Button("ACQUISTI");
             schedaAcquisti.setOnAction(actionEvent -> {
-
+                Cliente data = (Cliente) schedaAcquisti.getUserData();
+                sch.manageSchede(data);
             });
 
             Button schedaCiente = new Button("VEDI SCHEDA");
@@ -294,7 +300,6 @@ public class FiltroController implements Initializable {
         if (mainBorderImpiegati!=null) {
             SharedData.getInstance().setCurrentParent(mainBorderImpiegati);
         }
-        System.out.println("ciao");
     }
 
 }

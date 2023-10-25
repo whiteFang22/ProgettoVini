@@ -231,7 +231,7 @@ public class RicercaController implements Initializable{
     protected void ricercaVini(){
         UtenteGenerico user = SharedData.getInstance().getUser();
         int anno = -1; //indica che non va effettuata una ricerca per anno ma per nome
-        String nome = "";
+        String nome = null;
         if (!annoProduzione.getText().equals("")){
             anno = Integer.parseInt(annoProduzione.getText());
         }

@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="VboxRicerca" prefHeight="372.0" prefWidth="159.0" style="-fx-border-width: 0 1 0 0; -fx-border-color: black;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="VboxRicerca" prefHeight="372.0" prefWidth="159.0" style="-fx-border-width: 0 1 0 0; -fx-border-color: black;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.RicercaController">
    <children>
       <Label style="-fx-font-weight: bold;" text="FILTRI RICERCA">
          <VBox.margin>

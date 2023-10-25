@@ -23,19 +23,19 @@
             <Insets top="20.0" />
          </VBox.margin>
       </Label>
-      <TextField />
+      <TextField fx:id="filtro_cognome" />
       <Label text="data1">
          <VBox.margin>
             <Insets top="20.0" />
          </VBox.margin>
       </Label>
-      <DatePicker />
+      <DatePicker fx:id="data1" />
       <Label text="data2">
          <VBox.margin>
             <Insets top="20.0" />
          </VBox.margin>
       </Label>
-      <DatePicker />
+      <DatePicker fx:id="data2" />
       <Button mnemonicParsing="false" onAction="#cercaClienti" text="RICERCA">
          <VBox.margin>
             <Insets top="20.0" />

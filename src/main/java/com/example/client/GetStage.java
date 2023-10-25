@@ -26,7 +26,7 @@ public class GetStage {
                 break;
             case "amministratore":
                 path1 = "amministratore/adm-initial-page";
-                parentPath = "#mainBorder";
+                parentPath = "#mainBorderImpiegati";
                 path2 = "impiegato/center-clienti-registrati";
                 break;
         }

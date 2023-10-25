@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,18 +74,18 @@ public class ServerThread implements Runnable
   @Override
   /*
    * thread main code, handles client requests via Switch case statement switching request codes
-   * 0 - Cliente, registrazione
-   * 1 - UtenteGenerico, Login
-   * 2 - Cliente, modifica credenziali
+   * 0 - Cliente, registrazione             --
+   * 1 - UtenteGenerico, Login              OK
+   * 2 - Cliente, modifica credenziali      ++
    * 3 - Cliente, acquistabottiglie
    * 4 - Cliente, confermaPagamento
-   * 9 - Cliente, ricercaVino
-   * 10 - Impiegato, ricercaCliente
+   * 9 - Cliente, ricercaVino               OK
+   * 10 - Impiegato, ricercaCliente         --
    * 11 - Impiegato, ricercaOrdineVendita
    * 12 - Impiegato, ricercaOrdineAcquisto
-   * 20 - Admin, registraImpiegato
-   * 21 - Admin, eliminaUtente
-   * 22 - Admin, modificaCredenzialiUtente
+   * 20 - Admin, registraImpiegato          --
+   * 21 - Admin, eliminaUtente              ++
+   * 22 - Admin, modificaCredenzialiUtente  ++
   */
   public void run()
   {
@@ -123,18 +124,24 @@ public class ServerThread implements Runnable
           //request Handle
           switch(requestId){
             case 0:
+              /*
+               quando cerco di registrarmi con una mail già esistente si genera giustamente un errore ma poi,
+               invece che restituire res con isSuccess=false il server si stoppa
+               Lo stesso va fatto in registraImpiegato
+              */
             System.out.println("Got from client request id: " + requestId);
               //Registrazione Cliente, requestData instance of Cliente
-               if(requestData != null && requestData instanceof Cliente){
+                if(requestData != null && requestData instanceof Cliente){
                   Cliente user = (Cliente) requestData;
                   System.out.println("Request OK, contacting db");
                   String dbquery = "INSERT INTO clienti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
                   rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico(), user.getIndirizzoDiConsegna());
                   System.out.println("query Executed "+ rowsAffected + " rows Affected");
-                  response.set(1,null,null);
+                  response.set(1,null,null); //non dovrebbe darmi authCode?
                   response.setSuccess();
                   message(response,os);
-               }
+                }
+
               break;
             case 1:
               // Login Utente, requestData instance of Cliente/Impiegato/Amministratore 
@@ -148,7 +155,7 @@ public class ServerThread implements Runnable
 
                 if(resultset.next()){
                   System.out.println("User found, checking password");
-                  String passwordhash = resultset.getString("passwordhash");
+                  String passwordhash = resultset.getString("password_hash");
                   System.out.println(user.getPasswordhash());
                   System.out.println(passwordhash);
                   if(passwordhash.equals(user.getPasswordhash())){
@@ -159,7 +166,7 @@ public class ServerThread implements Runnable
                        per capire se creare un impiegato o un amministratore 
                        RISOLTO
                        */
-                    Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),resultset.getString("passwordhash"), resultset.getString("codiceFiscale"), resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
+                    Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),resultset.getString("password_hash"), resultset.getString("codiceFiscale"), resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
                     System.out.println(authCode);
@@ -188,7 +195,7 @@ public class ServerThread implements Runnable
 
                     if(resultset.next()){
                       System.out.println("User found, checking password");
-                      String passwordhash = resultset.getString("passwordhash");
+                      String passwordhash = resultset.getString("password_hash");
                       System.out.println(user.getPasswordhash());
                       System.out.println(passwordhash);
 
@@ -197,7 +204,7 @@ public class ServerThread implements Runnable
                         Boolean isAdmin = resultset.getBoolean("isAdmin");
                         if(isAdmin){
                           //Amministratore
-                          Amministratore loggeduser = new Amministratore(resultset.getString("passwordtohash"), resultset.getString("nome"),
+                          Amministratore loggeduser = new Amministratore(resultset.getString("password_hash"), resultset.getString("nome"),
                           resultset.getString("cognome"), resultset.getString("codice_fiscale"),
                           resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
                           final String authCode = AuthCodeGenerator.generateAuthCode();
@@ -255,7 +262,7 @@ public class ServerThread implements Runnable
                //Modifica password 
                if(requestData != null && requestData instanceof Cliente && clientAuthCode == connectionAuthCode){
                 Cliente cliente = (Cliente) requestData;
-                String query = "UPDATE clienti SET passwordhash = ? WHERE codiceFiscale = ?;";
+                String query = "UPDATE clienti SET password_hash = ? WHERE codiceFiscale = ?;";
                 rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
                 System.out.println("query Executed "+ rowsAffected + " rows Affected");
                 response.set(1,null,null);
@@ -431,15 +438,15 @@ public class ServerThread implements Runnable
                   // RISOLTO
                   ResultSet resultSet;
 
-                  if(wineToSearch.nome() != null && wineToSearch.annoProduzione() != null){
+                  if(wineToSearch.nome() != null && wineToSearch.annoProduzione() != -1){
                     String dbquery = "SELECT * FROM vini where nome = ? and anno = ?";
                     resultSet = db.executeQuery(dbquery,wineToSearch.nome(), wineToSearch.annoProduzione());
                   }
-                  else if(wineToSearch.nome() == null && wineToSearch.annoProduzione() != null){
+                  else if(wineToSearch.nome() == null && wineToSearch.annoProduzione() != -1){
                     String dbquery = "SELECT * FROM vini where anno = ?";
                     resultSet = db.executeQuery(dbquery,wineToSearch.annoProduzione());
                   }
-                  else if(wineToSearch.nome() != null && wineToSearch.annoProduzione() == null){
+                  else if(wineToSearch.nome() != null && wineToSearch.annoProduzione() == -1){
                     String dbquery = "SELECT * FROM vini where nome = ?";
                     resultSet = db.executeQuery(dbquery,wineToSearch.nome());
                   }
@@ -461,6 +468,7 @@ public class ServerThread implements Runnable
                       // TODO Auto-generated catch block
                       e.printStackTrace();
                   }
+                 System.out.println(wineList);
                   response.set(1, wineList, this.connectionAuthCode);
                   response.setSuccess();
                   message(response, os);
@@ -469,13 +477,15 @@ public class ServerThread implements Runnable
                break;
             
             case 10:
+              // se mando 5 volte di fila questa richiesta, il server smette di rispondermi
+              // prova a capire se c'è un numero max di richieste che il server può soddisfare
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof String){
                 String cognome = (String) requestData;
                 List<Cliente> listaClienti = new ArrayList<>();
                 ResultSet resultSet;
 
-                if(cognome == ""){
+                if(cognome.equals("")){
                   String dbquery = "Select * from clienti";
                   resultSet = db.executeQuery(dbquery);
                 }
@@ -488,7 +498,7 @@ public class ServerThread implements Runnable
                 while (resultSet.next()) {
                   String nome = resultSet.getString("nome");
                   String clicognome = resultSet.getString("cognome");
-                  String passwordtohash = resultSet.getString("passwordhash");
+                  String passwordtohash = resultSet.getString("password_hash");
                   String codiceFiscale = resultSet.getString("codiceFiscale");
                   String email = resultSet.getString("email");
                   String numeroTelefonico = resultSet.getString("numeroTelefonico");
@@ -518,7 +528,7 @@ public class ServerThread implements Runnable
                 while(resultSet.next()){
                   String nome = resultSet.getString("nome");
                   String cognome = resultSet.getString("cognome");
-                  String passwordtohash = resultSet.getString("passwordhash");
+                  String passwordtohash = resultSet.getString("password_hash");
                   String codiceFiscale = resultSet.getString("codiceFiscale");
                   String email = resultSet.getString("email");
                   String numeroTelefonico = resultSet.getString("numeroTelefonico");
@@ -545,7 +555,7 @@ public class ServerThread implements Runnable
               if(requestData != null && requestData instanceof FiltriRicerca){
                 FiltriRicerca dateToSearch = (FiltriRicerca) requestData;
                 List<OrdineAcquisto> list = new ArrayList();
-                String dbquery1 = "SELECT impiegati.email AS impiegato_email, impiegati.nome AS impiegato_nome, impiegati.cognome AS impiegato_cognome, impiegati.password_hash AS impiegato_password_hash, impiegati.codice_fiscale AS impiegato_codice_fiscale, impiegati.numero_telefonico AS impiegato_numero_telefonico, impiegati.indirizzo_residenza AS impiegato_indirizzo_residenza, impiegati.isAdmin AS impiegato_isAdmin, clienti.email AS cliente_email, clienti.nome AS cliente_nome, clienti.cognome AS cliente_cognome, clienti.passwordhash AS cliente_password_hash, clienti.codiceFiscale AS cliente_codice_fiscale, clienti.numeroTelefonico AS cliente_numero_telefonico, clienti.indirizzoDiConsegna AS cliente_indirizzo_di_consegna, ordini_di_acquisto.id AS ordine_id, ordini_di_acquisto.proposta_associata_id AS ordine_proposta_id, ordini_di_acquisto.indirizzo_azienda AS ordine_indirizzo_azienda, ordini_di_acquisto.data_creazione AS ordine_data_creazione, ordini_di_acquisto.completato AS ordine_completato, proposte_di_acquisto.id AS proposta_id, proposte_di_acquisto.cliente_id AS proposta_cliente_id, proposte_di_acquisto.lista_quantita AS proposta_lista_quantita, vendita.id AS vendita_id, vendita.cliente_id AS vendita_cliente_id, vendita.lista_quantita AS vendita_lista_quantita, vendita.indirizzo_consegna AS vendita_indirizzo_consegna, vendita.data_consegna AS vendita_data_consegna, vendita.data_creazione AS vendita_data_creazione FROM wineshop.impiegati INNER JOIN wineshop.clienti ON impiegati.email = clienti.email INNER JOIN wineshop.ordini_di_acquisto ON impiegati.email = ordini_di_acquisto.impiegato_id INNER JOIN wineshop.proposte_di_acquisto ON proposte_di_acquisto.ordine_id = ordini_di_acquisto.id INNER JOIN wineshop.ordini_vendita AS vendita ON vendita.cliente_id = clienti.email WHERE ordini_di_acquisto.data_creazione BETWEEN ? AND ?";
+                String dbquery1 = "SELECT impiegati.email AS impiegato_email, impiegati.nome AS impiegato_nome, impiegati.cognome AS impiegato_cognome, impiegati.password_hash AS impiegato_password_hash, impiegati.codice_fiscale AS impiegato_codice_fiscale, impiegati.numero_telefonico AS impiegato_numero_telefonico, impiegati.indirizzo_residenza AS impiegato_indirizzo_residenza, impiegati.isAdmin AS impiegato_isAdmin, clienti.email AS cliente_email, clienti.nome AS cliente_nome, clienti.cognome AS cliente_cognome, clienti.password_hash AS cliente_password_hash, clienti.codiceFiscale AS cliente_codice_fiscale, clienti.numeroTelefonico AS cliente_numero_telefonico, clienti.indirizzoDiConsegna AS cliente_indirizzo_di_consegna, ordini_di_acquisto.id AS ordine_id, ordini_di_acquisto.proposta_associata_id AS ordine_proposta_id, ordini_di_acquisto.indirizzo_azienda AS ordine_indirizzo_azienda, ordini_di_acquisto.data_creazione AS ordine_data_creazione, ordini_di_acquisto.completato AS ordine_completato, proposte_di_acquisto.id AS proposta_id, proposte_di_acquisto.cliente_id AS proposta_cliente_id, proposte_di_acquisto.lista_quantita AS proposta_lista_quantita, vendita.id AS vendita_id, vendita.cliente_id AS vendita_cliente_id, vendita.lista_quantita AS vendita_lista_quantita, vendita.indirizzo_consegna AS vendita_indirizzo_consegna, vendita.data_consegna AS vendita_data_consegna, vendita.data_creazione AS vendita_data_creazione FROM wineshop.impiegati INNER JOIN wineshop.clienti ON impiegati.email = clienti.email INNER JOIN wineshop.ordini_di_acquisto ON impiegati.email = ordini_di_acquisto.impiegato_id INNER JOIN wineshop.proposte_di_acquisto ON proposte_di_acquisto.ordine_id = ordini_di_acquisto.id INNER JOIN wineshop.ordini_vendita AS vendita ON vendita.cliente_id = clienti.email WHERE ordini_di_acquisto.data_creazione BETWEEN ? AND ?";
             
                 
                 ResultSet resultSet1 = db.executeQuery(dbquery1,dateToSearch.data1(),dateToSearch.data2());
@@ -630,7 +640,7 @@ public class ServerThread implements Runnable
                 ResultSet resultSet = db.executeQuery(dbquery, user.getEmail());
                 if(resultSet.next()){
                   //it's in clienti
-                  dbquery = "UPDATE clienti SET passwordhash = ? WHERE email = ?";
+                  dbquery = "UPDATE clienti SET password_hash = ? WHERE email = ?";
                   rowsAffected = db.executeUpdate(dbquery,user.getPasswordhash(), user.getEmail());
                 }
                 else{
