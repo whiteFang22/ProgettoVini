@@ -74,7 +74,7 @@ public class ServerThread implements Runnable
   @Override
   /*
    * thread main code, handles client requests via Switch case statement switching request codes
-   * 0 - Cliente, registrazione             --
+   * 0 - Cliente, registrazione             try
    * 1 - UtenteGenerico, Login              OK
    * 2 - Cliente, modifica credenziali      ++
    * 3 - Cliente, acquistabottiglie
@@ -83,7 +83,7 @@ public class ServerThread implements Runnable
    * 10 - Impiegato, ricercaCliente         --
    * 11 - Impiegato, ricercaOrdineVendita
    * 12 - Impiegato, ricercaOrdineAcquisto
-   * 20 - Admin, registraImpiegato          --
+   * 20 - Admin, registraImpiegato          try
    * 21 - Admin, eliminaUtente              ++
    * 22 - Admin, modificaCredenzialiUtente  ++
   */
@@ -128,6 +128,8 @@ public class ServerThread implements Runnable
                quando cerco di registrarmi con una mail già esistente si genera giustamente un errore ma poi,
                invece che restituire res con isSuccess=false il server si stoppa
                Lo stesso va fatto in registraImpiegato
+
+              F: Dovrebbe essere OK ora
               */
             System.out.println("Got from client request id: " + requestId);
               //Registrazione Cliente, requestData instance of Cliente
@@ -135,11 +137,18 @@ public class ServerThread implements Runnable
                   Cliente user = (Cliente) requestData;
                   System.out.println("Request OK, contacting db");
                   String dbquery = "INSERT INTO clienti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
-                  rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico(), user.getIndirizzoDiConsegna());
-                  System.out.println("query Executed "+ rowsAffected + " rows Affected");
-                  response.set(1,null,null); //non dovrebbe darmi authCode?
-                  response.setSuccess();
-                  message(response,os);
+                  try{
+                    rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico(), user.getIndirizzoDiConsegna());
+                    System.out.println("query Executed "+ rowsAffected + " rows Affected");
+                    response.set(1,null,null); //non dovrebbe darmi authCode?
+                    response.setSuccess();
+                    }
+                  catch(SQLException e){
+                    response.set(0,null,null);
+                  }
+                  finally{
+                    message(response,os);
+                  }
                 }
 
               break;
@@ -606,8 +615,19 @@ public class ServerThread implements Runnable
                 Impiegato impiegato = (Impiegato) requestData;
                 String dbquery = "INSERT INTO impiegati (email, nome, cognome, password_hash, codice_fiscale, numero_telefonico, indirizzo_residenza, isAdmin) VALUES "+
                 "(?,?,?,?,?,?,?,?)";
-                rowsAffected = db.executeUpdate(dbquery,impiegato.getEmail(),impiegato.getNome(),impiegato.getCognome(),impiegato.getPasswordhash(),impiegato.getCodiceFiscale(),impiegato.getNumeroTelefonico(),impiegato.getIndirizzoResidenza(),0);
-              }
+                try{
+                  rowsAffected = db.executeUpdate(dbquery,impiegato.getEmail(),impiegato.getNome(),impiegato.getCognome(),impiegato.getPasswordhash(),impiegato.getCodiceFiscale(),impiegato.getNumeroTelefonico(),impiegato.getIndirizzoResidenza(),0);
+                  System.out.println("query Executed "+ rowsAffected + " rows Affected");
+                  response.set(1,null,null); //non dovrebbe darmi authCode?
+                  response.setSuccess();
+                }
+                catch(SQLException e){
+                  response.set(0,null,null);
+                }
+                finally{
+                  message(response, os);
+                }
+                }
             break;
             case 21:
               //Delete user
