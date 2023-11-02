@@ -3,63 +3,69 @@ package com.example.classes;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.io.Serializable;
 
-public class Client implements Serializable {
+public class Client implements AutoCloseable{
     private String serverAddress;
     private int serverPort;
+    private Socket socket;
 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
+        this.open();
     }
 
-    /*
-     Questo metodo sarà implementato nei metodi delle classi utente per
-     poter effettuare richieste al server.
+    public void open() {
+        try {
+            socket = new Socket(serverAddress, serverPort);
+        } catch (IOException e) {
+            System.out.println("Error opening socket");
+            e.printStackTrace();
+        }
+    }
 
-     Il server potrebbe restituire un oggetto della classe Response la quale contiene tanti attributi (tutti
-     i possibili tipi di risultati che il server restituisce) che vengono settati lato server.
-     In questo modo posso sempre ricevere dal server lo stesso oggetto che poi restituisco a chi ha chiamato
-     il metodo.
+    @Override
+    public void close() {
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            System.out.println("Error closing socket");
+            e.printStackTrace();
+        }
+    }
 
-     Possibili attributi della classe Responde:
-     vini List<Vini>, messaggio String, List<OrdineVendita> ordiniVendita, List<OrdineAcquisto> ordiniAcquisto
-     List<PropostaAcquisto> proposteAcquisto.
-     Ogniuno di questi deve avere un rispettivo setter e getter. I setter saranno usati lato server
-     mertre i getter lato client, rispettivamente per inserire ed estrapolare da responde solo
-     quello che mi serve nella/dalla oggetto della classe Response.
-    */
     public Response message(Request request) {
         Response response = null;
-        try (Socket socket = new Socket(serverAddress, serverPort)) {
+        try {
+            if (socket == null || socket.isClosed()) {
+                throw new IllegalStateException("Socket is not open. Call open() before sending a message.");
+            }
+
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
             objectOutputStream.writeObject(request);
             objectOutputStream.flush();
-            //delay
+            // Delay
             System.out.println("Client sent request id: " + request.getId());
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
             response = (Response) objectInputStream.readObject();
-            System.out.println("Got back from server id: " + response.getId());
+            System.out.println("Got back from the server id: " + response.getId());
             return response;
         } catch (Exception e) {
-            System.out.println("Comunication Error");
+            System.out.println("Communication Error");
             e.printStackTrace();
             return response;
         }
     }
 
     public static void main(String[] args) {
-        Cliente examplecliente = new Cliente("andrea","verdi","1111", "ndrvrd87g12f463x","averdi@gmail.com", "123321","Via averdi");
-        //examplecliente.registrazione();
+        Cliente examplecliente = new Cliente("andrea","verdi","1111", "ndrvrd87g12f463x","ferdi@gmail.com", "123321","Via averdi");
+        examplecliente.registrazione();
         //examplecliente.login();
-        //examplecliente.ClientModificaCredenziali("1111");
-        Map<Integer,Integer> bottiglielist = new HashMap();
-        bottiglielist.put(6,2);
-        examplecliente.acquistaBottiglie(bottiglielist);
     }
 }

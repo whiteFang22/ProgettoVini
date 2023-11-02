@@ -17,7 +17,7 @@ public class UtenteGenerico implements Serializable{
     private String numeroTelefonico;
     protected String AuthCode;        //given from server when logged
 
-    protected final Client client = new Client("localhost", 4444);
+    protected transient final Client client = new Client("localhost", 4444);
 
     public UtenteGenerico(String nome, String cognome,String passwordtohash, String codiceFiscale, String email, String numeroTelefonico) {
         setpasswordhash(passwordtohash);
@@ -26,7 +26,6 @@ public class UtenteGenerico implements Serializable{
         this.codiceFiscale = codiceFiscale;
         this.email = email;
         this.numeroTelefonico = numeroTelefonico;
-
         //password hashing
         try {
             // Create a MessageDigest instance for SHA-256

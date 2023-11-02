@@ -66,11 +66,11 @@ public class Server
       }
       catch (Exception e)
       {
+        System.out.println("FATAL ERROR: Server died");
         e.printStackTrace();
         break;
       }
     }
-
     this.pool.shutdown();
   }
 
@@ -98,6 +98,9 @@ public class Server
     catch (Exception e)
     {
       e.printStackTrace();
+    }
+    finally{
+      this.pool.shutdown();
     }
   }
 

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -55,6 +56,7 @@ public class ServerThread implements Runnable
   private Cliente loggedCliente = null;
   private Impiegato loggedImpiegato = null;
   private Amministratore loggedAmministratore = null;
+  private Boolean stayOpen = true;
 
   /**
    * Class constructor.
@@ -103,13 +105,13 @@ public class ServerThread implements Runnable
       return;
     }
     //main loop
-    while (true)
+    while (stayOpen)
     { 
       try
       {
-        System.out.println("Thread running...... pid: ");
-        long pid = ProcessHandle.current().pid();
-        System.out.println(pid);
+        //System.out.println("Thread running...... pid: ");
+        //long pid = ProcessHandle.current().pid();
+        //System.out.println(pid);
 
         //Read Client Request
         Object objReq = is.readObject();
@@ -136,7 +138,9 @@ public class ServerThread implements Runnable
                 if(requestData != null && requestData instanceof Cliente){
                   Cliente user = (Cliente) requestData;
                   System.out.println("Request OK, contacting db");
-                  String dbquery = "INSERT INTO clienti (nome, cognome, password_hash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
+                  
+                  String dbquery = "INSERT INTO clienti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
+
                   try{
                     rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico(), user.getIndirizzoDiConsegna());
                     System.out.println("query Executed "+ rowsAffected + " rows Affected");
@@ -145,6 +149,9 @@ public class ServerThread implements Runnable
                     }
                   catch(SQLException e){
                     response.set(0,null,null);
+
+                    e.printStackTrace();
+
                   }
                   finally{
                     message(response,os);
@@ -687,20 +694,23 @@ public class ServerThread implements Runnable
           throw new IOException("Client Request IO Error");
         }
       }
+
       catch (EOFException e){
-        System.out.println("Thread exiting due to client closing connection");
-        //System.exit(0);
-        try{
-        Thread.sleep(SLEEPTIME);
-        } catch (Exception f){
-          e.printStackTrace();
+        System.out.println("Thread waiting");
+        try {
+          Thread.sleep(SLEEPTIME);
+        } 
+        catch (InterruptedException e1) {
+          e1.printStackTrace();
         }
+      }
+      catch (SocketException e){
+        System.out.println("Client closed socket: exiting...");
         stop();
       }
       catch (Exception e)
       {
         e.printStackTrace();
-        System.exit(0);
         stop();
       }
     }
@@ -709,9 +719,10 @@ public class ServerThread implements Runnable
   //Thread dies
   public void stop(){
     try {
+        System.out.println("Thread exiting...");
+        this.stayOpen = false;
         this.db.close();
         this.socket.close();
-        System.out.println("Thread exiting...");
         }
         catch (Exception e) {
           e.printStackTrace();
