@@ -136,7 +136,7 @@ public class ServerThread implements Runnable
                 if(requestData != null && requestData instanceof Cliente){
                   Cliente user = (Cliente) requestData;
                   System.out.println("Request OK, contacting db");
-                  String dbquery = "INSERT INTO clienti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
+                  String dbquery = "INSERT INTO clienti (nome, cognome, password_hash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
                   try{
                     rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico(), user.getIndirizzoDiConsegna());
                     System.out.println("query Executed "+ rowsAffected + " rows Affected");
@@ -179,7 +179,9 @@ public class ServerThread implements Runnable
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
                     System.out.println(authCode);
+                    System.out.println("loggedUser: "+loggeduser);
                     this.loggedCliente = loggeduser;
+                    System.out.println("loggedCliente: "+loggedCliente);
                     response.setId(1);
                     response.setAuthCode(authCode);
                     response.setData(loggeduser);
@@ -290,11 +292,12 @@ public class ServerThread implements Runnable
               //Acquista Bottiglie 
               if(requestData != null && requestData instanceof Map<?,?> && clientAuthCode == connectionAuthCode){
                   Map<Integer, Integer> bottiglieList = (Map<Integer, Integer>) requestData;
-                  Map<Vino, Integer> viniPresenti = new HashMap();
-                  Map<Vino,Integer> viniMancanti = new HashMap();
-                  Boolean allInStock = true;
+                  Map<Vino, Integer> viniPresenti = new HashMap<>();
+                  Map<Vino,Integer> viniMancanti = new HashMap<>();
+                  boolean allInStock = true;
                   
                   //Initialize OrdineVendita
+                  System.out.println("cliente: "+loggedCliente);
                   OrdineVendita ordineVendita = new OrdineVendita(loggedCliente, null,new Date());
 
                   for (Map.Entry<Integer, Integer> line : bottiglieList.entrySet()){
@@ -469,7 +472,7 @@ public class ServerThread implements Runnable
                   try {
                       while (resultSet.next()) {
                           // Extract data from the result set and create an object
-                          Vino vino = new Vino(resultSet.getString("nome"),resultSet.getInt("anno"));
+                          Vino vino = new Vino(resultSet.getInt("id"),resultSet.getString("nome"),resultSet.getInt("anno"), resultSet.getFloat("prezzo"));
                           // Add the object to the list
                           wineList.add(vino);
                       }
@@ -531,6 +534,7 @@ public class ServerThread implements Runnable
                 List<OrdineVendita> list = new ArrayList();
                 String dbquery = "SELECT * FROM ordini_vendita INNER JOIN clienti ON ordini_vendita.cliente_id = clienti.email" + 
                 "WHERE data_creazione BETWEEN ? AND ?";
+                System.out.println("data: "+dateToSearch.data1());
                 ResultSet resultSet = db.executeQuery(dbquery,dateToSearch.data1(),dateToSearch.data2());
 
                 //resultSet unpack and cast into OrdineVendita

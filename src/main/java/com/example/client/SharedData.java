@@ -5,6 +5,7 @@ import com.example.classes.UtenteGenerico;
 import javafx.scene.layout.BorderPane;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class SharedData {
     private Response res;
     private String userType;
     private BorderPane currentParent;
-    private Map<Integer, Integer> viniSelezionati;
+    private Map<Integer, Integer> viniSelezionati = new HashMap<>();
 
     private SharedData() {
         // Costruttore privato per impedire l'istanziazione diretta
@@ -42,6 +43,10 @@ public class SharedData {
     public void setContenitori(List<Object> contenitori){ this.contenitoriSelezionati = contenitori; }
     public List<Object> getContenitori(){ return contenitoriSelezionati; } // contiene casse e confezioni
 
+    public void setViniSelezionati(int id, int qnt){
+        if (viniSelezionati.get(id)!=null) viniSelezionati.compute(id, (key, value) -> value+=qnt);
+        else viniSelezionati.put(id,qnt);
+    }
     public Map<Integer, Integer> getVini(){ return viniSelezionati; }
 
     public void setRes(Response res){ this.res = res;}

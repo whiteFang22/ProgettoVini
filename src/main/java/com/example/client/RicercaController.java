@@ -57,6 +57,7 @@ public class RicercaController implements Initializable{
         // usa metodo cliente che contatta il server per capire se c'è la disponibilità dei vini richiesti, se si
         // procedi con il pagamento altrimenti schermata proposta di acquisto
         Cliente user = (Cliente) SharedData.getInstance().getUser();
+        System.out.println("vini:"+SharedData.getInstance().getVini());
         Response res = user.acquistaBottiglie(SharedData.getInstance().getVini());
         success = res.isSuccess();
         // se true visualizzo l'ordine di vendita
@@ -240,7 +241,6 @@ public class RicercaController implements Initializable{
         }
         FiltriRicerca filtri = new FiltriRicerca(null, null, nome, anno);
         List<Vino> listaVini = user.cercaVini(filtri);
-        System.out.println("ok"+listaVini);
 
         // crea una tabella e per ogni riga aggiungi un vino
         creaGrid(listaVini);
@@ -261,6 +261,7 @@ public class RicercaController implements Initializable{
             quantitaTextField.setEditable(false);
             quantitaTextField.setPrefColumnCount(2);
 
+            //System.out.println(vino.getPrezzo());
             Text prezoUnitario = new Text("prezzo unitario: "+vino.getPrezzo()+"€");
 
             Button incrementaButton = new Button("+");
@@ -336,6 +337,7 @@ public class RicercaController implements Initializable{
 
                     // meccanismo per creare confezioni di vini
                     if (qnt>0) {
+                        SharedData.getInstance().setViniSelezionati(vino.getId(), qnt);
                         while (qnt > confezione.getCapacita()){
                             if (qnt>=6){
                                 CassaVino cassa = new CassaVino(vino, 6, 0);
@@ -389,6 +391,7 @@ public class RicercaController implements Initializable{
                     while (cassePerVino>0){
                         CassaVino cassa = new CassaVino(vino, qnt, 0);
                         contenitoriSelezionati.add(cassa);
+                        SharedData.getInstance().setViniSelezionati(vino.getId(), cassePerVino*qnt);
                         cassePerVino--;
                     }
                 }
@@ -413,9 +416,9 @@ public class RicercaController implements Initializable{
     }
     private void revisione(Node n){
         // REVISIONE ORDINE
-        System.out.println("-------------");
-        System.out.println("REVISIONE");
-        System.out.println(SharedData.getInstance().getUser().getEmail());
+        //System.out.println("-------------");
+        //System.out.println("REVISIONE");
+        //System.out.println(SharedData.getInstance().getUser().getEmail());
         int confezioni = 0, casse = 0;
         float prezzoTotale = 0;
         List<Object> contenitoriSelezionati = SharedData.getInstance().getContenitori();
@@ -423,12 +426,12 @@ public class RicercaController implements Initializable{
             if (ob instanceof ConfezioneVini) {
                 confezioni++;
                 prezzoTotale += ((ConfezioneVini) ob).getPrezzo();
-                ((ConfezioneVini) ob).visualizza();
+                //((ConfezioneVini) ob).visualizza();
             }
             else if (ob instanceof CassaVino) {
                 casse++;
                 prezzoTotale += ((CassaVino) ob).getPrezzo();
-                System.out.println("cassa "+((CassaVino) ob).getVino().getNome() +" - quantità :"+((CassaVino) ob).getQuantita());
+                //System.out.println("cassa "+((CassaVino) ob).getVino().getNome() +" - quantità :"+((CassaVino) ob).getQuantita());
             }
         }
 
@@ -448,6 +451,6 @@ public class RicercaController implements Initializable{
         if (mainPaneInitialClient!=null) {
             SharedData.getInstance().setCurrentParent(mainPaneInitialClient);
         }
-        System.out.println("ciao");
+        //System.out.println("ciao");
     }
 }

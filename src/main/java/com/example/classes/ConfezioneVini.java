@@ -62,7 +62,7 @@ public class ConfezioneVini {
     public void visualizza() {
         for (Map.Entry<Vino, Integer> entry : vini.entrySet()) {
             Vino vino = entry.getKey();
-            System.out.println(vino.getNome()+" - quantità: "+entry.getValue());
+            //System.out.println(vino.getNome()+" - quantità: "+entry.getValue());
         }
     }
 }

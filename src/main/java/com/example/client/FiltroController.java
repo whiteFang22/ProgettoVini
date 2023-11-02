@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -210,13 +211,17 @@ public class FiltroController implements Initializable {
         ObservableList<HBox> items = FXCollections.observableArrayList();
 
         SchedeController sch = new SchedeController();
-        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
-        Date data = formatoData.parse("22/09/2205");
+        System.out.println("data1: "+data1.getValue());
+
+        // Converti l'oggetto Instant in un oggetto Date
+        SimpleDateFormat formatoData = new SimpleDateFormat("yyyy/MM/dd");
+        Date d1 = new Date(data1.getValue().toEpochDay());
+        Date d2 = new Date(data2.getValue().toEpochDay());
 
         Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
-        //List<OrdineVendita> ordini = imp.ricercaOrdiniVendita(data, data);
+        List<OrdineVendita> ordini = imp.ricercaOrdiniVendita(d1,d2);
 
-        List<OrdineVendita> ordini = null;
+        //List<OrdineVendita> ordini = null;
 
         for (OrdineVendita ordine : ordini){
             Text dataCreazione = new Text(formatoData.format(ordine.getDataCreazione()));

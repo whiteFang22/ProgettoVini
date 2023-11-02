@@ -27,9 +27,11 @@ public class Vino implements Serializable{
         this.numeroVendite = numeroVendite;
         this.disponibilita = disponibilita;
     }
-    public Vino(String nome,int anno){
+    public Vino(int id, String nome,int anno, float prezzo){
+        this.id = id;
         this.nome = nome;
         this.anno = anno;
+        this.prezzo = prezzo;
     }
     public Vino(int id, String nome, String produttore, String provenienza, int anno, String noteTecniche,
                 List<String> vitigni, float prezzo, int numeroVendite, int disponibilita) {
