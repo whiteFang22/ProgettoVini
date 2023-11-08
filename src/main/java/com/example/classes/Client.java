@@ -12,6 +12,7 @@ public class Client implements AutoCloseable{
     private String serverAddress;
     private int serverPort;
     private Socket socket;
+
     private ObjectOutputStream os;
     private ObjectInputStream is;
 
@@ -24,22 +25,24 @@ public class Client implements AutoCloseable{
     public void open() {
         try {
             socket = new Socket(serverAddress, serverPort);
+
             System.out.println("socket open");
             this.os = new ObjectOutputStream(socket.getOutputStream());
             System.out.println("OS open");
             this.is =  new ObjectInputStream(socket.getInputStream());
             System.out.println("IS open");
             is.readObject();
-            
-            
+
         } catch (IOException e) {
             System.out.println("Error opening socket");
             e.printStackTrace();
         }
+
         catch (Exception e){
             System.out.println("Error opening socket");
             e.printStackTrace();
         }
+
     }
 
     @Override
@@ -47,8 +50,10 @@ public class Client implements AutoCloseable{
         try {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
+              
                 os.close();
                 is.close();
+
             }
         } catch (IOException e) {
             System.out.println("Error closing socket");
@@ -62,11 +67,13 @@ public class Client implements AutoCloseable{
             if (socket == null || socket.isClosed()) {
                 throw new IllegalStateException("Socket is not open. Call open() before sending a message.");
             }
+
             os.writeObject(request);
             os.flush();
             // Delay
             System.out.println("Client sent request id: " + request.getId());
             response = (Response) is.readObject();
+
             System.out.println("Got back from the server id: " + response.getId());
             return response;
         } catch (Exception e) {
@@ -77,6 +84,7 @@ public class Client implements AutoCloseable{
     }
 
     public static void main(String[] args) {
+
         //Cliente examplecliente = new Cliente("andrea","verdi","12344321", "ndrvrd87g12f463x","fcdecardelli@gmail.com", "123321","Via averdi",true);
         //examplecliente.registrazione();
         //examplecliente.login();
@@ -84,5 +92,6 @@ public class Client implements AutoCloseable{
         
         //FiltriRicerca fr = new FiltriRicerca(null, null, null, 2012);
         //examplecliente.cercaVini(fr);
+
     }
 }

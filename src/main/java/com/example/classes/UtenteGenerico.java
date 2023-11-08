@@ -26,9 +26,11 @@ public class UtenteGenerico implements Serializable{
         this.codiceFiscale = codiceFiscale;
         this.email = email;
         this.numeroTelefonico = numeroTelefonico;
+
         if(isClient){
             client = new Client("localhost", 4444);
         }
+
         //password hashing
         try {
             // Create a MessageDigest instance for SHA-256
