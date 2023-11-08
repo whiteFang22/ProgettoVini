@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Amministratore extends Impiegato {
     public Amministratore(String passwordtohash, String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico,
-                          String indirizzoResidenza) {
-        super(passwordtohash, nome, cognome, codiceFiscale, email, numeroTelefonico, indirizzoResidenza);
+                          String indirizzoResidenza, Boolean isClient) {
+        super(passwordtohash, nome, cognome, codiceFiscale, email, numeroTelefonico, indirizzoResidenza,isClient);
     }
 
     // Salva nel db l'impiegato passato
@@ -35,7 +35,7 @@ public class Amministratore extends Impiegato {
     public boolean AdminModificaCredenziali(String email, String password, boolean delete) {
         // Esempio: Modifica le credenziali di un utente (password e reset)
         Request req = new Request();
-        UtenteGenerico user = new UtenteGenerico(null, null, password, null, email, null);
+        UtenteGenerico user = new UtenteGenerico(null, null, password, null, email, null,false);
         if(delete){
             req.set(21, user, null);
         }

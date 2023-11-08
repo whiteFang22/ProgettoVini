@@ -17,15 +17,18 @@ public class UtenteGenerico implements Serializable{
     private String numeroTelefonico;
     protected String AuthCode;        //given from server when logged
 
-    protected transient final Client client = new Client("localhost", 4444);
+    protected transient static Client client;
 
-    public UtenteGenerico(String nome, String cognome,String passwordtohash, String codiceFiscale, String email, String numeroTelefonico) {
+    public UtenteGenerico(String nome, String cognome,String passwordtohash, String codiceFiscale, String email, String numeroTelefonico, boolean isClient) {
         setpasswordhash(passwordtohash);
         this.nome = nome;
         this.cognome = cognome;
         this.codiceFiscale = codiceFiscale;
         this.email = email;
         this.numeroTelefonico = numeroTelefonico;
+        if(isClient){
+            client = new Client("localhost", 4444);
+        }
         //password hashing
         try {
             // Create a MessageDigest instance for SHA-256
@@ -100,7 +103,8 @@ public class UtenteGenerico implements Serializable{
         // Implementazione del metodo login
         // Esempio: Verifica delle credenziali e autenticazione
         Request request = new Request();
-        request.setId(1);
+        int id = 1;
+        request.setId(id);
         request.setData(this);
         Response res = client.message(request);
         //response unpack

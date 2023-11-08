@@ -14,8 +14,9 @@ public class Cliente extends UtenteGenerico {
         String codiceFiscale, 
         String email, 
         String numeroTelefonico,
-        String indirizzoDiConsegna) {
-        super(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico);
+        String indirizzoDiConsegna,
+        Boolean isClient) {
+        super(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico,isClient);
         this.indirizzoDiConsegna = indirizzoDiConsegna;
     }
 
