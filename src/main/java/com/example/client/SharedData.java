@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class SharedData {
     private static SharedData instance = new SharedData();
-    private UtenteGenerico user = new UtenteGenerico("", "", "", "", "", "");
+    private UtenteGenerico user = new UtenteGenerico("", "", "", "", "", "",false);
     private List<Object> contenitoriSelezionati = new ArrayList<>();
     private Response res;
     private String userType;

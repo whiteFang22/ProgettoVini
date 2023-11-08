@@ -113,7 +113,7 @@ public class LogFormControllers {
 
         //Ho aggiunto il campo password.getText() per istanziare gia l'utente con la password in modo che poi sia sufficiente
         //chiamare c.registrazione(), credo sia da implementare in front end 
-        Cliente c = new Cliente(nome.getText(), cognome.getText(),password.getText(), codiceFiscale.getText(), email.getText(), numTelefonico.getText(), indirizzo.getText());
+        Cliente c = new Cliente(nome.getText(), cognome.getText(),password.getText(), codiceFiscale.getText(), email.getText(), numTelefonico.getText(), indirizzo.getText(),false);
         SharedData.getInstance().setUser(c);
         boolean success = c.registrazione();
 

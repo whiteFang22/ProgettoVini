@@ -104,6 +104,7 @@ public class ServerThread implements Runnable
       e.printStackTrace();
       return;
     }
+    message(null,os);
     //main loop
     while (stayOpen)
     { 
@@ -139,7 +140,7 @@ public class ServerThread implements Runnable
                   Cliente user = (Cliente) requestData;
                   System.out.println("Request OK, contacting db");
                   
-                  String dbquery = "INSERT INTO clienti (nome, cognome, passwordhash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna) VALUES (?,?,?,?,?,?,?)";
+                  String dbquery = "INSERT INTO clienti (nome, cognome, password_hash, codice_fiscale, email, numero_telefonico, indirizzo_consegna) VALUES (?,?,?,?,?,?,?)";
 
                   try{
                     rowsAffected = db.executeUpdate(dbquery,user.getNome(),user.getCognome(),user.getPasswordhash(),user.getCodiceFiscale(),user.getEmail(),user.getNumeroTelefonico(), user.getIndirizzoDiConsegna());
@@ -182,7 +183,7 @@ public class ServerThread implements Runnable
                        per capire se creare un impiegato o un amministratore 
                        RISOLTO
                        */
-                    Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),resultset.getString("password_hash"), resultset.getString("codiceFiscale"), resultset.getString("email"), resultset.getString("numeroTelefonico"), resultset.getString("indirizzoDiConsegna"));
+                    Cliente loggeduser = new Cliente(resultset.getString("nome"), resultset.getString("cognome"),resultset.getString("password_hash"), resultset.getString("codice_fiscale"), resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_consegna"),false);
                     final String authCode = AuthCodeGenerator.generateAuthCode();
                     this.connectionAuthCode = authCode;
                     System.out.println(authCode);
@@ -224,7 +225,7 @@ public class ServerThread implements Runnable
                           //Amministratore
                           Amministratore loggeduser = new Amministratore(resultset.getString("password_hash"), resultset.getString("nome"),
                           resultset.getString("cognome"), resultset.getString("codice_fiscale"),
-                          resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
+                          resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"),false);
                           final String authCode = AuthCodeGenerator.generateAuthCode();
                           this.connectionAuthCode = authCode;
                           System.out.println(authCode);
@@ -238,7 +239,7 @@ public class ServerThread implements Runnable
                           //Impiegato
                           Impiegato loggeduser = new Impiegato(resultset.getString("password_hash"), resultset.getString("nome"),
                           resultset.getString("cognome"), resultset.getString("codice_fiscale"),
-                          resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"));
+                          resultset.getString("email"), resultset.getString("numero_telefonico"), resultset.getString("indirizzo_residenza"),false);
                           final String authCode = AuthCodeGenerator.generateAuthCode();
                           this.connectionAuthCode = authCode;
                           System.out.println(authCode);
@@ -278,9 +279,9 @@ public class ServerThread implements Runnable
             case 2:
                System.out.println("Got from client request id: " + requestId);
                //Modifica password 
-               if(requestData != null && requestData instanceof Cliente && clientAuthCode == connectionAuthCode){
+               if(requestData != null && requestData instanceof Cliente && clientAuthCode.equals(connectionAuthCode)){
                 Cliente cliente = (Cliente) requestData;
-                String query = "UPDATE clienti SET password_hash = ? WHERE codiceFiscale = ?;";
+                String query = "UPDATE clienti SET password_hash = ? WHERE codice_fiscale = ?;";
                 rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
                 System.out.println("query Executed "+ rowsAffected + " rows Affected");
                 response.set(1,null,null);
@@ -297,7 +298,7 @@ public class ServerThread implements Runnable
 
               System.out.println("Got from client request id: " + requestId);
               //Acquista Bottiglie 
-              if(requestData != null && requestData instanceof Map<?,?> && clientAuthCode == connectionAuthCode){
+              if(requestData != null && requestData instanceof Map<?,?> && clientAuthCode.equals(connectionAuthCode)){
                   Map<Integer, Integer> bottiglieList = (Map<Integer, Integer>) requestData;
                   Map<Vino, Integer> viniPresenti = new HashMap<>();
                   Map<Vino,Integer> viniMancanti = new HashMap<>();
@@ -391,7 +392,7 @@ public class ServerThread implements Runnable
             case 4:
               System.out.println("Got from client request id: " + requestId);
 
-              if(requestData != null && requestData instanceof Boolean && clientAuthCode == connectionAuthCode){
+              if(requestData != null && requestData instanceof Boolean && clientAuthCode.equals(connectionAuthCode)){
                 Boolean conferma = (Boolean) requestData;
                 if(conferma){
                   //Conferma = true
@@ -450,7 +451,7 @@ public class ServerThread implements Runnable
               // non ti passo vino ma FiltriRicerca
               System.out.println("Got from client request id: " + requestId);
               //Ricerca Vino nel database
-               if(requestData != null && requestData instanceof FiltriRicerca && clientAuthCode == connectionAuthCode){
+               if(requestData != null && requestData instanceof FiltriRicerca && clientAuthCode.equals(connectionAuthCode)){
                   FiltriRicerca wineToSearch = (FiltriRicerca) requestData;
                   // non sempre i campi nome e annoProduzione sono pieni, alcune volte sono "" e a seconda di queso
                   // bisogna fare la query corrispondente
@@ -490,9 +491,11 @@ public class ServerThread implements Runnable
                  System.out.println(wineList);
                   response.set(1, wineList, this.connectionAuthCode);
                   response.setSuccess();
-                  message(response, os);
+                }
+              else{
+                response.set(0, null, this.connectionAuthCode);
               }
-
+              message(response, os);
                break;
             
             case 10:
@@ -518,14 +521,14 @@ public class ServerThread implements Runnable
                   String nome = resultSet.getString("nome");
                   String clicognome = resultSet.getString("cognome");
                   String passwordtohash = resultSet.getString("password_hash");
-                  String codiceFiscale = resultSet.getString("codiceFiscale");
+                  String codiceFiscale = resultSet.getString("codice_fiscale");
                   String email = resultSet.getString("email");
-                  String numeroTelefonico = resultSet.getString("numeroTelefonico");
-                  String indirizzoDiConsegna = resultSet.getString("indirizzoDiConsegna");
+                  String numeroTelefonico = resultSet.getString("numero_telefonico");
+                  String indirizzoDiConsegna = resultSet.getString("indirizzo_consegna");
   
                   // Create a new Cliente object and add it to the list
                   Cliente cliente = new Cliente(
-                      nome, clicognome, passwordtohash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna);
+                      nome, clicognome, passwordtohash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna,false);
                   listaClienti.add(cliente);
               }
               response.set(1,listaClienti,this.connectionAuthCode);
@@ -549,10 +552,10 @@ public class ServerThread implements Runnable
                   String nome = resultSet.getString("nome");
                   String cognome = resultSet.getString("cognome");
                   String passwordtohash = resultSet.getString("password_hash");
-                  String codiceFiscale = resultSet.getString("codiceFiscale");
+                  String codiceFiscale = resultSet.getString("codice_fiscale");
                   String email = resultSet.getString("email");
-                  String numeroTelefonico = resultSet.getString("numeroTelefonico");
-                  String indirizzoDiConsegna = resultSet.getString("indirizzoDiConsegna");
+                  String numeroTelefonico = resultSet.getString("numero_telefonico");
+                  String indirizzoDiConsegna = resultSet.getString("indirizzo_consegna");
                   Date dataConsegna = resultSet.getDate("data_consegna");
                   Date dataCreazione = resultSet.getDate("data_creazione");
                   
@@ -561,7 +564,7 @@ public class ServerThread implements Runnable
                   Map<Vino, Integer> vini = gson.fromJson(listaQuantita, new TypeToken<Map<Vino, Integer>>() {}.getType());
 
                   // Create a new Cliente object and add it to the list
-                  Cliente cliente = new Cliente(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna);
+                  Cliente cliente = new Cliente(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna,false);
                   OrdineVendita row = new OrdineVendita(cliente,vini,dataConsegna,dataCreazione);
                   list.add(row);
                 }
@@ -575,7 +578,7 @@ public class ServerThread implements Runnable
               if(requestData != null && requestData instanceof FiltriRicerca){
                 FiltriRicerca dateToSearch = (FiltriRicerca) requestData;
                 List<OrdineAcquisto> list = new ArrayList();
-                String dbquery1 = "SELECT impiegati.email AS impiegato_email, impiegati.nome AS impiegato_nome, impiegati.cognome AS impiegato_cognome, impiegati.password_hash AS impiegato_password_hash, impiegati.codice_fiscale AS impiegato_codice_fiscale, impiegati.numero_telefonico AS impiegato_numero_telefonico, impiegati.indirizzo_residenza AS impiegato_indirizzo_residenza, impiegati.isAdmin AS impiegato_isAdmin, clienti.email AS cliente_email, clienti.nome AS cliente_nome, clienti.cognome AS cliente_cognome, clienti.password_hash AS cliente_password_hash, clienti.codiceFiscale AS cliente_codice_fiscale, clienti.numeroTelefonico AS cliente_numero_telefonico, clienti.indirizzoDiConsegna AS cliente_indirizzo_di_consegna, ordini_di_acquisto.id AS ordine_id, ordini_di_acquisto.proposta_associata_id AS ordine_proposta_id, ordini_di_acquisto.indirizzo_azienda AS ordine_indirizzo_azienda, ordini_di_acquisto.data_creazione AS ordine_data_creazione, ordini_di_acquisto.completato AS ordine_completato, proposte_di_acquisto.id AS proposta_id, proposte_di_acquisto.cliente_id AS proposta_cliente_id, proposte_di_acquisto.lista_quantita AS proposta_lista_quantita, vendita.id AS vendita_id, vendita.cliente_id AS vendita_cliente_id, vendita.lista_quantita AS vendita_lista_quantita, vendita.indirizzo_consegna AS vendita_indirizzo_consegna, vendita.data_consegna AS vendita_data_consegna, vendita.data_creazione AS vendita_data_creazione FROM wineshop.impiegati INNER JOIN wineshop.clienti ON impiegati.email = clienti.email INNER JOIN wineshop.ordini_di_acquisto ON impiegati.email = ordini_di_acquisto.impiegato_id INNER JOIN wineshop.proposte_di_acquisto ON proposte_di_acquisto.ordine_id = ordini_di_acquisto.id INNER JOIN wineshop.ordini_vendita AS vendita ON vendita.cliente_id = clienti.email WHERE ordini_di_acquisto.data_creazione BETWEEN ? AND ?";
+                String dbquery1 = "SELECT impiegati.email AS impiegato_email, impiegati.nome AS impiegato_nome, impiegati.cognome AS impiegato_cognome, impiegati.password_hash AS impiegato_password_hash, impiegati.codice_fiscale AS impiegato_codice_fiscale, impiegati.numero_telefonico AS impiegato_numero_telefonico, impiegati.indirizzo_residenza AS impiegato_indirizzo_residenza, impiegati.isAdmin AS impiegato_isAdmin, clienti.email AS cliente_email, clienti.nome AS cliente_nome, clienti.cognome AS cliente_cognome, clienti.password_hash AS cliente_password_hash, clienti.codice_fiscale AS cliente_codice_fiscale, clienti.numero_telefonico AS cliente_numero_telefonico, clienti.indirizzo_consegna AS cliente_indirizzo_di_consegna, ordini_di_acquisto.id AS ordine_id, ordini_di_acquisto.proposta_associata_id AS ordine_proposta_id, ordini_di_acquisto.indirizzo_azienda AS ordine_indirizzo_azienda, ordini_di_acquisto.data_creazione AS ordine_data_creazione, ordini_di_acquisto.completato AS ordine_completato, proposte_di_acquisto.id AS proposta_id, proposte_di_acquisto.cliente_id AS proposta_cliente_id, proposte_di_acquisto.lista_quantita AS proposta_lista_quantita, vendita.id AS vendita_id, vendita.cliente_id AS vendita_cliente_id, vendita.lista_quantita AS vendita_lista_quantita, vendita.indirizzo_consegna AS vendita_indirizzo_consegna, vendita.data_consegna AS vendita_data_consegna, vendita.data_creazione AS vendita_data_creazione FROM wineshop.impiegati INNER JOIN wineshop.clienti ON impiegati.email = clienti.email INNER JOIN wineshop.ordini_di_acquisto ON impiegati.email = ordini_di_acquisto.impiegato_id INNER JOIN wineshop.proposte_di_acquisto ON proposte_di_acquisto.ordine_id = ordini_di_acquisto.id INNER JOIN wineshop.ordini_vendita AS vendita ON vendita.cliente_id = clienti.email WHERE ordini_di_acquisto.data_creazione BETWEEN ? AND ?";
             
                 
                 ResultSet resultSet1 = db.executeQuery(dbquery1,dateToSearch.data1(),dateToSearch.data2());
@@ -608,8 +611,8 @@ public class ServerThread implements Runnable
                   Map<Vino, Integer> viniAcquistati = gson.fromJson(listaQuantitaVendita, new TypeToken<Map<Vino, Integer>>() {}.getType());
 
                   //class building
-                  Cliente cliente = new Cliente(nomeCliente, cognomeCliente, passwordtohashCliente, codiceFiscaleCliente, emailCliente, numeroTelefonicoCliente, indirizzoDiConsegnaCliente);
-                  Impiegato impiegato = new Impiegato(passwordtohashImpiegato, nomeImpiegato, cognomeImpiegato, codiceFiscaleImpiegato, emailImpiegato, numeroTelefonicoImpiegato, indirizzoResidenzaImpiegato);
+                  Cliente cliente = new Cliente(nomeCliente, cognomeCliente, passwordtohashCliente, codiceFiscaleCliente, emailCliente, numeroTelefonicoCliente, indirizzoDiConsegnaCliente,false);
+                  Impiegato impiegato = new Impiegato(passwordtohashImpiegato, nomeImpiegato, cognomeImpiegato, codiceFiscaleImpiegato, emailImpiegato, numeroTelefonicoImpiegato, indirizzoResidenzaImpiegato,false);
                   OrdineVendita ordine = new OrdineVendita(cliente, viniAcquistati, dataConsegnaVendita, dataCreazioneVendita);
                   PropostaAcquisto proposta = new PropostaAcquisto(cliente, viniMancanti, indirizzoDiConsegnaCliente, ordine);
                   OrdineAcquisto row = new OrdineAcquisto(cliente, impiegato, proposta, indirizzoAziendaAcquisto, dataCreazioneAcquisto);

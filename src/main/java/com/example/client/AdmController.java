@@ -38,7 +38,7 @@ public class AdmController {
 
         //Ho aggiunto il campo password.getText() per istanziare gia l'utente con la password in modo che poi sia sufficiente
         //chiamare c.registrazione(), credo sia da implementare in front end
-        Impiegato i = new Impiegato(nome.getText(), cognome.getText(),password.getText(), codiceFiscale.getText(), email.getText(), numTelefonico.getText(), indirizzo.getText());
+        Impiegato i = new Impiegato(nome.getText(), cognome.getText(),password.getText(), codiceFiscale.getText(), email.getText(), numTelefonico.getText(), indirizzo.getText(),false);
         boolean success = adm.registrazioneImpiegato(i, password.getText());
 
         if (success){
