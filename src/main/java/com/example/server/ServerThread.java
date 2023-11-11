@@ -281,7 +281,7 @@ public class ServerThread implements Runnable
                //Modifica password 
                if(requestData != null && requestData instanceof Cliente && clientAuthCode.equals(connectionAuthCode)){
                 Cliente cliente = (Cliente) requestData;
-                String query = "UPDATE clienti SET password_hash = ? WHERE codice_fiscale = ?;";
+                String query = "UPDATE clienti SET password_hash = ? WHERE email = ?;";
                 rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
                 System.out.println("query Executed "+ rowsAffected + " rows Affected");
                 response.set(1,null,null);
@@ -303,6 +303,7 @@ public class ServerThread implements Runnable
                   Map<Vino, Integer> viniPresenti = new HashMap<>();
                   Map<Vino,Integer> viniMancanti = new HashMap<>();
                   boolean allInStock = true;
+                  
                   
                   //Initialize OrdineVendita
                   System.out.println("cliente: "+loggedCliente);
@@ -340,10 +341,11 @@ public class ServerThread implements Runnable
                       }
                     }
                   }
+                  ordineVendita.setCompletato(false);
+                  ordineVendita.setViniAcquistati(viniPresenti);
                   if(allInStock){
                     //tutti i vini disponibili, finalizza OrdineVendita e salva in db
-                    ordineVendita.setViniAcquistati(viniPresenti);
-                    ordineVendita.setCompletato(true);
+                    
                     //db Store
                     String dbquery = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -356,8 +358,7 @@ public class ServerThread implements Runnable
                   }
                   else{
                     //Non tutti i vini sono disponibili in quantita sufficienti, creo proposta di acquisto
-                    ordineVendita.setViniAcquistati(viniPresenti);
-                    ordineVendita.setCompletato(false);
+                    
                     PropostaAcquisto propostaAcquisto = new PropostaAcquisto(this.loggedCliente, viniMancanti, this.loggedCliente.getIndirizzoDiConsegna(), ordineVendita);
                     //db Store
                     String dbquery1 = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +

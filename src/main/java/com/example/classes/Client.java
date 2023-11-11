@@ -85,13 +85,19 @@ public class Client implements AutoCloseable{
 
     public static void main(String[] args) {
 
-        //Cliente examplecliente = new Cliente("andrea","verdi","12344321", "ndrvrd87g12f463x","fcdecardelli@gmail.com", "123321","Via averdi",true);
+        Cliente examplecliente = new Cliente("andrea","verdi","12344321", "ndrvrd87g12f463x","fcdecardelli@gmail.com", "123321","Via averdi",true);
         //examplecliente.registrazione();
-        //examplecliente.login();
+        examplecliente.login();
         //examplecliente.ClientModificaCredenziali("1234");
         
         //FiltriRicerca fr = new FiltriRicerca(null, null, null, 2012);
         //examplecliente.cercaVini(fr);
+
+        Map<Integer, Integer> list = new HashMap();
+        list.put(1,10);
+
+        examplecliente.acquistaBottiglie(list);
+        examplecliente.confermaPagamento(true);
 
     }
 }
