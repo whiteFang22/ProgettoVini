@@ -94,7 +94,8 @@ public class Client implements AutoCloseable{
         //examplecliente.cercaVini(fr);
 
         Map<Integer, Integer> list = new HashMap();
-        list.put(1,10);
+        list.put(3,10);
+        
 
         examplecliente.acquistaBottiglie(list);
         examplecliente.confermaPagamento(true);

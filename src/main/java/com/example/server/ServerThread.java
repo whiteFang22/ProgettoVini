@@ -338,6 +338,7 @@ public class ServerThread implements Runnable
                       }
                       else{
                         //vino non disponibile o non abbastanza bottiglie in magazzino, creo Map viniMancanti
+                        viniPresenti.put(vino, disponibilita);
                         viniMancanti.put(vino, quantitaRichiesta - disponibilita);
                         allInStock = false;
                       }
