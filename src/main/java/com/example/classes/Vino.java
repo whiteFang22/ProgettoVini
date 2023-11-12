@@ -1,8 +1,8 @@
 package com.example.classes;
 
 import java.util.List;
-
-import com.google.gson.Gson;
+import com.google.gson.*;
+import java.lang.reflect.Type;
 
 import java.io.Serializable;
 
@@ -48,6 +48,11 @@ public class Vino implements Serializable{
         this.prezzo = prezzo;
         this.numeroVendite = numeroVendite;
         this.disponibilita = disponibilita;
+    }
+    @Override
+    public String toString() {
+        Gson gson = new GsonBuilder().registerTypeAdapter(Vino.class, new VinoSerializer()).create();
+        return gson.toJson(this, Vino.class);
     }
     public int getId() {
         return id;
