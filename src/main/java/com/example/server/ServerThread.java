@@ -11,6 +11,7 @@ import java.net.SocketException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,18 +69,18 @@ public class ServerThread implements Runnable
   @Override
   /*
    * thread main code, handles client requests via Switch case statement switching request codes
-   * 0 - Cliente, registrazione             try
-   * 1 - UtenteGenerico, Login              OK
-   * 2 - Cliente, modifica credenziali      ++
-   * 3 - Cliente, acquistabottiglie
-   * 4 - Cliente, confermaPagamento
-   * 9 - Cliente, ricercaVino               OK
-   * 10 - Impiegato, ricercaCliente         --
-   * 11 - Impiegato, ricercaOrdineVendita
+   * 0 - Cliente, registrazione             tested
+   * 1 - UtenteGenerico, Login              tested
+   * 2 - Cliente, modifica credenziali      tested
+   * 3 - Cliente, acquistabottiglie         tested
+   * 4 - Cliente, confermaPagamento         tested
+   * 9 - Cliente, ricercaVino               tested
+   * 10 - Impiegato, ricercaCliente         tested
+   * 11 - Impiegato, ricercaOrdineVendita   tested
    * 12 - Impiegato, ricercaOrdineAcquisto
-   * 20 - Admin, registraImpiegato          try
-   * 21 - Admin, eliminaUtente              ++
-   * 22 - Admin, modificaCredenzialiUtente  ++
+   * 20 - Admin, registraImpiegato          tested
+   * 21 - Admin, eliminaUtente              tested
+   * 22 - Admin, modificaCredenzialiUtente  tested
   */
   public void run()
   {
@@ -542,10 +543,12 @@ public class ServerThread implements Runnable
               if(requestData != null && requestData instanceof FiltriRicerca){
                 FiltriRicerca dateToSearch = (FiltriRicerca) requestData;
                 List<OrdineVendita> list = new ArrayList();
-                String dbquery = "SELECT * FROM ordini_vendita INNER JOIN clienti ON ordini_vendita.cliente_id = clienti.email" + 
-                "WHERE data_creazione BETWEEN ? AND ?";
-                System.out.println("data: "+dateToSearch.data1());
-                ResultSet resultSet = db.executeQuery(dbquery,dateToSearch.data1(),dateToSearch.data2());
+                String dbquery = "SELECT * FROM ordini_vendita INNER JOIN clienti ON ordini_vendita.cliente_id = clienti.email WHERE data_creazione BETWEEN ? AND ?";
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String formattedDate1 = dateFormat.format(dateToSearch.data1());
+                String formattedDate2 = dateFormat.format(dateToSearch.data2());
+                System.out.println("formattedDate1: "+formattedDate1);
+                ResultSet resultSet = db.executeQuery(dbquery,formattedDate1,formattedDate2);
 
                 //resultSet unpack and cast into OrdineVendita
                 while(resultSet.next()){
@@ -560,8 +563,7 @@ public class ServerThread implements Runnable
                   Date dataCreazione = resultSet.getDate("data_creazione");
                   
                   String listaQuantita = resultSet.getString("lista_quantita");
-                  Gson gson = new Gson();
-                  Map<Vino, Integer> vini = gson.fromJson(listaQuantita, new TypeToken<Map<Vino, Integer>>() {}.getType());
+                  Map<Vino, Integer> vini = mapgson.fromJson(listaQuantita, new TypeToken<Map<Vino, Integer>>() {}.getType());
 
                   // Create a new Cliente object and add it to the list
                   Cliente cliente = new Cliente(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna,false);
