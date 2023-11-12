@@ -60,8 +60,10 @@ public class RicercaController implements Initializable{
         System.out.println("vini:"+SharedData.getInstance().getVini());
         Response res = user.acquistaBottiglie(SharedData.getInstance().getVini());
         success = res.isSuccess();
+        //F: success è legato al corretto funzionamento del server, è true anche se non ci sono bottiglie sufficienti purchè non
+        //si siano verificati errori, ti rispondo con id = 1 se ce tutto, id = 2 se non ci sono abbastanza bottiglie
         // se true visualizzo l'ordine di vendita
-        if (success) {
+        if (res.getId() == 1) {
             OrdineVendita ordine = (OrdineVendita) res.getData(); // deve restituirmi l'oridne di vendita creato sulla base dell'acquisto
             //visualizza l'ordine di vendita
             visualizzaPaginaOrdine();
@@ -70,7 +72,7 @@ public class RicercaController implements Initializable{
             visualizzaLeft();
         }
         // se false chiedo se si vuole effettuare una proposta di acquisto: i vini non ci sono in magazzino
-        else {
+        else if(res.getId()==2) {
             // schermata proposta di acquisto
             System.out.println("Proposta");
             SharedData.getInstance().setRes(res); // salvo la res in modo che dopo possa accedere alla proposta di acquisto restituita dal server in precedenza
@@ -153,45 +155,51 @@ public class RicercaController implements Initializable{
         casse.add(ca);
         ca = new CassaVino(v2, 12, 0);
         casse.add(ca);*/
-
+        ordine.ottimizza();
+        System.out.println(ordine);
+        System.out.println(ordine.getCasseVino());
+        System.out.println(ordine.getconfezioniVini());
         List<CassaVino> casse = ordine.getCasseVino();
         List<ConfezioneVini> confezioni = ordine.getconfezioniVini();
 
-        int i = 0;
-        for (CassaVino cassa : casse) {
-            Vino vino = cassa.getVino();
-            Label nomeVino = new Label(vino.getNome()+" - "+vino.getAnno());
-            nomeVino.setUserData(vino);
-            nomeVino.setMinWidth(135);
-
-            String qnt = String.valueOf(cassa.getQuantita());
-            Label quantitaField = new Label("quantità: "+qnt);
-            quantitaField.setMinWidth(80);
-            quantitaField.setId("quantita");
-
-            Text costo = new Text("costo: "+String.format("%.2f", cassa.getPrezzo())+"€");
-            HBox riga = new HBox(nomeVino, quantitaField, costo);
-            riga.setSpacing(10);
-            items.add(riga);
-        }
-        // per ogni confezione scorri i vini contenuti
-        for (ConfezioneVini confezione : confezioni) {
-            Map<Vino,Integer> vini = confezione.getVini();
-            for (Map.Entry<Vino, Integer> entry : vini.entrySet()){
-                Vino vino = entry.getKey();
+        if(casse != null){
+            for (CassaVino cassa : casse) {
+                Vino vino = cassa.getVino();
                 Label nomeVino = new Label(vino.getNome()+" - "+vino.getAnno());
                 nomeVino.setUserData(vino);
                 nomeVino.setMinWidth(135);
 
-                int quantita = entry.getValue();
-                Label quantitaField = new Label("quantità: "+quantita);
+                String qnt = String.valueOf(cassa.getQuantita());
+                Label quantitaField = new Label("quantità: "+qnt);
                 quantitaField.setMinWidth(80);
                 quantitaField.setId("quantita");
 
-                Text costo = new Text("costo: "+String.format("%.2f", vino.getPrezzo()*quantita )+"€");
+                Text costo = new Text("costo: "+String.format("%.2f", cassa.getPrezzo())+"€");
                 HBox riga = new HBox(nomeVino, quantitaField, costo);
                 riga.setSpacing(10);
                 items.add(riga);
+            }
+        }
+        // per ogni confezione scorri i vini contenuti
+        if(confezioni != null){
+            for (ConfezioneVini confezione : confezioni) {
+                Map<Vino,Integer> vini = confezione.getVini();
+                for (Map.Entry<Vino, Integer> entry : vini.entrySet()){
+                    Vino vino = entry.getKey();
+                    Label nomeVino = new Label(vino.getNome()+" - "+vino.getAnno());
+                    nomeVino.setUserData(vino);
+                    nomeVino.setMinWidth(135);
+
+                    int quantita = entry.getValue();
+                    Label quantitaField = new Label("quantità: "+quantita);
+                    quantitaField.setMinWidth(80);
+                    quantitaField.setId("quantita");
+
+                    Text costo = new Text("costo: "+String.format("%.2f", vino.getPrezzo()*quantita )+"€");
+                    HBox riga = new HBox(nomeVino, quantitaField, costo);
+                    riga.setSpacing(10);
+                    items.add(riga);
+                }
             }
         }
         listView.setItems(items);

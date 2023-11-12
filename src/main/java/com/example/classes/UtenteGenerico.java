@@ -33,7 +33,7 @@ public class UtenteGenerico implements Serializable{
             client = new Client("localhost", 4444);
         }
     }
-    private void setAuthCode(String inAuthCode){
+    public void setAuthCode(String inAuthCode){
         this.AuthCode = inAuthCode;
     }
     public String getNome() {

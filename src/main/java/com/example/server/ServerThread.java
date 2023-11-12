@@ -356,7 +356,7 @@ public class ServerThread implements Runnable
                     String lista_quantita = mapgson.toJson(ordineVendita.getViniAcquistati());
                     db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
                     //response code 1, data empty
-                    response.set(1,null,this.connectionAuthCode);
+                    response.set(1,ordineVendita,this.connectionAuthCode);
                     response.setSuccess();
                   }
                   else{
