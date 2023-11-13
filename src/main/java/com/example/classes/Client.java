@@ -95,6 +95,7 @@ public class Client implements AutoCloseable{
         //FiltriRicerca fr = new FiltriRicerca(null, null, null, 2012);
         //examplecliente.cercaVini(fr);
 
+
         //Map<Integer, Integer> list = new HashMap();
         //list.put(3,10);
 
@@ -117,6 +118,7 @@ public class Client implements AutoCloseable{
         calendar.set(2023,Calendar.DECEMBER,1);
         Date Date2 = calendar.getTime();
         System.out.println(exampleImpiegato.ricercaOrdiniVendita(Date1,Date2));
+
 
     }
 }

@@ -20,9 +20,11 @@ public class UtenteGenerico implements Serializable{
     protected transient static Client client;
 
     public UtenteGenerico(String nome, String cognome,String passwordtohash, String codiceFiscale, String email, String numeroTelefonico, boolean isClient) {
+
         if(passwordtohash != null){
             setpasswordhash(passwordtohash);
         }
+
         this.nome = nome;
         this.cognome = cognome;
         this.codiceFiscale = codiceFiscale;
@@ -31,6 +33,7 @@ public class UtenteGenerico implements Serializable{
 
         if(isClient){
             client = new Client("localhost", 4444);
+
         }
     }
     public void setAuthCode(String inAuthCode){

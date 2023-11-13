@@ -283,7 +283,9 @@ public class ServerThread implements Runnable
                //Modifica password 
                if(requestData != null && requestData instanceof Cliente && clientAuthCode.equals(connectionAuthCode)){
                 Cliente cliente = (Cliente) requestData;
+
                 String query = "UPDATE clienti SET password_hash = ? WHERE email = ?;";
+
                 rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
                 System.out.println("query Executed "+ rowsAffected + " rows Affected");
                 response.set(1,null,null);
