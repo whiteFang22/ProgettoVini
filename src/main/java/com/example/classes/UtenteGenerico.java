@@ -111,7 +111,7 @@ public class UtenteGenerico implements Serializable{
         //response unpack
         // Create a list to hold the data
         List<Vino> wineList = new ArrayList<>();
-        if(res.getId() == 1 && res.getAuthCode() == this.AuthCode){     //check response id and double check AuthCode
+        if(res.getId() == 1 && res.getAuthCode().equals(this.AuthCode)){     //check response id and double check AuthCode
             if (res.getData() != null){
                wineList = (List<Vino>) res.getData();
         }
