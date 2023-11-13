@@ -88,6 +88,7 @@ public class LogFormControllers {
                 case "impiegato" -> user = (Impiegato) res.getData();
                 case "amministratore" -> user = (Amministratore) res.getData();
             }
+            user.setAuthCode(res.getAuthCode());
 
             // RESTITUISCE LA SCHERMATA HOME DEL PROGRAMMA
             SharedData.getInstance().setUser(user);

@@ -11,27 +11,20 @@ import java.net.SocketException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Date;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
 
-import com.example.classes.AuthCodeGenerator;
-import com.example.classes.Cliente;
-import com.example.classes.FiltriRicerca;
-import com.example.classes.Impiegato;
-import com.example.classes.OrdineAcquisto;
-import com.example.classes.OrdineVendita;
-import com.example.classes.Amministratore;
-import com.example.classes.PropostaAcquisto;
-import com.example.classes.Request;
-import com.example.classes.Response;
-import com.example.classes.UtenteGenerico;
-import com.example.classes.Vino;
+import com.example.classes.*;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -76,18 +69,18 @@ public class ServerThread implements Runnable
   @Override
   /*
    * thread main code, handles client requests via Switch case statement switching request codes
-   * 0 - Cliente, registrazione             try
-   * 1 - UtenteGenerico, Login              OK
-   * 2 - Cliente, modifica credenziali      ++
-   * 3 - Cliente, acquistabottiglie
-   * 4 - Cliente, confermaPagamento
-   * 9 - Cliente, ricercaVino               OK
-   * 10 - Impiegato, ricercaCliente         --
-   * 11 - Impiegato, ricercaOrdineVendita
+   * 0 - Cliente, registrazione             tested
+   * 1 - UtenteGenerico, Login              tested
+   * 2 - Cliente, modifica credenziali      tested
+   * 3 - Cliente, acquistabottiglie         tested
+   * 4 - Cliente, confermaPagamento         tested
+   * 9 - Cliente, ricercaVino               tested
+   * 10 - Impiegato, ricercaCliente         tested
+   * 11 - Impiegato, ricercaOrdineVendita   tested
    * 12 - Impiegato, ricercaOrdineAcquisto
-   * 20 - Admin, registraImpiegato          try
-   * 21 - Admin, eliminaUtente              ++
-   * 22 - Admin, modificaCredenzialiUtente  ++
+   * 20 - Admin, registraImpiegato          tested
+   * 21 - Admin, eliminaUtente              tested
+   * 22 - Admin, modificaCredenzialiUtente  tested
   */
   public void run()
   {
@@ -124,6 +117,15 @@ public class ServerThread implements Runnable
           final String clientAuthCode = crequest.getAuthCode();
           int rowsAffected = 0;
           Response response = new Response();
+
+          Gson mapgson = new GsonBuilder()
+              .registerTypeAdapter(new TypeToken<Map<Vino, Integer>>() {}.getType(), new VinoMapSerializer())
+              .registerTypeAdapter(new TypeToken<Map<Vino, Integer>>() {}.getType(), new VinoMapDeserializer())
+              .registerTypeAdapter(Vino.class, new VinoSerializer())
+              .registerTypeAdapter(Vino.class, new VinoDeserializer())
+              .create();
+            Type mapType = new TypeToken<Map<Vino, Integer>>() {}.getType();
+
           //request Handle
           switch(requestId){
             case 0:
@@ -281,7 +283,9 @@ public class ServerThread implements Runnable
                //Modifica password 
                if(requestData != null && requestData instanceof Cliente && clientAuthCode.equals(connectionAuthCode)){
                 Cliente cliente = (Cliente) requestData;
-                String query = "UPDATE clienti SET password_hash = ? WHERE codice_fiscale = ?;";
+
+                String query = "UPDATE clienti SET password_hash = ? WHERE email = ?;";
+
                 rowsAffected = db.executeUpdate(query,cliente.getPasswordhash(),cliente.getCodiceFiscale());
                 System.out.println("query Executed "+ rowsAffected + " rows Affected");
                 response.set(1,null,null);
@@ -294,6 +298,7 @@ public class ServerThread implements Runnable
                 message(response,os);
               }
               break;
+
             case 3:
 
               System.out.println("Got from client request id: " + requestId);
@@ -303,6 +308,7 @@ public class ServerThread implements Runnable
                   Map<Vino, Integer> viniPresenti = new HashMap<>();
                   Map<Vino,Integer> viniMancanti = new HashMap<>();
                   boolean allInStock = true;
+                  
                   
                   //Initialize OrdineVendita
                   System.out.println("cliente: "+loggedCliente);
@@ -335,35 +341,34 @@ public class ServerThread implements Runnable
                       }
                       else{
                         //vino non disponibile o non abbastanza bottiglie in magazzino, creo Map viniMancanti
+                        viniPresenti.put(vino, disponibilita);
                         viniMancanti.put(vino, quantitaRichiesta - disponibilita);
                         allInStock = false;
                       }
                     }
                   }
+                  ordineVendita.setCompletato(false);
+                  ordineVendita.setViniAcquistati(viniPresenti);
                   if(allInStock){
                     //tutti i vini disponibili, finalizza OrdineVendita e salva in db
-                    ordineVendita.setViniAcquistati(viniPresenti);
-                    ordineVendita.setCompletato(true);
+                    
                     //db Store
                     String dbquery = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    Gson gson = new Gson();
-                    String lista_quantita = gson.toJson(ordineVendita.getViniAcquistati());
+                    String lista_quantita = mapgson.toJson(ordineVendita.getViniAcquistati());
                     db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
                     //response code 1, data empty
-                    response.set(1,null,this.connectionAuthCode);
+                    response.set(1,ordineVendita,this.connectionAuthCode);
                     response.setSuccess();
                   }
                   else{
                     //Non tutti i vini sono disponibili in quantita sufficienti, creo proposta di acquisto
-                    ordineVendita.setViniAcquistati(viniPresenti);
-                    ordineVendita.setCompletato(false);
+                    
                     PropostaAcquisto propostaAcquisto = new PropostaAcquisto(this.loggedCliente, viniMancanti, this.loggedCliente.getIndirizzoDiConsegna(), ordineVendita);
                     //db Store
                     String dbquery1 = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    Gson gson = new Gson();
-                    String lista_quantita = gson.toJson(ordineVendita.getViniAcquistati());
+                    String lista_quantita = mapgson.toJson(ordineVendita.getViniAcquistati());
                     db.executeUpdate(dbquery1,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
 
                     String dbquery2 = "SELECT * FROM ordini_vendita WHERE cliente_id = ?";
@@ -374,8 +379,7 @@ public class ServerThread implements Runnable
                     }
                     String dbquery3 = "INSERT INTO proposte_di_acquisto (cliente_id, lista_quantita, ordine_id) " +
                     "VALUES (?, ?, ?)";
-                    gson = new Gson();
-                    String lista_quantita_mancanti = gson.toJson(propostaAcquisto.getVini());
+                    String lista_quantita_mancanti = mapgson.toJson(propostaAcquisto.getVini());
                     db.executeUpdate(dbquery3,propostaAcquisto.getCliente().getEmail(),lista_quantita_mancanti,id);
 
                     //response code 2, data: PropostaAcquisto
@@ -390,6 +394,7 @@ public class ServerThread implements Runnable
 
             break;
             case 4:
+
               System.out.println("Got from client request id: " + requestId);
 
               if(requestData != null && requestData instanceof Boolean && clientAuthCode.equals(connectionAuthCode)){
@@ -401,9 +406,7 @@ public class ServerThread implements Runnable
                   ResultSet resultset = db.executeQuery(dbquery, this.loggedCliente.getEmail());
                   if(resultset.next()){
                     //Get lista_quantità from ordine_vendita and parse into Map
-                    Gson gson = new Gson();
-                    Type mapType = new TypeToken<Map<Vino, Integer>>() {}.getType();
-                    Map<Vino, Integer> wineList = gson.fromJson(resultset.getString("lista_quantita"), mapType);
+                    Map<Vino, Integer> wineList = mapgson.fromJson(resultset.getString("lista_quantita"), mapType);
                     //Iterate through Map
                     for (Map.Entry<Vino, Integer> row : wineList.entrySet()) {
                       Vino wine = row.getKey();
@@ -425,7 +428,7 @@ public class ServerThread implements Runnable
                     }
                     //Modifica ordine e proposta acquisto
                     dbquery = "UPDATE ordini_vendita SET completato = 1 WHERE cliente_id = ? AND completato = 0";
-                    db.executeQuery(dbquery, this.loggedCliente.getEmail());
+                    db.executeUpdate(dbquery, this.loggedCliente.getEmail());
                     dbquery = "UPDATE proposte_di_acquisto SET completato = 1 WHERE cliente_id = ? AND completato = 0";
                     db.executeUpdate(dbquery,this.loggedCliente.getEmail());
                   }
@@ -542,10 +545,12 @@ public class ServerThread implements Runnable
               if(requestData != null && requestData instanceof FiltriRicerca){
                 FiltriRicerca dateToSearch = (FiltriRicerca) requestData;
                 List<OrdineVendita> list = new ArrayList();
-                String dbquery = "SELECT * FROM ordini_vendita INNER JOIN clienti ON ordini_vendita.cliente_id = clienti.email" + 
-                "WHERE data_creazione BETWEEN ? AND ?";
-                System.out.println("data: "+dateToSearch.data1());
-                ResultSet resultSet = db.executeQuery(dbquery,dateToSearch.data1(),dateToSearch.data2());
+                String dbquery = "SELECT * FROM ordini_vendita INNER JOIN clienti ON ordini_vendita.cliente_id = clienti.email WHERE data_creazione BETWEEN ? AND ?";
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String formattedDate1 = dateFormat.format(dateToSearch.data1());
+                String formattedDate2 = dateFormat.format(dateToSearch.data2());
+                System.out.println("formattedDate1: "+formattedDate1);
+                ResultSet resultSet = db.executeQuery(dbquery,formattedDate1,formattedDate2);
 
                 //resultSet unpack and cast into OrdineVendita
                 while(resultSet.next()){
@@ -560,8 +565,7 @@ public class ServerThread implements Runnable
                   Date dataCreazione = resultSet.getDate("data_creazione");
                   
                   String listaQuantita = resultSet.getString("lista_quantita");
-                  Gson gson = new Gson();
-                  Map<Vino, Integer> vini = gson.fromJson(listaQuantita, new TypeToken<Map<Vino, Integer>>() {}.getType());
+                  Map<Vino, Integer> vini = mapgson.fromJson(listaQuantita, new TypeToken<Map<Vino, Integer>>() {}.getType());
 
                   // Create a new Cliente object and add it to the list
                   Cliente cliente = new Cliente(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna,false);

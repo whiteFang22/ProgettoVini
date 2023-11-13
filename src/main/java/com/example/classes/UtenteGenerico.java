@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class UtenteGenerico implements Serializable{
     private static final long serialVersionUID = 1L;
-    private String passwordhash;
+    private String passwordhash = "0000";
     private String nome;
     private String cognome;
     private String codiceFiscale;
@@ -20,7 +20,11 @@ public class UtenteGenerico implements Serializable{
     protected transient static Client client;
 
     public UtenteGenerico(String nome, String cognome,String passwordtohash, String codiceFiscale, String email, String numeroTelefonico, boolean isClient) {
-        setpasswordhash(passwordtohash);
+
+        if(passwordtohash != null){
+            setpasswordhash(passwordtohash);
+        }
+
         this.nome = nome;
         this.cognome = cognome;
         this.codiceFiscale = codiceFiscale;
@@ -29,33 +33,10 @@ public class UtenteGenerico implements Serializable{
 
         if(isClient){
             client = new Client("localhost", 4444);
-        }
 
-        //password hashing
-        try {
-            // Create a MessageDigest instance for SHA-256
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            
-            // Convert the password string into bytes
-            byte[] passwordBytes = passwordtohash.getBytes();
-            
-            // Update the digest with the password bytes
-            byte[] hashedBytes = md.digest(passwordBytes);
-            
-            // Convert the hashed bytes to a hexadecimal representation
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            
-            this.passwordhash = sb.toString(); // Return the hashed password as a hexadecimal string
-        } catch (NoSuchAlgorithmException e) {
-            // Handle the exception, e.g., by logging or throwing a custom exception
-            e.printStackTrace();
-            this.passwordhash = null; // Return null in case of an error
         }
     }
-    private void setAuthCode(String inAuthCode){
+    public void setAuthCode(String inAuthCode){
         this.AuthCode = inAuthCode;
     }
     public String getNome() {

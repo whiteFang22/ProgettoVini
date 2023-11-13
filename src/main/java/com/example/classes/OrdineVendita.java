@@ -1,6 +1,8 @@
 package com.example.classes;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -9,8 +11,8 @@ import java.util.Map;
 public class OrdineVendita implements Serializable{
     private Cliente cliente;
     private Map<Vino, Integer> viniAcquistati;
-    private List<ConfezioneVini> confezioniVini;
-    private List<CassaVino> casseVino;
+    private List<ConfezioneVini> confezioniVini = new ArrayList<>();
+    private List<CassaVino> casseVino = new ArrayList<>();
     private String indirizzoConsegna;
     private Date dataConsegna;
     private Date dataCreazione;
@@ -116,7 +118,7 @@ public class OrdineVendita implements Serializable{
     }
 
     public void ottimizza(){
-        Map<Vino,Integer> rimanenti = new HashMap();
+        Map<Vino,Integer> rimanenti = new HashMap<Vino,Integer>();
         for (Map.Entry<Vino, Integer> line : this.viniAcquistati.entrySet()){
             Vino vino = line.getKey();
             int quantita = line.getValue();
@@ -138,7 +140,6 @@ public class OrdineVendita implements Serializable{
             //lista dei rimanenti da inserire in confezioni
             rimanenti.put(vino,bottiglieRimaste);
         }
-
         ConfezioneVini confezione = new ConfezioneVini();
 
         for (Map.Entry<Vino, Integer> entry : rimanenti.entrySet()) {
@@ -156,6 +157,9 @@ public class OrdineVendita implements Serializable{
                 }
             }
         }
+        if(confezione.getCapacita()<5){
+            this.confezioniVini.add(confezione);
+        }
     }
 
     public Date getDataCreazione() {
@@ -165,4 +169,5 @@ public class OrdineVendita implements Serializable{
     public void setDataCreazione(Date dataCreazione) {
         this.dataCreazione = dataCreazione;
     }
+    
 }
