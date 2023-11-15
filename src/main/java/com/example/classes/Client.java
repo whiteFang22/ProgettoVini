@@ -97,27 +97,29 @@ public class Client implements AutoCloseable{
 
 
         //Map<Integer, Integer> list = new HashMap();
-        //list.put(3,10);
+        //list.put(1,10);
+        //list.put(2,10);
+        //list.put(3,1);
 
 
         //examplecliente.acquistaBottiglie(list);
         //examplecliente.confermaPagamento(true);
 
         //Amministratore exampleAdmin = new Amministratore("1234","admin","admin","admin","root@admin.admin","0000","none",true);
-        Impiegato exampleImpiegato = new Impiegato("1111", "andrea", "martini", "ndrmrt88g655f", "amartini@gmail.com", "3421234554", "Via Roma 33", true);
+        //Impiegato exampleImpiegato = new Impiegato("1111", "andrea", "martini", "ndrmrt88g655f", "amartini@gmail.com", "3421234554", "Via Roma 33", true);
         //exampleAdmin.registrazioneImpiegato(exampleImpiegato, "1111");
         //exampleAdmin.AdminModificaCredenziali("dverdi@gmail.com","0000" , false);
         //exampleAdmin.AdminModificaCredenziali("everdi@gmail.com", null, true);
 
-        System.out.println(exampleImpiegato.ricercaClienti("rossi"));
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2023, Calendar.NOVEMBER, 1); // Adjust year, month, and day
+        //System.out.println(exampleImpiegato.ricercaClienti("rossi"));
+        //Calendar calendar = Calendar.getInstance();
+        //calendar.set(2023, Calendar.NOVEMBER, 1); // Adjust year, month, and day
 
         // Convert Calendar to Date
-        Date Date1 = calendar.getTime();
-        calendar.set(2023,Calendar.DECEMBER,1);
-        Date Date2 = calendar.getTime();
-        System.out.println(exampleImpiegato.ricercaOrdiniVendita(Date1,Date2));
+        //Date Date1 = calendar.getTime();
+        //calendar.set(2023,Calendar.DECEMBER,1);
+        //Date Date2 = calendar.getTime();
+        //System.out.println(exampleImpiegato.ricercaOrdiniVendita(Date1,Date2));
 
 
     }

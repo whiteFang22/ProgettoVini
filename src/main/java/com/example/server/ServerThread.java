@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +118,7 @@ public class ServerThread implements Runnable
           final String clientAuthCode = crequest.getAuthCode();
           int rowsAffected = 0;
           Response response = new Response();
-
+          /*
           Gson mapgson = new GsonBuilder()
               .registerTypeAdapter(new TypeToken<Map<Vino, Integer>>() {}.getType(), new VinoMapSerializer())
               .registerTypeAdapter(new TypeToken<Map<Vino, Integer>>() {}.getType(), new VinoMapDeserializer())
@@ -125,7 +126,7 @@ public class ServerThread implements Runnable
               .registerTypeAdapter(Vino.class, new VinoDeserializer())
               .create();
             Type mapType = new TypeToken<Map<Vino, Integer>>() {}.getType();
-
+          */
           //request Handle
           switch(requestId){
             case 0:
@@ -312,7 +313,14 @@ public class ServerThread implements Runnable
                   
                   //Initialize OrdineVendita
                   System.out.println("cliente: "+loggedCliente);
-                  OrdineVendita ordineVendita = new OrdineVendita(loggedCliente, null,new Date());
+                  //Calculate Time
+                  Date now = new Date();
+                  Calendar calendar = Calendar.getInstance();
+                  calendar.setTime(now);
+                  calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                  Date nextWeek = calendar.getTime();
+
+                  OrdineVendita ordineVendita = new OrdineVendita(loggedCliente, nextWeek ,now);
 
                   for (Map.Entry<Integer, Integer> line : bottiglieList.entrySet()){
                     Integer idVino = line.getKey();
@@ -341,7 +349,8 @@ public class ServerThread implements Runnable
                       }
                       else{
                         //vino non disponibile o non abbastanza bottiglie in magazzino, creo Map viniMancanti
-                        viniPresenti.put(vino, disponibilita);
+                        //Inserisco nell'ordineVendita anche i vini che non sono disponibili a magazzino!!
+                        viniPresenti.put(vino, quantitaRichiesta);
                         viniMancanti.put(vino, quantitaRichiesta - disponibilita);
                         allInStock = false;
                       }
@@ -352,12 +361,7 @@ public class ServerThread implements Runnable
                   if(allInStock){
                     //tutti i vini disponibili, finalizza OrdineVendita e salva in db
                     
-                    //db Store
-                    String dbquery = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    String lista_quantita = mapgson.toJson(ordineVendita.getViniAcquistati());
-                    db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
-                    //response code 1, data empty
+                    dbStoreOrdineVendita(ordineVendita);
                     response.set(1,ordineVendita,this.connectionAuthCode);
                     response.setSuccess();
                   }
@@ -366,11 +370,8 @@ public class ServerThread implements Runnable
                     
                     PropostaAcquisto propostaAcquisto = new PropostaAcquisto(this.loggedCliente, viniMancanti, this.loggedCliente.getIndirizzoDiConsegna(), ordineVendita);
                     //db Store
-                    String dbquery1 = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                    String lista_quantita = mapgson.toJson(ordineVendita.getViniAcquistati());
-                    db.executeUpdate(dbquery1,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
-
+                    dbStoreOrdineVendita(ordineVendita);
+                    
                     String dbquery2 = "SELECT * FROM ordini_vendita WHERE cliente_id = ?";
                     ResultSet resultSet = db.executeQuery(dbquery2,ordineVendita.getCliente().getEmail());
                     int id = 0;
@@ -379,13 +380,17 @@ public class ServerThread implements Runnable
                     }
                     String dbquery3 = "INSERT INTO proposte_di_acquisto (cliente_id, lista_quantita, ordine_id) " +
                     "VALUES (?, ?, ?)";
-                    String lista_quantita_mancanti = mapgson.toJson(propostaAcquisto.getVini());
+
+                    //String lista_quantita_mancanti = mapgson.toJson(propostaAcquisto.getVini());
+                    String lista_quantita_mancanti = mapVinoToIdSerialized(propostaAcquisto.getVini());
+
                     db.executeUpdate(dbquery3,propostaAcquisto.getCliente().getEmail(),lista_quantita_mancanti,id);
 
                     //response code 2, data: PropostaAcquisto
                     response.set(2,propostaAcquisto,this.connectionAuthCode);
                     response.setSuccess();
                   }
+                  
               }
               else{
                 response.set(0, null, this.connectionAuthCode);
@@ -400,26 +405,33 @@ public class ServerThread implements Runnable
               if(requestData != null && requestData instanceof Boolean && clientAuthCode.equals(connectionAuthCode)){
                 Boolean conferma = (Boolean) requestData;
                 if(conferma){
-                  //Conferma = true
+                  //Conferma = true -> invia a impiegato
+                  //TODO: se conferma è true invia copia ordine a un impiegato, sara poi lui a firmare l'ordine e aggiornare le disponibilita
+                  //TODO: quindi il codice qua sotto andra spostato da un altra parte
                   //Aggiornamento quantità magazzino
                   String dbquery = "SELECT * from ordini_vendita WHERE cliente_id = ? and completato = 0";
                   ResultSet resultset = db.executeQuery(dbquery, this.loggedCliente.getEmail());
                   if(resultset.next()){
                     //Get lista_quantità from ordine_vendita and parse into Map
-                    Map<Vino, Integer> wineList = mapgson.fromJson(resultset.getString("lista_quantita"), mapType);
+                    //Map<Vino, Integer> wineList = mapgson.fromJson(resultset.getString("lista_quantita"), mapType);
+                    Gson gson = new Gson();
+                    Type mapType = new TypeToken<Map<Integer, Integer>>() {}.getType();
+                    Map<Integer, Integer> wineList = gson.fromJson(resultset.getString("lista_quantita"),mapType);
                     //Iterate through Map
-                    for (Map.Entry<Vino, Integer> row : wineList.entrySet()) {
-                      Vino wine = row.getKey();
+                    for (Map.Entry<Integer, Integer> row : wineList.entrySet()) {
+                      int wineid = row.getKey();
                       int quantity = row.getValue();
                       dbquery = "SELECT disponibilita, numero_vendite FROM vini WHERE id = ?";
-                      resultset = db.executeQuery(dbquery, wine.getId());
+                      resultset = db.executeQuery(dbquery, wineid);
                       if(resultset.next()){
                         Integer disponibilita = resultset.getInt("disponibilita");
                         Integer numeroVendite = resultset.getInt("numero_vendite");
+
+                        //TODO: what happens if not all bottles are in stock?
                         disponibilita-=quantity;
                         numeroVendite+=quantity;
                         dbquery="UPDATE vini SET disponibilita = ?, numero_vendite = ? WHERE id = ?";
-                        db.executeUpdate(dbquery,disponibilita,numeroVendite,wine.getId());
+                        db.executeUpdate(dbquery,disponibilita,numeroVendite,wineid);
                       }
                       else{
                         //Errore, non ce il vino
@@ -565,11 +577,14 @@ public class ServerThread implements Runnable
                   Date dataCreazione = resultSet.getDate("data_creazione");
                   
                   String listaQuantita = resultSet.getString("lista_quantita");
-                  Map<Vino, Integer> vini = mapgson.fromJson(listaQuantita, new TypeToken<Map<Vino, Integer>>() {}.getType());
+                  Gson gson = new Gson();
+                  Type mapType = new TypeToken<Map<Integer, Integer>>() {}.getType();
+                  Map<Integer, Integer> vini = gson.fromJson(listaQuantita, mapType);
+                  Map<Vino,Integer> vinimap = rebuildFromMapIntInt(vini);
 
                   // Create a new Cliente object and add it to the list
                   Cliente cliente = new Cliente(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico, indirizzoDiConsegna,false);
-                  OrdineVendita row = new OrdineVendita(cliente,vini,dataConsegna,dataCreazione);
+                  OrdineVendita row = new OrdineVendita(cliente,vinimap,dataConsegna,dataCreazione);
                   list.add(row);
                 }
                 response.set(1, list, this.connectionAuthCode);
@@ -748,6 +763,58 @@ public class ServerThread implements Runnable
     }
     return 1;
   }
+
+  private String mapVinoToIdSerialized(Map<Vino,Integer> map){
+    Map<Integer,Integer> mapInteger = new HashMap<>();
+    Gson gson = new Gson();
+    
+    for (Map.Entry<Vino, Integer> line : map.entrySet()){
+      int keyOut = line.getKey().getId();
+      int valueOut = line.getValue();
+      mapInteger.put(keyOut,valueOut);
+    }
+    
+    return gson.toJson(mapInteger);
+  }
+
+  private Map<Vino,Integer> rebuildFromMapIntInt(Map<Integer,Integer> mapInt) throws SQLException{
+      Map<Vino,Integer> mapVino = new HashMap<Vino,Integer>();
+
+      for (Map.Entry<Integer, Integer> line : mapInt.entrySet()){
+        Integer idVino = line.getKey();
+        Integer quantita = line.getValue();
+        String dbquery = "SELECT * FROM vini where id = ?";
+        ResultSet resultSet = db.executeQuery(dbquery,idVino);
+        if(resultSet.next()){
+        //Build vino object from resultSet
+          int id = resultSet.getInt("id");
+          String nome = resultSet.getString("nome");
+          String produttore = resultSet.getString("produttore");
+          String provenienza = resultSet.getString("provenienza");
+          int anno = resultSet.getInt("anno");
+          String noteTecniche = resultSet.getString("note_tecniche");
+          String vitigniJson = resultSet.getString("vitigni");
+          List<String> vitigni = new Gson().fromJson(vitigniJson, new TypeToken<List<String>>() {}.getType());
+          float prezzo = resultSet.getFloat("prezzo");
+          int numeroVendite = resultSet.getInt("numero_vendite");
+          int disponibilita = resultSet.getInt("disponibilita");
+          Vino vino = new Vino(id, nome, produttore, provenienza, anno, noteTecniche,vitigni, prezzo, numeroVendite, disponibilita);
+          mapVino.put(vino, quantita);
+        }
+      }
+    return mapVino;
+    }
+    private int dbStoreOrdineVendita(OrdineVendita ordineVendita)throws SQLException{
+      //db Store
+      String dbquery = "INSERT INTO ordini_vendita (cliente_id, lista_quantita, indirizzo_consegna, data_consegna, data_creazione, completato, firmato) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+      //String lista_quantita = mapgson.toJson(ordineVendita.getViniAcquistati());
+      String lista_quantita = mapVinoToIdSerialized(ordineVendita.getViniAcquistati());
+
+      return db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
+                    
+    }
 
 }
 
