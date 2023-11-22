@@ -28,6 +28,7 @@ public class SharedData {
     public void resetInstance(){
         List<Object> newCont = new ArrayList<>();
         setContenitori(newCont);
+        viniSelezionati = new HashMap<>();
     }
 
     public String getUserType() {

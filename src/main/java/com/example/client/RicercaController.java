@@ -203,8 +203,8 @@ public class RicercaController implements Initializable{
             }
         }
         listView.setItems(items);
-        listView.setMinWidth(350);
-        listView.setMinHeight(100);
+        listView.setMinWidth(380);
+        listView.setMinHeight(200);
         listView.setSelectionModel(null);
 
         //BorderPane main = find.findBorderPane(VboxRicerca);
@@ -292,7 +292,7 @@ public class RicercaController implements Initializable{
         }
 
         listView.setItems(items);
-        listView.setMinWidth(430);
+        listView.setMinWidth(450);
         listView.setMinHeight(200);
         listView.setSelectionModel(null);
 
@@ -396,10 +396,10 @@ public class RicercaController implements Initializable{
                 if (i==1) {
                     TextField elem = (TextField) node;
                     cassePerVino = Integer.parseInt(elem.getText());
+                    if (cassePerVino!=0) SharedData.getInstance().setViniSelezionati(vino.getId(), cassePerVino*qnt);
                     while (cassePerVino>0){
                         CassaVino cassa = new CassaVino(vino, qnt, 0);
                         contenitoriSelezionati.add(cassa);
-                        SharedData.getInstance().setViniSelezionati(vino.getId(), cassePerVino*qnt);
                         cassePerVino--;
                     }
                 }

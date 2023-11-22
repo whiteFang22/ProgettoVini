@@ -81,6 +81,7 @@ public class Impiegato extends UtenteGenerico {
         return res.isSuccess();
     }
 
+    // INUTILE
     public void gestionePropostaAcquisto(PropostaAcquisto proposta) {
         // Esempio: Gestisci la proposta di acquisto (accetta, rifiuta, etc.)
     }
@@ -96,6 +97,7 @@ public class Impiegato extends UtenteGenerico {
     */
     public boolean preparaOrdineAcquisto(OrdineAcquisto ordine){
         Request req = new Request();
+        // in ordine è importante il campo firmato da checkkare lato server
         req.set(0,ordine,this.AuthCode);
 
         Response res = client.message(req);

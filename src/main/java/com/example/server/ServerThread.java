@@ -74,7 +74,7 @@ public class ServerThread implements Runnable
    * 1 - UtenteGenerico, Login              tested
    * 2 - Cliente, modifica credenziali      tested
    * 3 - Cliente, acquistabottiglie         tested    ok!
-   * 4 - Cliente, confermaPagamento         tested    da sistemare 
+   * 4 - Cliente, confermaPagamento         tested    da sistemare
    * 5 - Cliente, proponiAcquisto
    * 9 - Cliente, ricercaVino               tested
    * 10 - Impiegato, ricercaCliente         tested
@@ -375,7 +375,7 @@ public class ServerThread implements Runnable
                     PropostaAcquisto propostaAcquisto = new PropostaAcquisto(this.loggedCliente, viniMancanti, this.loggedCliente.getIndirizzoDiConsegna(), ordineVendita);
                     //db Store
                     dbStoreOrdineVendita(ordineVendita);
-                    
+
                     String dbquery2 = "SELECT * FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
                     ResultSet resultSet = db.executeQuery(dbquery2,ordineVendita.getCliente().getEmail());
                     int id = 0;
@@ -394,7 +394,7 @@ public class ServerThread implements Runnable
                     response.set(2,propostaAcquisto,this.connectionAuthCode);
                     response.setSuccess();
                   }
-                  
+
               }
               else{
                 response.set(0, null, this.connectionAuthCode);
@@ -410,7 +410,7 @@ public class ServerThread implements Runnable
                 Boolean conferma = (Boolean) requestData;
                 if(conferma){
                   //Conferma = true -> invia a impiegato
-                  
+
                   //TODO: se conferma è true invia copia ordine a un impiegato, sara poi lui a firmare l'ordine e aggiornare le disponibilita
                   //TODO: quindi il codice qua sotto andra spostato da un altra parte
                   //Aggiornamento quantità magazzino
@@ -485,7 +485,7 @@ public class ServerThread implements Runnable
 
                 if(resultSet.next()){
                   if(conferma){
-                    
+
 
                     //Get Objects from db
                     query = "SELECT pa.*, ov.*, cl.* FROM proposte_di_acquisto pa INNER JOIN ordini_vendita ov ON pa.ordine_id = ov.id INNER JOIN clienti cl ON pa.cliente_id = cl.email WHERE pa.cliente_id = ? AND pa.completato = 0;";
@@ -494,11 +494,11 @@ public class ServerThread implements Runnable
                     if(resultSet.next()){
                       PropostaAcquisto propostaAcquisto = dbGetPropostaAcquisto(resultSet);
                       OrdineAcquisto ordineAcquisto = new OrdineAcquisto(propostaAcquisto.getCliente(), null, propostaAcquisto, propostaAcquisto.getIndirizzoConsegna(), new Date());
-                    
+
                       //STORE
                       query = "INSERT INTO ordini_di_acquisto (cliente_id,impiegato_id, proposta_associata_id, data_creazione, completato) VALUES (?,0,?,?,0)";
                       db.executeUpdate(query,ordineAcquisto.getCliente().getEmail(), resultSet.getString("pa.id"), ordineAcquisto.getDataCreazione());
-                      
+
                       //Cliente conferma
                       query = "UPDATE proposte_di_acquisto SET completato = 1 WHERE cliente_id = ? AND completato = 0";
                       db.executeUpdate(query, this.loggedCliente.getEmail());
@@ -516,7 +516,7 @@ public class ServerThread implements Runnable
                     db.executeUpdate(query,this.loggedCliente.getEmail());
                     query = "DELETE FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
                     db.executeUpdate(query,this.loggedCliente.getEmail());
-                    
+
                     response.set(1,null,this.connectionAuthCode);
                     response.setSuccess();
                   }
@@ -590,7 +590,7 @@ public class ServerThread implements Runnable
                 String cognome = (String) requestData;
                 List<Cliente> listaClienti = new ArrayList<>();
                 ResultSet resultSet;
-                      
+
                 if(cognome.equals("")){
                   String dbquery = "Select * from clienti";
                   resultSet = db.executeQuery(dbquery);
@@ -619,19 +619,19 @@ public class ServerThread implements Runnable
               response.setSuccess();
               message(response, os);
               }
+              
             break;
-
             case 11:
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof FiltriRicerca){
                 FiltriRicerca dateToSearch = (FiltriRicerca) requestData;
                 List<OrdineVendita> list = new ArrayList();
                 String dbquery = "SELECT * FROM ordini_vendita INNER JOIN clienti ON ordini_vendita.cliente_id = clienti.email WHERE data_creazione BETWEEN ? AND ?";
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String formattedDate1 = dateFormat.format(dateToSearch.data1());
-                String formattedDate2 = dateFormat.format(dateToSearch.data2());
-                System.out.println("formattedDate1: "+formattedDate1);
-                ResultSet resultSet = db.executeQuery(dbquery,formattedDate1,formattedDate2);
+                String d1 = dateToSearch.data1().toString();
+                String d2 = dateToSearch.data2().toString();
+                System.out.println("Date1: "+dateToSearch.data1());
+                System.out.println("Date2: "+dateToSearch.data2());
+                ResultSet resultSet = db.executeQuery(dbquery,dateToSearch.data1(),dateToSearch.data2());
 
                 //resultSet unpack and cast into OrdineVendita
                 while(resultSet.next()){
@@ -725,7 +725,7 @@ public class ServerThread implements Runnable
                 //Aggiorno in db quanto gia creato dal cliente
                 String query = "UPDATE ordini_di_acquisto SET impiegato_id = ?, indirizzo_azienda = ? WHERE cliente_id = ? AND completato = 0 AND impiegato_id = 0";
                 db.executeUpdate(query,ordineAcquisto.getImpiegato().getEmail(), ordineAcquisto.getIndirizzoAzienda(), ordineAcquisto.getCliente().getEmail());
-                
+
                 //TODO: qui l'Impiegato fisicamente completa l'ordine
 
                 //Aggiorno disponibilità vini
@@ -785,7 +785,7 @@ public class ServerThread implements Runnable
                   response.set(0,null,connectionAuthCode);
                 }
               }
-            break;
+            break; 
             case 20:
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof Impiegato){
@@ -911,13 +911,13 @@ public class ServerThread implements Runnable
   private String mapVinoToIdSerialized(Map<Vino,Integer> map){
     Map<Integer,Integer> mapInteger = new HashMap<>();
     Gson gson = new Gson();
-    
+
     for (Map.Entry<Vino, Integer> line : map.entrySet()){
       int keyOut = line.getKey().getId();
       int valueOut = line.getValue();
       mapInteger.put(keyOut,valueOut);
     }
-    
+
     return gson.toJson(mapInteger);
   }
   private Map<Integer,Integer> toMapIntInt(Map<Vino,Integer> mapVino){
@@ -967,7 +967,7 @@ public class ServerThread implements Runnable
       String lista_quantita = mapVinoToIdSerialized(ordineVendita.getViniAcquistati());
 
       return db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
-                    
+
     }
     private PropostaAcquisto dbGetPropostaAcquisto(ResultSet resultSet) throws SQLException{
       Cliente cliente = new Cliente(resultSet.getString("cl.nome"),resultSet.getString("cl.cognome"),null,resultSet.getString("cl.codice_fiscale"),resultSet.getString("cl.email"),resultSet.getString("cl.numero_telefonico"),resultSet.getString("cl.indirizzo_consegna"),false);

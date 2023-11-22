@@ -212,19 +212,21 @@ public class FiltroController implements Initializable {
 
         SchedeController sch = new SchedeController();
         System.out.println("data1: "+data1.getValue());
+        System.out.println("data2: "+data2.getValue());
 
         // Converti l'oggetto Instant in un oggetto Date
-        SimpleDateFormat formatoData = new SimpleDateFormat("yyyy/MM/dd");
-        Date d1 = new Date(data1.getValue().toEpochDay());
-        Date d2 = new Date(data2.getValue().toEpochDay());
+        Date d1 = java.sql.Date.valueOf(data1.getValue());
+        Date d2 = java.sql.Date.valueOf(data2.getValue());
 
+        System.out.println("data1F: "+d1);
+        System.out.println("data2F: "+d2);
         Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
         List<OrdineVendita> ordini = imp.ricercaOrdiniVendita(d1,d2);
 
         //List<OrdineVendita> ordini = null;
 
         for (OrdineVendita ordine : ordini){
-            Text dataCreazione = new Text(formatoData.format(ordine.getDataCreazione()));
+            Text dataCreazione = new Text(ordine.getDataCreazione().toString());
 
             Button cliente = new Button(ordine.getCliente().getEmail());
             cliente.setUserData(ordine.getCliente());
