@@ -73,8 +73,9 @@ public class ServerThread implements Runnable
    * 0 - Cliente, registrazione             tested
    * 1 - UtenteGenerico, Login              tested
    * 2 - Cliente, modifica credenziali      tested
-   * 3 - Cliente, acquistabottiglie         tested
-   * 4 - Cliente, confermaPagamento         tested
+   * 3 - Cliente, acquistabottiglie         tested    ok!
+   * 4 - Cliente, confermaPagamento         tested    da sistemare 
+   * 5 - Cliente, proponiAcquisto
    * 9 - Cliente, ricercaVino               tested
    * 10 - Impiegato, ricercaCliente         tested
    * 11 - Impiegato, ricercaOrdineVendita   tested
@@ -350,6 +351,7 @@ public class ServerThread implements Runnable
                       else{
                         //vino non disponibile o non abbastanza bottiglie in magazzino, creo Map viniMancanti
                         //Inserisco nell'ordineVendita anche i vini che non sono disponibili a magazzino!!
+                        //Mentre in proposta solo quelli che mancano!!
                         viniPresenti.put(vino, quantitaRichiesta);
                         viniMancanti.put(vino, quantitaRichiesta - disponibilita);
                         allInStock = false;
@@ -461,6 +463,56 @@ public class ServerThread implements Runnable
                 response.setSuccess();
                 message(response, os);
               }
+            break;
+            case 5:
+              System.out.println("Got from client request id: " + requestId);
+              //Cliente proponiAcquisto
+              if(requestData != null && requestData instanceof Boolean && clientAuthCode.equals(connectionAuthCode)){
+                Boolean conferma = (Boolean) requestData;
+                String query = "SELECT * FROM proposte_di_acquisto WHERE Cliente_id = ? AND completato = 0";
+                ResultSet resultSet = db.executeQuery(query, this.loggedCliente.getEmail());
+
+                if(resultSet.next()){
+                  if(conferma){
+                    //Cliente conferma
+                    query = "UPDATE proposte_di_acquisto SET completato = 1 WHERE cliente_id = ? AND completato = 0";
+                    db.executeUpdate(query, this.loggedCliente.getEmail());
+
+                    //Get Objects from db
+                    query = "SELECT pa.*, ov.*, cl.* FROM proposte_di_acquisto pa INNER JOIN ordini_vendita ov ON pa.ordine_id = ov.id INNER JOIN clienti cl ON pa.cliente_id = cl.email WHERE pa.cliente_id = ? AND pa.completato = 0;";
+                    resultSet = db.executeQuery(query, this.loggedCliente.getEmail());
+                    PropostaAcquisto propostaAcquisto = dbGetPropostaAcquisto(resultSet);
+                    OrdineAcquisto ordineAcquisto = new OrdineAcquisto(propostaAcquisto.getCliente(), null, propostaAcquisto, propostaAcquisto.getIndirizzoConsegna(), new Date());
+                    
+                    //STORE
+                    query = "INSERT INTO ordini_di_acquisto (cliente_id, proposta_associata_id, data_creazione, completato) VALUES (?,?,?,0)";
+                    db.executeUpdate(query,ordineAcquisto.getCliente().getEmail(), resultSet.getString("pa.id"), ordineAcquisto.getDataCreazione());
+                    
+                    //TODO: Post OrdineAcquisto into Queue for worker to handle
+
+                    response.set(1, null, this.connectionAuthCode);
+                    response.setSuccess();
+                  }
+                  else{
+                    //Cliente annulla
+                    query = "DELETE FROM proposte_di_acquisto WHERE cliente_id = ? AND completato = 0";
+                    db.executeUpdate(query,this.loggedCliente.getEmail());
+                    query = "DELETE FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
+                    db.executeUpdate(query,this.loggedCliente.getEmail());
+                    
+                    response.set(1,null,this.connectionAuthCode);
+                    response.setSuccess();
+                  }
+                }
+                else{
+                  //nessuna proposta di acquisto in attesa di conferma
+                  response.set(0, null, this.connectionAuthCode);
+                }
+              }
+              else {
+                response.set(0,null,this.connectionAuthCode);
+              }
+              message(response,os);
             break;
             case 9:
               // non ti passo vino ma FiltriRicerca
@@ -814,6 +866,20 @@ public class ServerThread implements Runnable
 
       return db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),ordineVendita.getDataConsegna(), ordineVendita.getDataCreazione(), ordineVendita.isCompletato(),ordineVendita.isFirmato());
                     
+    }
+    private PropostaAcquisto dbGetPropostaAcquisto(ResultSet resultSet) throws SQLException{
+      Cliente cliente = new Cliente(resultSet.getString("cl.nome"),resultSet.getString("cl.cognome"),null,resultSet.getString("cl.codice_fiscale"),resultSet.getString("cl.email"),resultSet.getString("cl.numero_telefonico"),resultSet.getString("cl.indirizzo_consegna"),false);
+      
+      Gson gson = new Gson();
+      Type mapType = new TypeToken<Map<Integer, Integer>>() {}.getType();
+      Map<Integer,Integer> viniOrdineID = gson.fromJson(resultSet.getString("ov.lista_quantita"), mapType);
+      Map<Integer, Integer> viniPropostaID = gson.fromJson(resultSet.getString("pa.lista_quantita"), mapType);
+      Map<Vino,Integer> viniProposta = rebuildFromMapIntInt(viniPropostaID);
+      Map<Vino,Integer> viniOrdine = rebuildFromMapIntInt(viniOrdineID);
+
+      OrdineVendita ordineVendita = new OrdineVendita(cliente,viniOrdine,resultSet.getDate("data_consegna"),resultSet.getDate("data_creazione"));
+      PropostaAcquisto propostaAcquisto = new PropostaAcquisto(cliente, viniProposta, resultSet.getString("indirizzo_consegna"), ordineVendita);
+      return propostaAcquisto;
     }
 
 }
