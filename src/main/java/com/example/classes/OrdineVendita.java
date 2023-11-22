@@ -18,6 +18,7 @@ public class OrdineVendita implements Serializable{
     private Date dataCreazione;
     private boolean completato;
     private boolean firmato;
+    private int id;
 
     public boolean isCompletato() {
         return completato;
@@ -47,6 +48,18 @@ public class OrdineVendita implements Serializable{
         this.dataConsegna = dataConsegna;
         this.dataCreazione = dataCreazione;
         this.viniAcquistati = viniAcquistati;
+    }
+    public OrdineVendita(int id,Cliente cliente,Map<Vino, Integer> viniAcquistati, Date dataConsegna, Date dataCreazione) {
+        this.cliente = cliente;
+        //QUA
+        this.indirizzoConsegna = cliente.getIndirizzoDiConsegna();
+        this.dataConsegna = dataConsegna;
+        this.dataCreazione = dataCreazione;
+        this.viniAcquistati = viniAcquistati;
+        this.id = id;
+    }
+    public int getId(){
+        return id;
     }
 
     public Cliente getCliente() {

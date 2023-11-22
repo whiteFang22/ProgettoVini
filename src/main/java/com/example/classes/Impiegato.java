@@ -75,7 +75,7 @@ public class Impiegato extends UtenteGenerico {
     //TODO: gestioneOrdineVendita
     public boolean gestioneOrdineVendita(OrdineVendita ordine) {
         Request req = new Request();
-        req.set(0,ordine,this.AuthCode);
+        req.set(14,ordine,this.AuthCode);
 
         Response res = client.message(req);
         return res.isSuccess();
@@ -110,9 +110,9 @@ public class Impiegato extends UtenteGenerico {
 
         Per identificare gli ordini
     */
-    public boolean gestioneOrdineAcquisto(OrdineAcquisto ordine) {
+    public boolean gestioneOrdineAcquisto(Boolean conferma) {
         Request req = new Request();
-        req.set(0,ordine,this.AuthCode);
+        req.set(13,conferma,this.AuthCode);
 
         Response res = client.message(req);
         return res.isSuccess();

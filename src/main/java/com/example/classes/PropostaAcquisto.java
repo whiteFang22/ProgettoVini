@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 public class PropostaAcquisto implements Serializable {
+    private int id;
     private Cliente cliente;
     private Map<Vino, Integer> viniMancanti;
     private String indirizzoConsegna;
@@ -15,6 +16,16 @@ public class PropostaAcquisto implements Serializable {
         this.viniMancanti = viniMancanti;
         this.indirizzoConsegna = indirizzoConsegna;
         this.ordineCorrispondente = ordineCorrispondente;
+    }
+     public PropostaAcquisto(int id, Cliente cliente, Map<Vino, Integer> viniMancanti, String indirizzoConsegna, OrdineVendita ordineCorrispondente) {
+        this.id = id;
+        this.cliente = cliente;
+        this.viniMancanti = viniMancanti;
+        this.indirizzoConsegna = indirizzoConsegna;
+        this.ordineCorrispondente = ordineCorrispondente;
+    }
+    public int getId(){
+        return this.id;
     }
 
     public Cliente getCliente() {

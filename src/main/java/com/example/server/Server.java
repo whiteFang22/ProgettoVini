@@ -34,6 +34,7 @@ public class Server
   ;
   private ServerSocket socket;
   private ThreadPoolExecutor pool;
+  private LinkedBlockingQueue<Object> messageQueue;
 
 
   /**
@@ -46,6 +47,7 @@ public class Server
   public Server() throws IOException
   {
     this.socket = new ServerSocket(SPORT);
+    this.messageQueue = new LinkedBlockingQueue<Object>();
   }
 
   /**
@@ -84,7 +86,24 @@ public class Server
   {
     return this.pool;
   }
-
+  /**
+   * Gets first object from queue
+   * 
+   * @return the upper object of queue
+   * @throws InterruptedException
+   */
+  public Object queueTake() throws InterruptedException{
+    return this.messageQueue.take();
+  }
+ /**
+   * Puts object in queue
+   * 
+   * @return nothing
+ * @throws InterruptedException
+   */
+  public void queuePut(Object o) throws InterruptedException{
+    this.messageQueue.put(o);
+  }
   /**
    * Closes the server execution.
    *

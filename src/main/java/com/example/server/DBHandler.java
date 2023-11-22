@@ -12,9 +12,9 @@ import java.sql.SQLException;
 *
 **/
 public class DBHandler {
-    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/wine_shop?useSSL=false";
-    private static final String USERNAME = "mariomattiasulmonte";
-    private static final String PASSWORD = "qezxeZ-8nevwy-kofnah";
+    private static final String JDBC_URL = "jdbc:mysql://localhost:3306/wineshop?useSSL=false";
+    private static final String USERNAME = "fedecardelli";
+    private static final String PASSWORD = "CRDFRC01@g!";
 
     private Connection connection;
     /*
