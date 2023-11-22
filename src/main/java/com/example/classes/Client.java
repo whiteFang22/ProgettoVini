@@ -103,10 +103,12 @@ public class Client implements AutoCloseable{
 
 
         //examplecliente.acquistaBottiglie(list);
+        //examplecliente.proponiAcquisto(true);
         //examplecliente.confermaPagamento(true);
 
         //Amministratore exampleAdmin = new Amministratore("1234","admin","admin","admin","root@admin.admin","0000","none",true);
         //Impiegato exampleImpiegato = new Impiegato("1111", "andrea", "martini", "ndrmrt88g655f", "amartini@gmail.com", "3421234554", "Via Roma 33", true);
+        //exampleImpiegato.login();
         //exampleAdmin.registrazioneImpiegato(exampleImpiegato, "1111");
         //exampleAdmin.AdminModificaCredenziali("dverdi@gmail.com","0000" , false);
         //exampleAdmin.AdminModificaCredenziali("everdi@gmail.com", null, true);
@@ -120,6 +122,8 @@ public class Client implements AutoCloseable{
         //calendar.set(2023,Calendar.DECEMBER,1);
         //Date Date2 = calendar.getTime();
         //System.out.println(exampleImpiegato.ricercaOrdiniVendita(Date1,Date2));
+
+        //exampleImpiegato.gestioneOrdineAcquisto(true);
 
 
     }

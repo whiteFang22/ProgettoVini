@@ -106,7 +106,7 @@ public class Cliente extends UtenteGenerico {
      */
     public Response proponiAcquisto(Boolean conferma) {
         Request req = new Request();
-        req.set(0, conferma, this.AuthCode);
+        req.set(5, conferma, this.AuthCode);
 
         return client.message(req);
     }
