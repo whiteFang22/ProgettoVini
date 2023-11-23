@@ -55,9 +55,9 @@ public class Impiegato extends UtenteGenerico {
     //TODO: ricercaProposteAcquisto
     public List<PropostaAcquisto> ricercaProposteAcquisto(Date dete1, Date dete2) {
         // Esempio: Esegui una ricerca delle proposte di acquisto tra le date specificate
-        Object[] data = {dete1, dete2};
+        FiltriRicerca data = new FiltriRicerca(dete1, dete2, null, null);
         Request req = new Request();
-        req.set(0, data, this.AuthCode);
+        req.set(15, data, this.AuthCode);
 
         Response res = client.message(req);
         //res = client.message("ricercaProposteAcquisto", data);

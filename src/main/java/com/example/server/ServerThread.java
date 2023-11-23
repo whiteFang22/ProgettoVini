@@ -26,9 +26,6 @@ import com.google.gson.reflect.TypeToken;
 
 import com.example.classes.*;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 //import com.example.classes.Response;
 
 /**
@@ -73,8 +70,8 @@ public class ServerThread implements Runnable
    * 0 - Cliente, registrazione             tested
    * 1 - UtenteGenerico, Login              tested
    * 2 - Cliente, modifica credenziali      tested
-   * 3 - Cliente, acquistabottiglie         tested    ok!
-   * 4 - Cliente, confermaPagamento         tested    da sistemare 
+   * 3 - Cliente, acquistabottiglie         tested
+   * 4 - Cliente, confermaPagamento         tested
    * 5 - Cliente, proponiAcquisto
    * 9 - Cliente, ricercaVino               tested
    * 10 - Impiegato, ricercaCliente         tested
@@ -82,6 +79,7 @@ public class ServerThread implements Runnable
    * 12 - Impiegato, ricercaOrdineAcquisto
    * 13 - Impiegato, gestisciOrdineAcquisto
    * 14 - Impiegato, gestisciOrdineVendita
+   * 15 - Impiegato, ricercaProposteAcquisto
    * 20 - Admin, registraImpiegato          tested
    * 21 - Admin, eliminaUtente              tested
    * 22 - Admin, modificaCredenzialiUtente  tested
@@ -330,23 +328,12 @@ public class ServerThread implements Runnable
                     Integer quantitaRichiesta = line.getValue();
                     String dbquery = "SELECT * FROM vini where id = ?";
                     ResultSet resultSet = db.executeQuery(dbquery,idVino);
+                    Vino vino;
                     if(resultSet.next()){
+                        //TODO: build vino from resultset
+                        vino = rebuildVinoFromResultSet(resultSet);
 
-                        //Build vino object from resultSet
-                        int id = resultSet.getInt("id");
-                        String nome = resultSet.getString("nome");
-                        String produttore = resultSet.getString("produttore");
-                        String provenienza = resultSet.getString("provenienza");
-                        int anno = resultSet.getInt("anno");
-                        String noteTecniche = resultSet.getString("note_tecniche");
-                        String vitigniJson = resultSet.getString("vitigni");
-                        List<String> vitigni = new Gson().fromJson(vitigniJson, new TypeToken<List<String>>() {}.getType());
-                        float prezzo = resultSet.getFloat("prezzo");
-                        int numeroVendite = resultSet.getInt("numero_vendite");
-                        int disponibilita = resultSet.getInt("disponibilita");
-                        Vino vino = new Vino(id, nome, produttore, provenienza, anno, noteTecniche,vitigni, prezzo, numeroVendite, disponibilita);
-
-                      if(disponibilita >= quantitaRichiesta){
+                      if(vino.getDisponibilita() >= quantitaRichiesta){
                         //vino disponibile, aggiungi a OrdineVendita
                         viniPresenti.put(vino,quantitaRichiesta);
                       }
@@ -355,7 +342,7 @@ public class ServerThread implements Runnable
                         //Inserisco nell'ordineVendita anche i vini che non sono disponibili a magazzino!!
                         //Mentre in proposta solo quelli che mancano!!
                         viniPresenti.put(vino, quantitaRichiesta);
-                        viniMancanti.put(vino, quantitaRichiesta - disponibilita);
+                        viniMancanti.put(vino, quantitaRichiesta - vino.getDisponibilita());
                         allInStock = false;
                       }
                     }
@@ -537,15 +524,15 @@ public class ServerThread implements Runnable
                   
                   // Iterate through the result set
                   List<Vino> wineList = new ArrayList<>();
+
                   try {
                       while (resultSet.next()) {
                           // Extract data from the result set and create an object
-                          Vino vino = new Vino(resultSet.getInt("id"),resultSet.getString("nome"),resultSet.getInt("anno"), resultSet.getFloat("prezzo"));
+                          Vino vino = rebuildVinoFromResultSet(resultSet);
                           // Add the object to the list
                           wineList.add(vino);
                       }
                   } catch (SQLException e) {
-                      // TODO Auto-generated catch block
                       e.printStackTrace();
                   }
                  System.out.println(wineList);
@@ -642,10 +629,11 @@ public class ServerThread implements Runnable
               if(requestData != null && requestData instanceof FiltriRicerca){
                 FiltriRicerca dateToSearch = (FiltriRicerca) requestData;
                 List<OrdineAcquisto> list = new ArrayList();
-                String dbquery1 = "SELECT impiegati.email AS impiegato_email, impiegati.nome AS impiegato_nome, impiegati.cognome AS impiegato_cognome, impiegati.password_hash AS impiegato_password_hash, impiegati.codice_fiscale AS impiegato_codice_fiscale, impiegati.numero_telefonico AS impiegato_numero_telefonico, impiegati.indirizzo_residenza AS impiegato_indirizzo_residenza, impiegati.isAdmin AS impiegato_isAdmin, clienti.email AS cliente_email, clienti.nome AS cliente_nome, clienti.cognome AS cliente_cognome, clienti.password_hash AS cliente_password_hash, clienti.codice_fiscale AS cliente_codice_fiscale, clienti.numero_telefonico AS cliente_numero_telefonico, clienti.indirizzo_consegna AS cliente_indirizzo_di_consegna, ordini_di_acquisto.id AS ordine_id, ordini_di_acquisto.proposta_associata_id AS ordine_proposta_id, ordini_di_acquisto.indirizzo_azienda AS ordine_indirizzo_azienda, ordini_di_acquisto.data_creazione AS ordine_data_creazione, ordini_di_acquisto.completato AS ordine_completato, proposte_di_acquisto.id AS proposta_id, proposte_di_acquisto.cliente_id AS proposta_cliente_id, proposte_di_acquisto.lista_quantita AS proposta_lista_quantita, vendita.id AS vendita_id, vendita.cliente_id AS vendita_cliente_id, vendita.lista_quantita AS vendita_lista_quantita, vendita.indirizzo_consegna AS vendita_indirizzo_consegna, vendita.data_consegna AS vendita_data_consegna, vendita.data_creazione AS vendita_data_creazione FROM wineshop.impiegati INNER JOIN wineshop.clienti ON impiegati.email = clienti.email INNER JOIN wineshop.ordini_di_acquisto ON impiegati.email = ordini_di_acquisto.impiegato_id INNER JOIN wineshop.proposte_di_acquisto ON proposte_di_acquisto.ordine_id = ordini_di_acquisto.id INNER JOIN wineshop.ordini_vendita AS vendita ON vendita.cliente_id = clienti.email WHERE ordini_di_acquisto.data_creazione BETWEEN ? AND ?";
-            
-                
-                ResultSet resultSet1 = db.executeQuery(dbquery1,dateToSearch.data1(),dateToSearch.data2());
+                String dbquery1 = "SELECT impiegati.email AS impiegato_email, impiegati.nome AS impiegato_nome, impiegati.cognome AS impiegato_cognome, impiegati.password_hash AS impiegato_password_hash, impiegati.codice_fiscale AS impiegato_codice_fiscale, impiegati.numero_telefonico AS impiegato_numero_telefonico, impiegati.indirizzo_residenza AS impiegato_indirizzo_residenza, impiegati.isAdmin AS impiegato_isAdmin, clienti.email AS cliente_email, clienti.nome AS cliente_nome, clienti.cognome AS cliente_cognome, clienti.password_hash AS cliente_password_hash, clienti.codice_fiscale AS cliente_codice_fiscale, clienti.numero_telefonico AS cliente_numero_telefonico, clienti.indirizzo_consegna AS cliente_indirizzo_di_consegna, ordini_di_acquisto.id AS ordine_id, ordini_di_acquisto.proposta_associata_id AS ordine_proposta_id, ordini_di_acquisto.indirizzo_azienda AS ordine_indirizzo_azienda, ordini_di_acquisto.data_creazione AS ordine_data_creazione, ordini_di_acquisto.completato AS ordine_completato, proposte_di_acquisto.id AS proposta_id, proposte_di_acquisto.cliente_id AS proposta_cliente_id, proposte_di_acquisto.lista_quantita AS proposta_lista_quantita, vendita.id AS vendita_id, vendita.cliente_id AS vendita_cliente_id, vendita.lista_quantita AS vendita_lista_quantita, vendita.indirizzo_consegna AS vendita_indirizzo_consegna, vendita.data_consegna AS vendita_data_consegna, vendita.data_creazione AS vendita_data_creazione FROM impiegati INNER JOIN clienti ON impiegati.email = clienti.email INNER JOIN ordini_di_acquisto ON impiegati.email = ordini_di_acquisto.impiegato_id INNER JOIN proposte_di_acquisto ON proposte_di_acquisto.ordine_id = ordini_di_acquisto.id INNER JOIN ordini_vendita AS vendita ON vendita.cliente_id = clienti.email WHERE ordini_di_acquisto.data_creazione BETWEEN ? AND ?";
+                //Fix java.util.Date to Sql readable date
+                java.sql.Date sqlDate1 = new java.sql.Date(dateToSearch.data1().getTime());
+                java.sql.Date sqlDate2 = new java.sql.Date(dateToSearch.data2().getTime());
+                ResultSet resultSet1 = db.executeQuery(dbquery1,sqlDate1,sqlDate2);
                 //resultSet unpack and cast into OrdineAcquisto
                 while(resultSet1.next()){
                   String nomeCliente = resultSet1.getString("cliente_nome");
@@ -781,6 +769,28 @@ public class ServerThread implements Runnable
                 }
               }
             break;
+
+            case 15:
+              System.out.println("Got from client request id: " + requestId);
+              if(requestData != null && requestData instanceof FiltriRicerca){
+                String query = "SELECT pa.*, ov.*, cl.* FROM proposte_di_acquisto pa INNER JOIN ordini_vendita ov ON pa.ordine_id = ov.id INNER JOIN clienti cl ON pa.cliente_id = cl.email WHERE pa.data_creazione BETWEEN ? AND ?";
+                FiltriRicerca dateToSearch = (FiltriRicerca) requestData;
+
+                //Fix java.util.Date to Sql readable date
+                java.sql.Date sqlDate1 = new java.sql.Date(dateToSearch.data1().getTime());
+                java.sql.Date sqlDate2 = new java.sql.Date(dateToSearch.data2().getTime());
+                ResultSet resultSet = db.executeQuery(query,sqlDate1,sqlDate2);
+
+                List<PropostaAcquisto> list = new ArrayList<>();
+                if(resultSet.next()){
+                  PropostaAcquisto propostaAcquisto = dbGetPropostaAcquisto(resultSet);
+                  list.add(propostaAcquisto);
+                }
+                response.set(1,list,connectionAuthCode);
+                response.setSuccess();
+              }
+            break;
+
             case 20:
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof Impiegato){
@@ -978,6 +988,22 @@ public class ServerThread implements Runnable
       PropostaAcquisto propostaAcquisto = new PropostaAcquisto(id, cliente, viniProposta, resultSet.getString("indirizzo_consegna"), ordineVendita);
       return propostaAcquisto;
     }
+    private Vino rebuildVinoFromResultSet(ResultSet resultSet)throws SQLException{
+    //Build vino object from resultSet
+    int id = resultSet.getInt("id");
+    String nome = resultSet.getString("nome");
+    String produttore = resultSet.getString("produttore");
+    String provenienza = resultSet.getString("provenienza");
+    int anno = resultSet.getInt("anno");
+    String noteTecniche = resultSet.getString("note_tecniche");
+    String vitigniJson = resultSet.getString("vitigni");
+    List<String> vitigni = new Gson().fromJson(vitigniJson, new TypeToken<List<String>>() {}.getType());
+    float prezzo = resultSet.getFloat("prezzo");
+    int numeroVendite = resultSet.getInt("numero_vendite");
+    int disponibilita = resultSet.getInt("disponibilita");
+    Vino vino = new Vino(id, nome, produttore, provenienza, anno, noteTecniche,vitigni, prezzo, numeroVendite, disponibilita);
 
+      return vino;
+    }
 }
 
