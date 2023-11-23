@@ -769,6 +769,7 @@ public class ServerThread implements Runnable
                 }
               }
             break;
+
             case 15:
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof FiltriRicerca){
@@ -789,6 +790,7 @@ public class ServerThread implements Runnable
                 response.setSuccess();
               }
             break;
+
             case 20:
               System.out.println("Got from client request id: " + requestId);
               if(requestData != null && requestData instanceof Impiegato){
