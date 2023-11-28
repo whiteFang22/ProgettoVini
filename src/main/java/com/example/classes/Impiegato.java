@@ -1,6 +1,5 @@
 package com.example.classes;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +51,6 @@ public class Impiegato extends UtenteGenerico {
         Response res = client.message(req);
         return (List<OrdineAcquisto>) res.getData();
     }
-    //TODO: ricercaProposteAcquisto
     public List<PropostaAcquisto> ricercaProposteAcquisto(Date dete1, Date dete2) {
         // Esempio: Esegui una ricerca delle proposte di acquisto tra le date specificate
         FiltriRicerca data = new FiltriRicerca(dete1, dete2, null, null);
@@ -72,7 +70,20 @@ public class Impiegato extends UtenteGenerico {
         la data di consegna. Il server dovrà aggiornare tale informazione nel db e impostare
         il campo "firmato" a true.
     */
-    //TODO: gestioneOrdineVendita
+
+    /*
+     * Recupera un ordine vendita dalla queue, se non è presente attende per il tempo specificato poi ritorna
+     * 
+     * @return OrdineVendita
+     */
+    public OrdineVendita recuperaOrdineVendita(int time){
+        Request req = new Request();
+        req.set(34, time, this.AuthCode);
+
+        Response res = client.message(req);
+        return (OrdineVendita) res.getData();
+
+    }
     public boolean gestioneOrdineVendita(OrdineVendita ordine) {
         Request req = new Request();
         req.set(14,ordine,this.AuthCode);

@@ -1,6 +1,6 @@
 package com.example.classes;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +19,20 @@ public class Cliente extends UtenteGenerico {
         super(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico,isClient);
         this.indirizzoDiConsegna = indirizzoDiConsegna;
     }
+    public Cliente(
+        int id,
+        String nome, 
+        String cognome,
+        String passwordtohash,
+        String codiceFiscale, 
+        String email, 
+        String numeroTelefonico,
+        String indirizzoDiConsegna,
+        Boolean isClient) {
+        super(nome, cognome, passwordtohash, codiceFiscale, email, numeroTelefonico,isClient);
+        this.indirizzoDiConsegna = indirizzoDiConsegna;
+    }
+
 
     public String getIndirizzoDiConsegna() {
         return indirizzoDiConsegna;
@@ -93,7 +107,6 @@ public class Cliente extends UtenteGenerico {
     }
 
      /*
-     TODO: Cliente-proponiAcquisto
      SERVER: Se conferma==true viene creato l'ordine di Acquisto che verrà utilizzato nelle fasi successive per il rifornimento del magazzino
              Viene restituito al cliente una copia dell'ordine di Vendita aggiunto in precedenza nel DB
 
@@ -107,6 +120,14 @@ public class Cliente extends UtenteGenerico {
     public Response proponiAcquisto(Boolean conferma) {
         Request req = new Request();
         req.set(5, conferma, this.AuthCode);
+
+        return client.message(req);
+    }
+    public Response ricercaOrdiniVendita(){
+        Request req = new Request();
+        //@fedecardelli dimmi se ti serve che cerchi entro due date col filtro oppure te li restituisco tutti
+        FiltriRicerca filtro = new FiltriRicerca(null, null, null, null);
+        req.set(6,filtro,this.AuthCode);
 
         return client.message(req);
     }

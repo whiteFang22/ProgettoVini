@@ -1,7 +1,6 @@
 package com.example.client;
 
 import com.example.classes.Amministratore;
-import com.example.classes.Cliente;
 import com.example.classes.Impiegato;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
