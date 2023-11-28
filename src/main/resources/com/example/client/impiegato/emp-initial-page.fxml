@@ -33,7 +33,7 @@
             </HBox>
          </top>
          <left>
-            <VBox alignment="TOP_CENTER" prefHeight="364.0" prefWidth="163.0" style="-fx-border-width: 0 1 0 0; -fx-border-color: black;" BorderPane.alignment="CENTER">
+            <VBox fx:id="VBoxRicercaCliente" alignment="TOP_CENTER" prefHeight="364.0" prefWidth="163.0" style="-fx-border-width: 0 1 0 0; -fx-border-color: black;" BorderPane.alignment="CENTER">
                <children>
                   <Label style="-fx-font-weight: bold;" text="FILTRI RICERCA">
                      <VBox.margin>

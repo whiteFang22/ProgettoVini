@@ -89,6 +89,8 @@ public class UtenteGenerico implements Serializable{
         int id = 1;
         request.setId(id);
         request.setData(this);
+        System.out.println("passwordhash: "+this.passwordhash);
+
         Response res = client.message(request);
         //response unpack
         if(res.getId() == 1){
@@ -138,6 +140,7 @@ public class UtenteGenerico implements Serializable{
     public void setpasswordhash(String passwordtohash){
         //password hashing
         try {
+            this.passwordhash = null;
             // Create a MessageDigest instance for SHA-256
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             

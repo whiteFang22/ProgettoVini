@@ -1,9 +1,10 @@
 package com.example.classes;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConfezioneVini {
+public class ConfezioneVini implements Serializable {
     private Map<Vino, Integer> vini;
     private float prezzo;
     private int capacita = 5;

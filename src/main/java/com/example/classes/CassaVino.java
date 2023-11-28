@@ -1,6 +1,8 @@
 package com.example.classes;
 
-public class CassaVino {
+import java.io.Serializable;
+
+public class CassaVino implements Serializable {
     private Vino vino;
     private int quantita;//6 o 12
     private float scontoPercentuale;

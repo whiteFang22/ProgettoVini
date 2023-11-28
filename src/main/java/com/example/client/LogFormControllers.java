@@ -76,11 +76,12 @@ public class LogFormControllers {
         user.setEmail(email.getText());
         user.setpasswordhash(password.getText());
         Response res = user.login();
+
         System.out.println(res.isSuccess());
 
         boolean success = res.isSuccess();
 
-        System.out.println(email.getText() + password.getText());
+        System.out.println(email.getText() +" "+ password.getText());
         if (success)
         {
             switch (userType) {
