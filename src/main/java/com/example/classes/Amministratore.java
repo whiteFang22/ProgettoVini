@@ -1,5 +1,7 @@
 package com.example.classes;
 
+import java.util.List;
+
 public class Amministratore extends Impiegato {
     public Amministratore(String passwordtohash, String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico,
                           String indirizzoResidenza, Boolean isClient) {
@@ -18,10 +20,20 @@ public class Amministratore extends Impiegato {
 
     // TODO: Salva nel db il report passato
     //S: è solo da salvare cosi? o va gestito? se va gestito cosa ci devo fare
-    public void preparazioneReport(ReportMensile report) {
-        // Esempio: Prepara un report mensile e lo gestisce <-
-        Object[] data = {report};
-        //client.message("preparazioneReport", data);
+    public boolean preparazioneReport(ReportMensile report) {
+        Request req = new Request();
+        req.set(0,report,this.AuthCode);
+
+        Response res = client.message(req);
+        return res.isSuccess();
+    }
+    public List<String> ricercaImpiegati(){
+        Request req = new Request();
+        req.set(0,null,this.AuthCode);
+
+        Response res = client.message(req);
+
+        return (List<String>) res.getData();
     }
 
     /*

@@ -8,10 +8,10 @@ public class ReportMensile {
     private int bottiglieVendute;
     private int bottiglieDisponibili;
     private Map<Vino, Integer> venditePerVino;
-    private Map<Impiegato, Integer> valutazioneDipendenti;
+    private Map<String, Integer> valutazioneDipendenti;
 
     public ReportMensile(float introiti, float spese, int bottiglieVendute, int bottiglieDisponibili,
-                         Map<Vino, Integer> venditePerVino, Map<Impiegato, Integer> valutazioneDipendenti) {
+                         Map<Vino, Integer> venditePerVino, Map<String, Integer> valutazioneDipendenti) {
         this.introiti = introiti;
         this.spese = spese;
         this.bottiglieVendute = bottiglieVendute;
@@ -60,11 +60,11 @@ public class ReportMensile {
         this.venditePerVino = venditePerVino;
     }
 
-    public Map<Impiegato, Integer> getValutazioneDipendenti() {
+    public Map<String, Integer> getValutazioneDipendenti() {
         return valutazioneDipendenti;
     }
 
-    public void setValutazioneDipendenti(Map<Impiegato, Integer> valutazioneDipendenti) {
+    public void setValutazioneDipendenti(Map<String, Integer> valutazioneDipendenti) {
         this.valutazioneDipendenti = valutazioneDipendenti;
     }
 }

@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="VboxOdiniProposte" alignment="TOP_CENTER" prefHeight="364.0" prefWidth="163.0" style="-fx-border-width: 0 1 0 0; -fx-border-color: black;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.FiltroController">
+<VBox fx:id="VboxOrdiniProposte" alignment="TOP_CENTER" prefHeight="364.0" prefWidth="163.0" style="-fx-border-width: 0 1 0 0; -fx-border-color: black;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.client.FiltroController">
    <children>
       <Label style="-fx-font-weight: bold;" text="FILTRI RICERCA">
          <VBox.margin>
@@ -45,7 +45,7 @@
             <Insets top="20.0" />
          </VBox.margin>
       </VBox>
-      <Button mnemonicParsing="false" text="RICERCA">
+      <Button mnemonicParsing="false" onAction="#ChangeCenter" text="RICERCA">
          <VBox.margin>
             <Insets top="20.0" />
          </VBox.margin>

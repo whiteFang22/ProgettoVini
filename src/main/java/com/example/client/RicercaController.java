@@ -257,35 +257,48 @@ public class RicercaController implements Initializable{
         listView = new ListView<>();
         listView.setId("listaVini");
         ObservableList<HBox> items = FXCollections.observableArrayList();
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
+        String left = parent.getLeft().getId();
+        System.out.println("left: "+left);
+
         int i = 0;
         for (Vino vino : listaVini) {
-            TextField nomeVinotext = new TextField(vino.getNome()+" - "+vino.getAnno());
+            HBox riga = new HBox();
+
+            Button nomeVinotext = new Button(vino.getNome()+" - "+vino.getAnno());
             nomeVinotext.setUserData(vino);
             nomeVinotext.setMinWidth(100);
-            nomeVinotext.setEditable(false);
 
-            TextField quantitaTextField = new TextField("0");
-            quantitaTextField.setId("quantita");
-            quantitaTextField.setEditable(false);
-            quantitaTextField.setPrefColumnCount(2);
+            if (left.equals("VBoxRicercaVini")){
+                Text disponibilita = new Text("disponibilità: "+vino.getDisponibilita());
+                Text vendite = new Text("disponibilità: "+vino.getNumeroVendite());
 
-            //System.out.println(vino.getPrezzo());
-            Text prezoUnitario = new Text("prezzo unitario: "+vino.getPrezzo()+"€");
+                riga = new HBox(nomeVinotext, disponibilita, vendite);
+            }
+            else {
+                TextField quantitaTextField = new TextField("0");
+                quantitaTextField.setId("quantita");
+                quantitaTextField.setEditable(false);
+                quantitaTextField.setPrefColumnCount(2);
 
-            Button incrementaButton = new Button("+");
-            incrementaButton.setOnAction(event -> {
-                int quantita = Integer.parseInt(quantitaTextField.getText());
-                quantitaTextField.setText(String.valueOf(quantita + 1));
-            });
+                //System.out.println(vino.getPrezzo());
+                Text prezoUnitario = new Text("prezzo unitario: "+vino.getPrezzo()+"€");
 
-            Button decrementaButton = new Button("-");
-            decrementaButton.setOnAction(event -> {
-                int quantita = Integer.parseInt(quantitaTextField.getText());
-                if (quantita > 0) {
-                    quantitaTextField.setText(String.valueOf(quantita - 1));
-                }
-            });
-            HBox riga = new HBox(nomeVinotext, quantitaTextField, incrementaButton, decrementaButton, prezoUnitario);
+                Button incrementaButton = new Button("+");
+                incrementaButton.setOnAction(event -> {
+                    int quantita = Integer.parseInt(quantitaTextField.getText());
+                    quantitaTextField.setText(String.valueOf(quantita + 1));
+                });
+
+                Button decrementaButton = new Button("-");
+                decrementaButton.setOnAction(event -> {
+                    int quantita = Integer.parseInt(quantitaTextField.getText());
+                    if (quantita > 0) {
+                        quantitaTextField.setText(String.valueOf(quantita - 1));
+                    }
+                });
+                riga = new HBox(nomeVinotext, quantitaTextField, incrementaButton, decrementaButton, prezoUnitario);
+            }
 
             riga.setSpacing(10);
             items.add(riga);
@@ -296,8 +309,8 @@ public class RicercaController implements Initializable{
         listView.setMinHeight(200);
         listView.setSelectionModel(null);
 
-        BorderPane main = find.findBorderPane(VboxRicerca);
-        gridVini = (HBox) main.lookup("#gridVini");
+        //BorderPane main = find.findBorderPane(VboxRicerca);
+        gridVini = (HBox) parent.lookup("#gridVini");
         gridVini.getChildren().clear();
         gridVini.getChildren().add(listView);
     }

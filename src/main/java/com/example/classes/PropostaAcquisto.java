@@ -1,6 +1,7 @@
 package com.example.classes;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 
 public class PropostaAcquisto implements Serializable {
@@ -26,6 +27,8 @@ public class PropostaAcquisto implements Serializable {
     public int getId(){
         return this.id;
     }
+
+    public Date getDataCreazione(){ return this.ordineCorrispondente.getDataCreazione(); }
 
     public Cliente getCliente() {
         return cliente;

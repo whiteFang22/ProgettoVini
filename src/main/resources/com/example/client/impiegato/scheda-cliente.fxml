@@ -20,7 +20,7 @@
       <TextField fx:id="telefono" editable="false" prefHeight="26.0" prefWidth="277.0" />
       <Label text="INDIRIZZO DI CONSEGNA" />
       <TextField fx:id="indirizzo" editable="false" prefHeight="26.0" prefWidth="277.0" />
-      <Button mnemonicParsing="false" onAction="#indietro" text="indietro">
+      <Button mnemonicParsing="false" onAction="#indietroSC" text="indietro">
          <VBox.margin>
             <Insets top="10.0" />
          </VBox.margin>

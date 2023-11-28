@@ -35,6 +35,8 @@ public class FiltroController implements Initializable {
     @FXML
     Button viniButton;
     @FXML
+    Button credenzialiButton;
+    @FXML
     Button esciButton;
 
     @FXML
@@ -93,8 +95,10 @@ public class FiltroController implements Initializable {
         Pane view = object.getPage("impiegato/left-vini");
         parent.setLeft(view);
 
+        view = object.getPage("impiegato/center-vini");
+        parent.setCenter(view);
         RicercaController controller = new RicercaController();
-        controller.ricercaVini();
+        //controller.ricercaVini();
     }
 
     @FXML
@@ -107,12 +111,21 @@ public class FiltroController implements Initializable {
         parent.setCenter(view);
     }
     @FXML
-    private void showRecordPage(){
+    private void showReportPage(){
         System.out.println("registra impiegato");
         BorderPane parent = (BorderPane) reportButton.getParent().getParent();
 
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("amministratore/report");
+        Pane view = object.getPage("amministratore/reportP1");
+        parent.setCenter(view);
+    }
+    @FXML
+    private  void showModificaCredenziali(){
+        System.out.println("registra impiegato");
+        BorderPane parent = (BorderPane) credenzialiButton.getParent().getParent();
+
+        FxmlLoader object = new FxmlLoader();
+        Pane view = object.getPage("amministratore/credenziali-imp");
         parent.setCenter(view);
     }
 
@@ -151,7 +164,10 @@ public class FiltroController implements Initializable {
                 centerTitle.setText("ORDINI DI VENDITA");
                 cercaOrdiniVendita();
             }
-            case "Proposte Acquisto" -> centerTitle.setText("PROPOSTE DI ACQUISTO");
+            case "Proposte Acquisto" -> {
+                centerTitle.setText("PROPOSTE DI ACQUISTO");
+                cercaProposteAcquisto();
+            }
         }
     }
 
@@ -207,7 +223,7 @@ public class FiltroController implements Initializable {
     @FXML
     protected void cercaOrdiniVendita() throws IOException, ParseException {
         listView = new ListView<>();
-        listView.setId("listaViniOrdine");
+        //listView.setId("lista");
         ObservableList<HBox> items = FXCollections.observableArrayList();
 
         SchedeController sch = new SchedeController();
@@ -258,20 +274,20 @@ public class FiltroController implements Initializable {
     @FXML
     protected void cercaOrdiniAcquisto() throws IOException, ParseException {
         listView = new ListView<>();
-        listView.setId("listaViniOrdine");
+        //listView.setId("listaViniOrdine");
         ObservableList<HBox> items = FXCollections.observableArrayList();
 
         SchedeController sch = new SchedeController();
-        SimpleDateFormat formatoData = new SimpleDateFormat("dd/MM/yyyy");
-        Date data = formatoData.parse("22/09/2205");
+        Date d1 = java.sql.Date.valueOf(data1.getValue());
+        Date d2 = java.sql.Date.valueOf(data2.getValue());
 
         Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
-        //List<OrdineVendita> ordini = imp.ricercaOrdiniVendita(data, data);
+        List<OrdineAcquisto> ordini = imp.ricercaOrdiniAcquisto(d1, d2);
 
-        List<OrdineAcquisto> ordini = null;
+        //List<OrdineAcquisto> ordini = null;
 
         for (OrdineAcquisto ordine : ordini){
-            Text dataCreazione = new Text(formatoData.format(ordine.getDataCreazione()));
+            Text dataCreazione = new Text(ordine.getDataCreazione().toString());
 
             Button cliente = new Button(ordine.getCliente().getEmail());
             cliente.setUserData(ordine.getCliente());
@@ -284,6 +300,55 @@ public class FiltroController implements Initializable {
             schedaOrdine.setUserData(ordine);
             schedaOrdine.setOnAction(actionEvent -> {
                 sch.manageSchede(ordine);
+            });
+
+            HBox riga = new HBox(dataCreazione, cliente, schedaOrdine);
+            riga.setSpacing(10);
+            items.add(riga);
+        }
+        listView.setItems(items);
+        listView.setMinWidth(350);
+        listView.setMinHeight(100);
+        listView.setSelectionModel(null);
+
+        BorderPane main = SharedData.getInstance().getCurrentParent();
+        listaClienti = (HBox) main.lookup("#lista");
+        listaClienti.getChildren().clear();
+        listaClienti.getChildren().add(listView);
+    }
+    @FXML
+    protected void cercaProposteAcquisto() throws IOException, ParseException {
+        System.out.println("cerca proposte");
+        listView = new ListView<>();
+        //listView.setId("listaViniOrdine");
+        ObservableList<HBox> items = FXCollections.observableArrayList();
+
+        SchedeController sch = new SchedeController();
+
+        // Converti l'oggetto Instant in un oggetto Date
+        Date d1 = java.sql.Date.valueOf(data1.getValue());
+        Date d2 = java.sql.Date.valueOf(data2.getValue());
+
+        System.out.println("data1F: "+d1);
+        System.out.println("data2F: "+d2);
+        Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
+        List<PropostaAcquisto> proposte = imp.ricercaProposteAcquisto(d1,d2);
+        System.out.println("check1");
+        for (PropostaAcquisto proposta : proposte){
+            System.out.println("check2");
+            Text dataCreazione = new Text(proposta.getDataCreazione().toString());
+
+            Button cliente = new Button(proposta.getCliente().getEmail());
+            cliente.setUserData(proposta.getCliente());
+            cliente.setOnAction(event ->{
+                Cliente obj = (Cliente) cliente.getUserData();
+                sch.VediSchedaCliente(SharedData.getInstance().getCurrentParent(), obj);
+            });
+
+            Button schedaOrdine = new Button("VEDI SCHEDA");
+            schedaOrdine.setUserData(proposta);
+            schedaOrdine.setOnAction(actionEvent -> {
+                sch.manageSchede(proposta);
             });
 
             HBox riga = new HBox(dataCreazione, cliente, schedaOrdine);

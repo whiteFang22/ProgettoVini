@@ -1,17 +1,19 @@
 package com.example.client;
 
-import com.example.classes.Cliente;
-import com.example.classes.OrdineAcquisto;
-import com.example.classes.OrdineVendita;
-import com.example.classes.PropostaAcquisto;
+import com.example.classes.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public class SchedeController {
     @FXML
@@ -32,6 +34,20 @@ public class SchedeController {
     TextField telefono;
     @FXML
     TextField indirizzo;
+
+    // Per visualizzare i vini
+    @FXML
+    HBox viniProposti;
+    @FXML
+    TextField cliente;
+    @FXML
+    TextField prezzo;
+    @FXML
+    DatePicker dataConsegna;
+    @FXML
+    Button firmaButton;
+
+    private static ListView<HBox> listView;
 
 
     @FXML
@@ -76,6 +92,9 @@ public class SchedeController {
         FxmlLoader object = new FxmlLoader();
         Pane view = object.getPage("impiegato/scheda-ordine-acquisto");
         parent.setCenter(view);
+
+        //show wines
+        creaGrid(ordine.getViniMancanti());
     }
     private void VediSchedaOrdiniVendita(BorderPane parent, OrdineVendita ordine){
         System.out.println("scheda-cliente");
@@ -83,6 +102,20 @@ public class SchedeController {
         FxmlLoader object = new FxmlLoader();
         Pane view = object.getPage("impiegato/scheda-ordine-vendita");
         parent.setCenter(view);
+
+        //show wines
+        creaGrid(ordine.getViniAcquistati());
+
+        //show infos
+        email = (TextField) parent.lookup("#email");
+        email.setText(ordine.getCliente().getEmail());
+        indirizzo = (TextField) parent.lookup("#indirizzo");
+        indirizzo.setText(ordine.getIndirizzoConsegna());
+        prezzo = (TextField) parent.lookup("#prezzo");
+        ordine.ottimizza();
+        prezzo.setText(Float.toString(ordine.calcolaTotale()));
+        firmaButton = (Button) parent.lookup("#firmaButton");
+        firmaButton.setUserData(ordine);
     }
     private void VediSchedaPropostaAcquisto(BorderPane parent, PropostaAcquisto proposta){
         System.out.println("scheda-cliente");
@@ -90,17 +123,85 @@ public class SchedeController {
         FxmlLoader object = new FxmlLoader();
         Pane view = object.getPage("impiegato/scheda-proposta-acquisto");
         parent.setCenter(view);
+
+        //show wines
+        creaGrid(proposta.getVini());
     }
 
+    protected void creaGrid(Map<Vino, Integer> listaVini){
+        listView = new ListView<>();
+        listView.setId("listaVini");
+        ObservableList<HBox> items = FXCollections.observableArrayList();
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
+
+        listaVini.forEach((vino, qnt) -> {
+            HBox riga;
+
+            TextField nomeVinotext = new TextField(vino.getNome()+" - "+vino.getAnno());
+            nomeVinotext.setUserData(vino);
+            nomeVinotext.setMinWidth(100);
+
+            TextField quantita = new TextField("quantità: "+qnt);
+            quantita.setUserData(vino);
+            quantita.setMaxWidth(90);
+            riga = new HBox(nomeVinotext, quantita);
+
+            riga.setSpacing(10);
+            items.add(riga);
+        });
+
+        listView.setItems(items);
+        listView.setMinWidth(300);
+        //listView.setMinHeight(100);
+        listView.setSelectionModel(null);
+
+        //BorderPane main = find.findBorderPane(VboxRicerca);
+        viniProposti = (HBox) parent.lookup("#vini");
+        viniProposti.getChildren().clear();
+        viniProposti.getChildren().add(listView);
+    }
 
     @FXML
-    protected void indietro() throws IOException {
+    protected void onFirma(){
+        Date dc = java.sql.Date.valueOf(dataConsegna.getValue());
+        Impiegato imp = (Impiegato) SharedData.getInstance().getUser();
+
+        OrdineVendita ord = (OrdineVendita) firmaButton.getUserData();
+        System.out.println("id: "+ord.getId());
+        System.out.println(ord.getViniAcquistati());
+        System.out.println(ord.getDataConsegna());
+        ord.setDataConsegna(dc);
+        boolean succ = imp.gestioneOrdineVendita(ord);
+
+        if (succ) System.out.println("ordine firmato");
+        else System.out.println("errore on firma");
+    }
+
+    @FXML
+    protected void indietroSC() throws IOException {
+        System.out.println("indietro");
         BorderPane parent = SharedData.getInstance().getCurrentParent();
+
+        String path = "";
+        String settage = parent.getLeft().getId();
+        System.out.println(settage);
+        switch (settage) {
+            case "VBoxRicercaCliente" -> {
+                System.out.println("cli");
+                path = "impiegato/center-clienti-registrati";
+            }
+            case "VboxOrdiniProposte" -> {
+                System.out.println("ordprop");
+                path = "impiegato/center-ordini-proposte";
+            }
+        }
+
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("impiegato/center-clienti-registrati");
+        Pane view = object.getPage(path);
         parent.setCenter(view);
 
         FiltroController controller = new FiltroController();
-        controller.cercaClienti();
+        if (settage.equals("VBoxRicercaCliente")) controller.cercaClienti();
     }
+
 }
