@@ -1,7 +1,6 @@
 package com.example.classes;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
 
 public class PropostaAcquisto implements Serializable {

@@ -1,8 +1,5 @@
 package com.example.classes;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Amministratore extends Impiegato {
     public Amministratore(String passwordtohash, String nome, String cognome, String codiceFiscale, String email, String numeroTelefonico,
                           String indirizzoResidenza, Boolean isClient) {

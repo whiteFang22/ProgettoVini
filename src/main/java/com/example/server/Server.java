@@ -7,11 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.example.classes.*;
 
 /**
  *
@@ -26,15 +22,11 @@ public class Server
   private static final int MAXPOOL = 100;
   private static final long IDLETIME = 5000;
   private static final int SPORT = 4444;
-
-  //DB access variables
-  private static final String jdbcUrl = "jdbc:mysql://localhost:3306";
-  private static final String username = "fedecardelli";
-  private static final String password = "CRDFRC01@g!"
-  ;
+  
   private ServerSocket socket;
   private ThreadPoolExecutor pool;
-  private LinkedBlockingQueue<Object> messageQueue;
+  private LinkedBlockingQueue<OrdineVendita> ovQueue;
+  private LinkedBlockingQueue<OrdineAcquisto> oaQueue;
 
 
   /**
@@ -47,7 +39,8 @@ public class Server
   public Server() throws IOException
   {
     this.socket = new ServerSocket(SPORT);
-    this.messageQueue = new LinkedBlockingQueue<Object>();
+    this.ovQueue = new LinkedBlockingQueue<OrdineVendita>();
+    this.oaQueue = new LinkedBlockingQueue<OrdineAcquisto>();
   }
 
   /**
@@ -92,17 +85,45 @@ public class Server
    * @return the upper object of queue
    * @throws InterruptedException
    */
-  public Object queueTake() throws InterruptedException{
-    return this.messageQueue.take();
+  public Object oVqueueTake() throws InterruptedException{
+    return this.ovQueue.take();
+  }
+  /*
+   * Waits @timeout seconds for an object than returns
+   * @return OrdineVendita
+   */
+  public OrdineVendita oVqueuePoll(long timeout) throws InterruptedException{
+    return this.ovQueue.poll(timeout, TimeUnit.SECONDS);
+  }
+
+
+  public Object oAqueueTake() throws InterruptedException{
+    return this.oaQueue.take();
+  }
+  /*
+   * Waits @timeout seconds for an object than returns
+   * @return OrdineAcquisto
+   */
+  public OrdineAcquisto oAqueuePoll(long timeout) throws InterruptedException{
+    return this.oaQueue.poll(timeout, TimeUnit.SECONDS);
   }
  /**
-   * Puts object in queue
+   * Puts object in their queue
    * 
    * @return nothing
  * @throws InterruptedException
    */
   public void queuePut(Object o) throws InterruptedException{
-    this.messageQueue.put(o);
+    if(o instanceof OrdineVendita){
+      OrdineVendita obj = (OrdineVendita) o;
+      this.ovQueue.put(obj);
+    }
+    else if(o instanceof OrdineAcquisto){
+      OrdineAcquisto obj = (OrdineAcquisto) o;
+      this.oaQueue.put(obj);
+
+    }
+    
   }
   /**
    * Closes the server execution.
