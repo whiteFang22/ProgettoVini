@@ -76,9 +76,9 @@ public class Impiegato extends UtenteGenerico {
      * 
      * @return OrdineVendita
      */
-    public OrdineVendita recuperaOrdineVendita(int time){
+    public OrdineVendita recuperaOrdineVendita(int waitTime){
         Request req = new Request();
-        req.set(34, time, this.AuthCode);
+        req.set(34, waitTime, this.AuthCode);
 
         Response res = client.message(req);
         return (OrdineVendita) res.getData();
@@ -123,12 +123,18 @@ public class Impiegato extends UtenteGenerico {
 
         Per identificare gli ordini
     */
-    public boolean gestioneOrdineAcquisto(Boolean conferma) {
+    public boolean gestioneOrdineAcquisto(OrdineAcquisto ordineAcquisto) {
         Request req = new Request();
-        req.set(13,conferma,this.AuthCode);
+        req.set(13,ordineAcquisto,this.AuthCode);
 
         Response res = client.message(req);
         return res.isSuccess();
+    }
+    public OrdineAcquisto recuperaOrdineAcquisto(int waitTime){
+        Request req = new Request();
+        req.set(33,waitTime,this.AuthCode);
+        Response res = client.message(req);
+        return (OrdineAcquisto) res.getData();
     }
 }
 
