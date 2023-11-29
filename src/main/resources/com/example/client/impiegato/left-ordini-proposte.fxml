@@ -50,6 +50,16 @@
             <Insets top="20.0" />
          </VBox.margin>
       </Button>
+      <Button mnemonicParsing="false" onAction="#onWaitOrdiniVendita" text="WAIT VEDNITE">
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </Button>
+      <Button mnemonicParsing="false" onAction="#onWaitOrdiniAcquisto" text="WAIT PROPOSTE">
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </Button>
    </children>
    <padding>
       <Insets left="10.0" right="10.0" />

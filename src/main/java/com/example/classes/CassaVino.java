@@ -29,7 +29,7 @@ public class CassaVino implements Serializable {
 
     public void setQuantita(int quantita) {
         this.quantita = quantita;
-        //this.prezzo = calcolaPrezzo();
+        this.prezzo = calcolaPrezzo();
     }
 
     public float getScontoPercentuale() {
@@ -38,11 +38,11 @@ public class CassaVino implements Serializable {
 
     public void setScontoPercentuale(float scontoPercentuale) {
         this.scontoPercentuale = scontoPercentuale;
-        //this.prezzo = calcolaPrezzo();
+        this.prezzo = calcolaPrezzo();
     }
 
     public float getPrezzo() {
-        //this.prezzo = calcolaPrezzo();
+        this.prezzo = calcolaPrezzo();
         return prezzo;
     }
 

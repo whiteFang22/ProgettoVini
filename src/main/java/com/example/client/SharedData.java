@@ -25,10 +25,11 @@ public class SharedData {
     public static SharedData getInstance() {
         return instance;
     }
-    public void resetInstance(){
+    public void resetInstance(boolean resetClient){
         List<Object> newCont = new ArrayList<>();
         setContenitori(newCont);
         viniSelezionati = new HashMap<>();
+        if (resetClient) user = new UtenteGenerico("", "", "", "", "", "",true);
     }
 
     public String getUserType() {

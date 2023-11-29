@@ -51,13 +51,6 @@ public class Cliente extends UtenteGenerico {
         return res.isSuccess();
     }
 
-    // DA DEFINIRE... CREDO CHE NON DOBBA ESSERE IMPLEMENTATO
-    public Vino selezionaVino() {
-        // Implementazione del metodo selezionaVino
-        // Esempio: Restituisci un oggetto Vino selezionato
-        return null; // Modificare per restituire un vino effettivo
-    }
-
     public boolean ClientModificaCredenziali(String password) {
         // Implementazione del metodo modificaCredenziali
         // Esempio: Modifica la password del cliente

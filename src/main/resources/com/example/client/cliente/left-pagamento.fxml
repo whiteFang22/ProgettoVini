@@ -62,7 +62,7 @@
                   <Insets top="10.0" />
                </VBox.margin>
             </HBox>
-            <Button mnemonicParsing="false" onAction="#onAnnullaClick" text="Annulla" />
+            <Button fx:id="annullaPagamento" mnemonicParsing="false" onAction="#onAnnullaClick" text="Annulla" />
          </children>
          <padding>
             <Insets left="10.0" right="10.0" />

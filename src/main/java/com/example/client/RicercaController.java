@@ -58,6 +58,7 @@ public class RicercaController implements Initializable{
         // procedi con il pagamento altrimenti schermata proposta di acquisto
         Cliente user = (Cliente) SharedData.getInstance().getUser();
         System.out.println("vini:"+SharedData.getInstance().getVini());
+
         Response res = user.acquistaBottiglie(SharedData.getInstance().getVini());
         success = res.isSuccess();
         //F: success è legato al corretto funzionamento del server, è true anche se non ci sono bottiglie sufficienti purchè non
@@ -106,7 +107,7 @@ public class RicercaController implements Initializable{
 
     @FXML
     protected void annullaProposta(){
-        SharedData.getInstance().resetInstance();
+        SharedData.getInstance().resetInstance(false);
 
         System.out.println("Ordine");
         Cliente user = (Cliente) SharedData.getInstance().getUser();
@@ -147,14 +148,6 @@ public class RicercaController implements Initializable{
         listView.setId("listaViniOrdine");
         ObservableList<HBox> items = FXCollections.observableArrayList();
 
-        //crea manualmente lista di casse ma dopo dovrai recuperare da res
-        /*List<CassaVino> casse = new ArrayList<>();
-        Vino v1 = new Vino("Bordeaux",null,null,2020,null,null,23.65f,0,0);
-        Vino v2 = new Vino("Martell Millesime",null,null,1944,null,null,12.6f,0,0);
-        CassaVino ca = new CassaVino(v1, 6, 0);
-        casse.add(ca);
-        ca = new CassaVino(v2, 12, 0);
-        casse.add(ca);*/
         ordine.ottimizza();
         System.out.println(ordine);
         System.out.println(ordine.getCasseVino());
@@ -232,7 +225,7 @@ public class RicercaController implements Initializable{
         stage.setHeight(523);
 
         // azzera l'istanza SharedData
-        SharedData.getInstance().resetInstance();
+        SharedData.getInstance().resetInstance(true);
     }
 
     // mostra a schermo la lista di vini richiesta dal client
@@ -260,12 +253,18 @@ public class RicercaController implements Initializable{
         BorderPane parent = SharedData.getInstance().getCurrentParent();
         String left = parent.getLeft().getId();
         System.out.println("left: "+left);
+        SchedeController sch = new SchedeController();
 
         int i = 0;
         for (Vino vino : listaVini) {
             HBox riga = new HBox();
 
             Button nomeVinotext = new Button(vino.getNome()+" - "+vino.getAnno());
+            nomeVinotext.setUserData(vino);
+            nomeVinotext.setOnAction(event -> {
+                Vino obj = (Vino) nomeVinotext.getUserData();
+                sch.manageSchede(obj);
+            });
             nomeVinotext.setUserData(vino);
             nomeVinotext.setMinWidth(100);
 

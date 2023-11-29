@@ -20,6 +20,11 @@ public class PagamentoController {
     @FXML
     Button button1;
     @FXML
+    Button homeButton;
+    @FXML
+    Button annullaPagamento;
+
+    @FXML
     AnchorPane borderCenter;
     private boolean cliccato = false;
     private static ListView<HBox> listView;
@@ -47,10 +52,12 @@ public class PagamentoController {
     @FXML
     protected void onAnnullaClick(){
         BorderPane parent = (BorderPane) VboxPagamento.getParent().getParent();
+        Cliente c = (Cliente) SharedData.getInstance().getUser();
+        c.confermaPagamento(false);
         indietro(parent);
     }
     private void indietro(BorderPane parent){
-        SharedData.getInstance().resetInstance();
+        SharedData.getInstance().resetInstance(false);
 
         FxmlLoader object = new FxmlLoader();
         Pane view = object.getPage("cliente/left-ricerca");
@@ -71,11 +78,19 @@ public class PagamentoController {
             //notifica all'utente che è andato tutto a buon fine e torna con bottone a schermata iniziale
             risultatoPagamento.setText("Il pagamento è andato a buon fine");
             risultatoPagamento.setTextFill(Color.GREEN);
-            button1.setText("HOME");
+            button1.setDisable(true);
+
+            homeButton = (Button) parent.lookup("#homeButton");
+            homeButton.setDisable(false);
+            homeButton.setVisible(true);
+
             RadioButton radio = (RadioButton) parent.lookup("#bonificoChoice");
             radio.setDisable(true);
             radio = (RadioButton) parent.lookup("#cartaChoice");
             radio.setDisable(true);
+
+            annullaPagamento = (Button) parent.lookup("#annullaPagamento");
+            annullaPagamento.setDisable(true);
 
             if (cliccato) {
                 indietro(parent);
@@ -88,4 +103,10 @@ public class PagamentoController {
         }
         cliccato = !cliccato;
     }
+    @FXML
+    protected void toHome(){
+        BorderPane parent = SharedData.getInstance().getCurrentParent();
+        indietro(parent);
+    }
 }
+

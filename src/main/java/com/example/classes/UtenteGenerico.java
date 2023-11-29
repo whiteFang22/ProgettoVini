@@ -1,5 +1,7 @@
 package com.example.classes;
 
+import com.example.client.SharedData;
+
 import java.util.ArrayList;
 import java.util.List;
 

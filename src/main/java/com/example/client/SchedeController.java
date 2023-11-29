@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static javafx.scene.paint.Color.*;
+
 public class SchedeController {
     @FXML
     Button vediScheda;
@@ -47,6 +49,20 @@ public class SchedeController {
     @FXML
     Button firmaButton;
 
+    //per scheda vino
+    @FXML
+    TextField produttore;
+    @FXML
+    TextField provenienza;
+    @FXML
+    TextArea vitigni;
+    @FXML
+    TextArea noteTecniche;
+
+    //per scheda ordine
+    @FXML
+    Text resMessage;
+
     private static ListView<HBox> listView;
 
 
@@ -54,14 +70,19 @@ public class SchedeController {
     protected void manageSchede(Object data){
         System.out.println("managing");
         BorderPane parent = SharedData.getInstance().getCurrentParent();
-        centerTitle = (Label) parent.lookup("#centerTitle");
+        /*centerTitle = (Label) parent.lookup("#centerTitle");
         System.out.println(centerTitle.getText());
         switch (centerTitle.getText()) {
             case "CLIENTI REGISTRATI" -> VediSchedaCliente(parent, (Cliente) data);
             case "ORDINI DI ACQUISTO" -> VediSchedaOrdiniAcquisto(parent, (OrdineAcquisto) data);
             case "ORDINI DI VENDITA" -> VediSchedaOrdiniVendita(parent, (OrdineVendita) data);
             case "PROPOSTE DI ACQUISTO" -> VediSchedaPropostaAcquisto(parent, (PropostaAcquisto) data);
-        }
+        }*/
+        if (data instanceof Vino) VediSchedaVino(parent, (Vino) data);
+        else if (data instanceof Cliente) VediSchedaCliente(parent, (Cliente) data);
+        else if (data instanceof OrdineVendita) VediSchedaOrdiniVendita(parent, (OrdineVendita) data);
+        else if (data instanceof OrdineAcquisto) VediSchedaOrdiniAcquisto(parent, (OrdineAcquisto) data);
+        else if (data instanceof  PropostaAcquisto) VediSchedaPropostaAcquisto(parent, (PropostaAcquisto) data);
 
     }
 
@@ -86,11 +107,31 @@ public class SchedeController {
         indirizzo = (TextField) parent.lookup("#indirizzo");
         indirizzo.setText(cliente.getIndirizzoDiConsegna());
     }
+
+    private void VediSchedaVino(BorderPane parent, Vino vino){
+        System.out.println("scheda-vino");
+
+        FxmlLoader object = new FxmlLoader();
+        Pane view = object.getPage("general/scheda-vino");
+        parent.setCenter(view);
+
+        nome = (TextField) parent.lookup("#nome");
+        nome.setText(vino.getNome());
+        produttore = (TextField) parent.lookup("#produttore");
+        produttore.setText((vino.getProduttore()));
+        provenienza = (TextField) parent.lookup("#provenienza");
+        provenienza.setText(vino.getProvenienza());
+        noteTecniche = (TextArea) parent.lookup("#noteTecniche");
+        noteTecniche.setText((vino.getNoteTecniche()));
+        vitigni = (TextArea) parent.lookup("#vitigni");
+        vitigni.setText(vino.getVitigni().toString());
+    }
+
     private void VediSchedaOrdiniAcquisto(BorderPane parent, OrdineAcquisto ordine){
         System.out.println("scheda-cliente");
 
         FxmlLoader object = new FxmlLoader();
-        Pane view = object.getPage("impiegato/scheda-ordine-acquisto");
+        Pane view = object.getPage("impiegato/scheda-ordini-acquisto");
         parent.setCenter(view);
 
         //show wines
@@ -173,8 +214,15 @@ public class SchedeController {
         ord.setDataConsegna(dc);
         boolean succ = imp.gestioneOrdineVendita(ord);
 
-        if (succ) System.out.println("ordine firmato");
-        else System.out.println("errore on firma");
+        if (succ) {
+            resMessage.setText("ordine firmato correttamente");
+            resMessage.setFill(GREEN);
+            firmaButton.setDisable(true);
+        }
+        else {
+            resMessage.setText("qualcosa è andato storto");
+            resMessage.setFill(RED);
+        }
     }
 
     @FXML
@@ -193,6 +241,14 @@ public class SchedeController {
             case "VboxOrdiniProposte" -> {
                 System.out.println("ordprop");
                 path = "impiegato/center-ordini-proposte";
+            }
+            case "LVboxRicerca" -> {
+                System.out.println("viniC");
+                path = "cliente/scheda-vini-client";
+            }
+            case "VBoxRicercaVini" -> {
+                System.out.println("viniI");
+                path = "impiegato/center-vini";
             }
         }
 

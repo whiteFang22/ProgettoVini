@@ -11,6 +11,7 @@ public class OrdineAcquisto implements Serializable{
     private Impiegato impiegato;
 
     public OrdineAcquisto(Impiegato impiegato, PropostaAcquisto propostaAssociata, String indirizzoAzienda, Date dataCreazione) {
+
         this.impiegato = impiegato;
         this.propostaAssociata = propostaAssociata;
         this.indirizzoAzienda = indirizzoAzienda;

@@ -104,6 +104,7 @@ public class LogFormControllers {
             //stampa un messaggio di errore a schermo
             System.out.println("errore di autenticazione");
             loginMessageLable.setText("errore di autenticazione");
+            SharedData.getInstance().resetInstance(true);
         }
     }
 

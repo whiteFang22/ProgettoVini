@@ -13,13 +13,13 @@
    </padding>
    <children>
       <Label text="CLIENTE" />
-      <TextField editable="false" />
+      <TextField fx:id="email" editable="false" />
       <Label text="VINI DA ACQUISTARE" />
       <HBox fx:id="vini" prefHeight="100.0" prefWidth="200.0" />
       <Label text="INDIRIZZO  AZIENDA" />
-      <TextField editable="false" />
+      <TextField fx:id="indirizzo" editable="false" />
       <Label text="PREZZO FINALE" />
-      <TextField editable="false" />
+      <TextField fx:id="prezzo" editable="false" />
       <Button mnemonicParsing="false" onAction="#indietroSC" text="indietro">
          <VBox.margin>
             <Insets top="10.0" />

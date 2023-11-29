@@ -12,7 +12,7 @@ public class ControllerOrdine {
     final FindParent find = new FindParent();
 
     @FXML
-    protected void onAvantiClick(){
+    protected void onConfermaOrdineClick(){
         System.out.println("Acquista");
         FxmlLoader object = new FxmlLoader();
         Pane view = object.getPage("cliente/scheda-bonifico");

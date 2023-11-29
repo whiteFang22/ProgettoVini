@@ -31,7 +31,12 @@
             <Insets bottom="20.0" top="20.0" />
          </VBox.margin>
       </HBox>
-      <Button fx:id="button1" mnemonicParsing="false" onAction="#confermaPagamento" text="CONTINUA" />
+      <Button fx:id="button1" mnemonicParsing="false" onAction="#confermaPagamento" text="CONFERMA PAGAMENTO" />
+      <Button fx:id="homeButton" disable="true" mnemonicParsing="false" onAction="#toHome" text="HOME" visible="false">
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </Button>
    </children>
    <padding>
       <Insets left="100.0" right="100.0" />

@@ -108,7 +108,7 @@ public class Client implements AutoCloseable{
         //Impiegato exampleImpiegato = new Impiegato("1111", "andrea", "martini", "ndrmrt88g655f", "amartini@gmail.com", "3421234554", "Via Roma 33", true);
         //exampleImpiegato.login();
         /*
-        OrdineVendita work = exampleImpiegato.recuperaOrdineVendita(10);
+        OrdineVendita work = (OrdineVendita) exampleImpiegato.recuperaOrdineVendita(10).getData();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2023, Calendar.DECEMBER, 1);
         Date date = calendar.getTime();
