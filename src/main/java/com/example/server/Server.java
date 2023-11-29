@@ -117,10 +117,12 @@ public class Server
     if(o instanceof OrdineVendita){
       OrdineVendita obj = (OrdineVendita) o;
       this.ovQueue.put(obj);
+      System.out.println("in ordinevenditaqueue");
     }
     else if(o instanceof OrdineAcquisto){
       OrdineAcquisto obj = (OrdineAcquisto) o;
       this.oaQueue.put(obj);
+      System.out.println("in ordineacquistoqueue");
 
     }
     

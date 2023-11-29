@@ -86,34 +86,35 @@ public class Client implements AutoCloseable{
 
     public static void main(String[] args) {
 
-        //Cliente examplecliente = new Cliente("andrea","rossi","1234", "ndrvrd87g12f463x","andrerossi@gmail.com", "1234","Via averdi",true);
+        Cliente examplecliente = new Cliente("andrea","rossi","1234", "ndrvrd87g12f463x","andrerossi@gmail.com", "1234","Via averdi",true);
         //examplecliente.registrazione();
-        //examplecliente.login();
+        examplecliente.login();
         //examplecliente.ClientModificaCredenziali("1234");
         
-        //FiltriRicerca fr = new FiltriRicerca(null, null, null, 2012);
+        FiltriRicerca fr = new FiltriRicerca(null, null, null, 2012);
         //examplecliente.cercaVini(fr);
-        //Map<Integer, Integer> list = new HashMap();
-        //list.put(4,15);
+        Map<Integer, Integer> list = new HashMap();
+        list.put(4,15);
         //list.put(2,10);
-        //list.put(3,1);
+        //list.put(6,1);
 
 
         //examplecliente.acquistaBottiglie(list);
         //examplecliente.proponiAcquisto(true);
-        //examplecliente.confermaPagamento(true);
+        examplecliente.confermaPagamento(true);
 
         //Amministratore exampleAdmin = new Amministratore("1234","admin","admin","admin","root@admin.admin","0000","none",true);
-        
-        Impiegato exampleImpiegato = new Impiegato("1111", "andrea", "martini", "ndrmrt88g655f", "amartini@gmail.com", "3421234554", "Via Roma 33", true);
-        exampleImpiegato.login();
+         
+        //Impiegato exampleImpiegato = new Impiegato("1111", "andrea", "martini", "ndrmrt88g655f", "amartini@gmail.com", "3421234554", "Via Roma 33", true);
+        //exampleImpiegato.login();
+        /*
         OrdineVendita work = exampleImpiegato.recuperaOrdineVendita(10);
         Calendar calendar = Calendar.getInstance();
         calendar.set(2023, Calendar.DECEMBER, 1);
         Date date = calendar.getTime();
         work.setDataConsegna(date);
         exampleImpiegato.gestioneOrdineVendita(work);
-        
+        */
         //exampleAdmin.registrazioneImpiegato(exampleImpiegato, "1111");
         //exampleAdmin.AdminModificaCredenziali("dverdi@gmail.com","0000" , false);
         //exampleAdmin.AdminModificaCredenziali("everdi@gmail.com", null, true);
@@ -127,8 +128,11 @@ public class Client implements AutoCloseable{
         //calendar.set(2023,Calendar.DECEMBER,1);
         //Date Date2 = calendar.getTime();
         //System.out.println(exampleImpiegato.ricercaOrdiniVendita(Date1,Date2));
-
-        //exampleImpiegato.gestioneOrdineAcquisto(true);
+        /* 
+        OrdineAcquisto oa = exampleImpiegato.recuperaOrdineAcquisto(10);
+        System.out.println(oa);
+        exampleImpiegato.gestioneOrdineAcquisto(oa);
+        */
         //System.out.println(exampleImpiegato.ricercaOrdiniAcquisto(Date1, Date2));
 
 

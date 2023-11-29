@@ -65,25 +65,27 @@ public class ServerThread implements Runnable
   @Override
   /*
    * thread main code, handles client requests via Switch case statement switching request codes
-   * 0 - Cliente, registrazione             tested
-   * 1 - UtenteGenerico, Login              tested
-   * 2 - Cliente, modifica credenziali      tested
-   * 3 - Cliente, acquistabottiglie         tested    ok!
-   * 4 - Cliente, confermaPagamento         tested    da sistemare
+   * 0 - Cliente, registrazione             
+   * 1 - UtenteGenerico, Login            
+   * 2 - Cliente, modifica credenziali      
+   * 3 - Cliente, acquistabottiglie [1:ok] [2: ok, non tutto disponibile] [3:ordine ancora da completare, completa o elimina (tramite confermaPagamento(false))]    
+   * 4 - Cliente, confermaPagamento [1:ok conferma] [2:ok elimina]       
    * 5 - Cliente, proponiAcquisto
    * 6 - Cliente, ricercaOrdiniVendita
-   * 9 - Cliente, ricercaVino               tested    ok!
-   * 10 - Impiegato, ricercaCliente         tested
-   * 11 - Impiegato, ricercaOrdineVendita   tested    ok!
+   * 9 - Cliente, ricercaVino               
+   * 10 - Impiegato, ricercaCliente         
+   * 11 - Impiegato, ricercaOrdineVendita   
    * 12 - Impiegato, ricercaOrdineAcquisto
    * 33 - Impiegato, recuperaOrdineAcquisto
    * 13 - Impiegato, gestisciOrdineAcquisto
    * 34 - Impiegato, recuperaOrdineVendita
    * 14 - Impiegato, gestisciOrdineVendita
-   * 15 - Impiegato, ricercaProposteAcquisto          ok!
-   * 20 - Admin, registraImpiegato          tested    ok!
-   * 21 - Admin, eliminaUtente              tested    ok!
-   * 22 - Admin, modificaCredenzialiUtente  tested    ok!
+   * 15 - Impiegato, ricercaProposteAcquisto         
+   * 20 - Admin, registraImpiegato       
+   * 21 - Admin, eliminaUtente              
+   * 22 - Admin, modificaCredenzialiUtente
+   * 23 - Admin, preparazioneReport
+   * 24 - Admin, ricercaImpiegati
   */
   public void run()
   {
@@ -280,82 +282,90 @@ public class ServerThread implements Runnable
               System.out.println("Got from client request id: " + requestId);
               //Acquista Bottiglie
               if (requestData != null && requestData instanceof Map<?, ?> && clientAuthCode.equals(connectionAuthCode)) {
-                Map<Integer, Integer> bottiglieList = (Map<Integer, Integer>) requestData;
-                Map<Vino, Integer> viniPresenti = new HashMap<>();
-                Map<Vino, Integer> viniMancanti = new HashMap<>();
-                boolean allInStock = true;
+                //Check constrain -> only one ordinevendita not complete at any given time
+                String query = "SELECT * FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
+                ResultSet resultSet = db.executeQuery(query, this.loggedCliente.getEmail());
+                
+                if(!resultSet.next()){
+
+                  Map<Integer, Integer> bottiglieList = (Map<Integer, Integer>) requestData;
+                  Map<Vino, Integer> viniPresenti = new HashMap<>();
+                  Map<Vino, Integer> viniMancanti = new HashMap<>();
+                  boolean allInStock = true;
 
 
-                //Initialize OrdineVendita
-                System.out.println("cliente: " + loggedCliente);
-                //Calculate Time
-                Date now = new Date();
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTime(now);
-                calendar.add(Calendar.WEEK_OF_YEAR, 1);
-                Date nextWeek = calendar.getTime();
+                  //Initialize OrdineVendita
+                  System.out.println("cliente: " + loggedCliente);
+                  //Calculate Time
+                  Date now = new Date();
+                  Calendar calendar = Calendar.getInstance();
+                  calendar.setTime(now);
+                  calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                  Date nextWeek = calendar.getTime();
 
-                OrdineVendita ordineVendita = new OrdineVendita(loggedCliente, nextWeek, now);
+                  OrdineVendita ordineVendita = new OrdineVendita(loggedCliente, nextWeek, now);
 
-                for (Map.Entry<Integer, Integer> line : bottiglieList.entrySet()) {
-                  Integer idVino = line.getKey();
-                  Integer quantitaRichiesta = line.getValue();
-                  String dbquery = "SELECT * FROM vini where id = ?";
-                  ResultSet resultSet = db.executeQuery(dbquery, idVino);
-                  Vino vino;
-                  if (resultSet.next()) {
-                    vino = rebuildVinoFromResultSet(resultSet);
+                  for (Map.Entry<Integer, Integer> line : bottiglieList.entrySet()) {
+                    Integer idVino = line.getKey();
+                    Integer quantitaRichiesta = line.getValue();
+                    String dbquery = "SELECT * FROM vini where id = ?";
+                    resultSet = db.executeQuery(dbquery, idVino);
+                    Vino vino;
+                    if (resultSet.next()) {
+                      vino = rebuildVinoFromResultSet(resultSet);
 
-                    if (vino.getDisponibilita() >= quantitaRichiesta) {
-                      //vino disponibile, aggiungi a OrdineVendita
-                      viniPresenti.put(vino, quantitaRichiesta);
-                    } else {
-                      //vino non disponibile o non abbastanza bottiglie in magazzino, creo Map viniMancanti
-                      //Inserisco nell'ordineVendita anche i vini che non sono disponibili a magazzino!!
-                      //Mentre in proposta solo quelli che mancano!!
-                      viniPresenti.put(vino, quantitaRichiesta);
-                      viniMancanti.put(vino, quantitaRichiesta - vino.getDisponibilita());
-                      allInStock = false;
+                      if (vino.getDisponibilita() >= quantitaRichiesta) {
+                        //vino disponibile, aggiungi a OrdineVendita
+                        viniPresenti.put(vino, quantitaRichiesta);
+                      } else {
+                        //vino non disponibile o non abbastanza bottiglie in magazzino, creo Map viniMancanti
+                        //Inserisco nell'ordineVendita anche i vini che non sono disponibili a magazzino!!
+                        //Mentre in proposta solo quelli che mancano!!
+                        viniPresenti.put(vino, quantitaRichiesta);
+                        viniMancanti.put(vino, quantitaRichiesta - vino.getDisponibilita());
+                        allInStock = false;
+                      }
                     }
                   }
+                  ordineVendita.setCompletato(false);
+                  ordineVendita.setViniAcquistati(viniPresenti);
+
+                  dbStoreOrdineVendita(ordineVendita);
+
+                  if (allInStock) {
+                    //tutti i vini disponibili, finalizza OrdineVendita e salva in db
+                    response.set(1, ordineVendita, this.connectionAuthCode);
+                    response.setSuccess();
+                  } else {
+                    //Non tutti i vini sono disponibili in quantita sufficienti, creo proposta di acquisto se non ne esiste gia una in elaborazione
+
+                      PropostaAcquisto propostaAcquisto = new PropostaAcquisto(this.loggedCliente, viniMancanti, this.loggedCliente.getIndirizzoDiConsegna(), ordineVendita);
+
+                      String dbquery2 = "SELECT * FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
+                      resultSet = db.executeQuery(dbquery2, ordineVendita.getCliente().getEmail());
+                      int id = 0;
+                      if (resultSet.next()) {
+                        id = resultSet.getInt("id");
+                      }
+                      String dbquery3 = "INSERT INTO proposte_di_acquisto (cliente_id, lista_quantita, ordine_id) " +
+                              "VALUES (?, ?, ?)";
+
+                      //String lista_quantita_mancanti = mapgson.toJson(propostaAcquisto.getVini());
+                      String lista_quantita_mancanti = mapVinoToIdSerialized(propostaAcquisto.getVini());
+
+                      db.executeUpdate(dbquery3, propostaAcquisto.getCliente().getEmail(), lista_quantita_mancanti, id);
+
+                      //response code 2, data: PropostaAcquisto
+                      response.set(2, propostaAcquisto, this.connectionAuthCode);
+                      response.setSuccess();
                 }
-                ordineVendita.setCompletato(false);
-                ordineVendita.setViniAcquistati(viniPresenti);
 
-                dbStoreOrdineVendita(ordineVendita);
-
-                if (allInStock) {
-                  //tutti i vini disponibili, finalizza OrdineVendita e salva in db
-                  response.set(1, ordineVendita, this.connectionAuthCode);
-                  response.setSuccess();
-                } else {
-                  //Non tutti i vini sono disponibili in quantita sufficienti, creo proposta di acquisto
-
-                  PropostaAcquisto propostaAcquisto = new PropostaAcquisto(this.loggedCliente, viniMancanti, this.loggedCliente.getIndirizzoDiConsegna(), ordineVendita);
-
-                  String dbquery2 = "SELECT * FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
-                  ResultSet resultSet = db.executeQuery(dbquery2, ordineVendita.getCliente().getEmail());
-                  int id = 0;
-                  if (resultSet.next()) {
-                    id = resultSet.getInt("id");
-                  }
-                  String dbquery3 = "INSERT INTO proposte_di_acquisto (cliente_id, lista_quantita, ordine_id) " +
-                          "VALUES (?, ?, ?)";
-
-                  //String lista_quantita_mancanti = mapgson.toJson(propostaAcquisto.getVini());
-                  String lista_quantita_mancanti = mapVinoToIdSerialized(propostaAcquisto.getVini());
-
-                  db.executeUpdate(dbquery3, propostaAcquisto.getCliente().getEmail(), lista_quantita_mancanti, id);
-
-                  //response code 2, data: PropostaAcquisto
-                  response.set(2, propostaAcquisto, this.connectionAuthCode);
-                  response.setSuccess();
-                }
-
-              } else {
-                response.set(0, null, this.connectionAuthCode);
+              } 
+              else {
+                response.set(3,null, this.connectionAuthCode);
               }
               message(response, os);
+            }
             }
             case 4 -> {
               //Conferma Pagamento
@@ -380,7 +390,10 @@ public class ServerThread implements Runnable
                     Map<Vino, Integer> listaQuantita = rebuildFromMapIntInt(wineList);
                     int id = resultset.getInt("id");
                     OrdineVendita ordineVendita = new OrdineVendita(id, loggedCliente, listaQuantita, null, dataCreazione);
-
+                    
+                    //Controllo se i vini sono ancora disponibili o se nel frattempo sono stati acquistati da altri
+                    System.out.println(checkAvability(wineList));
+                    if(checkAvability(wineList)){
                     //Invio copia a impiegato su queue
                     this.server.queuePut(ordineVendita);
 
@@ -403,6 +416,12 @@ public class ServerThread implements Runnable
 
                     response.set(1, ordineVendita, this.connectionAuthCode);
                     response.setSuccess();
+                  }
+                  else{
+                    //disponibilità cambiate, vini non piu presenti! 
+                    //TODO: In questo caso che facciamo?
+                    response.set(0,null,connectionAuthCode);
+                  }
                   } else {
                     //ERRORE, non ce l'ordine
                     response.set(0, null, this.connectionAuthCode);
@@ -410,13 +429,14 @@ public class ServerThread implements Runnable
 
                 } else {
                   //conferma = false
-                  String dbquery = "DELETE FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
-                  db.executeQuery(dbquery, this.loggedCliente.getEmail());
-                  dbquery = "DELETE FROM proposte_di_acquisto WHERE cliente_id = ? AND completato = 0";
+                  String dbquery = "DELETE FROM proposte_di_acquisto WHERE cliente_id = ? AND completato = 0";
                   db.executeUpdate(dbquery, this.loggedCliente.getEmail());
+                  dbquery = "DELETE FROM ordini_vendita WHERE cliente_id = ? AND completato = 0";
+                  db.executeUpdate(dbquery, this.loggedCliente.getEmail());
+                  response.set(2,null,connectionAuthCode);
+                  response.setSuccess();
+                  
                 }
-                response.set(1, null, this.connectionAuthCode);
-                response.setSuccess();
                 message(response, os);
               }
             }
@@ -430,15 +450,13 @@ public class ServerThread implements Runnable
 
                 if (resultSet.next()) {
                   if (conferma) {
-
-
-                    //Get Objects from db
+                  //Get Objects from db
                     query = "SELECT pa.*, ov.*, cl.* FROM proposte_di_acquisto pa INNER JOIN ordini_vendita ov ON pa.ordine_id = ov.id INNER JOIN clienti cl ON pa.cliente_id = cl.email WHERE pa.cliente_id = ? AND pa.completato = 0;";
                     resultSet = db.executeQuery(query, this.loggedCliente.getEmail());
 
                     if (resultSet.next()) {
                       PropostaAcquisto propostaAcquisto = dbGetPropostaAcquisto(resultSet);
-                      OrdineAcquisto ordineAcquisto = new OrdineAcquisto(propostaAcquisto.getCliente(), null, propostaAcquisto, propostaAcquisto.getIndirizzoConsegna(), new Date());
+                      OrdineAcquisto ordineAcquisto = new OrdineAcquisto(null, propostaAcquisto, propostaAcquisto.getIndirizzoConsegna(), new Date());
 
                       //STORE
                       //query = "INSERT INTO ordini_di_acquisto (cliente_id,impiegato_id, proposta_associata_id, indirizzo_azienda, data_creazione, completato) VALUES (?,0,?,?,?,0)";
@@ -448,8 +466,9 @@ public class ServerThread implements Runnable
                       query = "UPDATE proposte_di_acquisto SET completato = 1 WHERE cliente_id = ? AND completato = 0";
                       db.executeUpdate(query, this.loggedCliente.getEmail());
 
-                      //TODO: Post OrdineAcquisto into Queue for worker to handle
+                      //Post OrdineAcquisto into Queue for worker to handle
                       this.server.queuePut(ordineAcquisto);
+                      System.out.println("queuePutted");
 
                       response.set(1, null, this.connectionAuthCode);
                       response.setSuccess();
@@ -660,7 +679,7 @@ public class ServerThread implements Runnable
                   Impiegato impiegato = new Impiegato(passwordtohashImpiegato, nomeImpiegato, cognomeImpiegato, codiceFiscaleImpiegato, emailImpiegato, numeroTelefonicoImpiegato, indirizzoResidenzaImpiegato, false);
                   OrdineVendita ordine = new OrdineVendita(cliente, viniAcquistati, dataConsegnaVendita, dataCreazioneVendita);
                   PropostaAcquisto proposta = new PropostaAcquisto(cliente, viniMancanti, indirizzoDiConsegnaCliente, ordine);
-                  OrdineAcquisto row = new OrdineAcquisto(cliente, impiegato, proposta, indirizzoAziendaAcquisto, dataCreazioneAcquisto);
+                  OrdineAcquisto row = new OrdineAcquisto(impiegato, proposta, indirizzoAziendaAcquisto, dataCreazioneAcquisto);
                   list.add(row);
                 }
                 response.set(1, list, this.connectionAuthCode);
@@ -669,32 +688,35 @@ public class ServerThread implements Runnable
               }
             }
             case 33 -> {
+              System.out.println("Got from client request id: " + requestId);
               //ordineAcquisto wait from queue
               if (requestData != null && requestData instanceof Integer) {
                 //Set Time end
-                int seconds = (Integer) requestData;
+                Integer seconds = (Integer) requestData;
 
-                OrdineAcquisto fromQueue = this.server.oAqueuePoll(seconds);
+                OrdineAcquisto fromQueue = this.server.oAqueuePoll(seconds.intValue());
                 if (fromQueue != null) {
                   response.set(1, fromQueue, connectionAuthCode);
                   response.setSuccess();
-                  break;
                 } else {
                   response.set(0, null, connectionAuthCode);
                 }
+              }
+              else{
+                response.set(0,null,connectionAuthCode);
               }
               message(response, os);
             }
             case 13 -> {
               System.out.println("Got from client request id: " + requestId);
               //gestisciOrdineAcquisto
-              if (requestData instanceof OrdineAcquisto) {
+              if (requestData instanceof OrdineAcquisto && requestData != null) {
                 OrdineAcquisto ordineAcquisto = (OrdineAcquisto) requestData;
                 ordineAcquisto.setImpiegato(loggedImpiegato);
 
                 //Aggiorno in db quanto gia creato dal cliente
-                String query = "INSERT INTO ordini_di_acquisto (cliente_id,impiegato_id, proposta_associata_id, indirizzo_azienda, data_creazione, completato) VALUES (?,?,?,?,?,0)";
-                db.executeUpdate(query, ordineAcquisto.getCliente().getEmail(), ordineAcquisto.getImpiegato().getEmail(), ordineAcquisto.getPropostaAssociata().getId(), ordineAcquisto.getIndirizzoAzienda(), ordineAcquisto.getDataCreazione());
+                String query = "INSERT INTO ordini_di_acquisto (impiegato_id, proposta_associata_id, indirizzo_azienda, data_creazione, completato) VALUES (?,?,?,?,0)";
+                db.executeUpdate(query, ordineAcquisto.getImpiegato().getEmail(), ordineAcquisto.getPropostaAssociata().getId(), ordineAcquisto.getIndirizzoAzienda(), ordineAcquisto.getDataCreazione());
 
                 //Aggiorno disponibilità vini
                 Map<Integer, Integer> wineList = toMapIntInt(ordineAcquisto.getPropostaAssociata().getVini());
@@ -717,8 +739,8 @@ public class ServerThread implements Runnable
                 }
 
                 //retrieve id from db
-                String dbquery = "SELECT id FROM ordini_di_acquisto WHERE cliente_id = ? AND completato = 0";
-                ResultSet resultSet = db.executeQuery(dbquery, ordineAcquisto.getCliente().getEmail());
+                String dbquery = "SELECT id FROM ordini_di_acquisto WHERE impiegato_id = ? AND completato = 0";
+                ResultSet resultSet = db.executeQuery(dbquery, ordineAcquisto.getImpiegato().getEmail());
                 if (resultSet.next()) {
                   int id = resultSet.getInt("id");
                   //Update values in db
@@ -727,9 +749,11 @@ public class ServerThread implements Runnable
                   response.set(1, ordineAcquisto, connectionAuthCode);
                   response.setSuccess();
                 }
-              } else {
+              } 
+              else {
                 response.set(0, null, connectionAuthCode);
               }
+              message(response, os);
             }
             case 34 -> {
               //ordineVendita wait from queue
@@ -843,6 +867,30 @@ public class ServerThread implements Runnable
               response.set(1, rowsAffected, this.connectionAuthCode);
               if (rowsAffected == 1) {
                 response.setSuccess();
+              }
+              message(response, os);
+            }
+            case 23 -> {
+              if(requestData != null && requestData instanceof ReportMensile){
+                ReportMensile reportMensile = (ReportMensile) requestData;
+                String query = "SELECT * FROM report";
+                ResultSet resultSet = db.executeQuery(query);
+                if(resultSet.next()){
+                  //ce un report passato
+                  Gson gson = new Gson();
+                  Type mapType = new TypeToken<Map<Integer, Integer>>() {}.getType();
+                  Map<Integer,Integer> venditePerVinoPassato = gson.fromJson(resultSet.getString("vendite_per_vini"), mapType);
+                  Type mapType2 = new TypeToken<Map<String, Integer>>() {}.getType();
+                  Map<String,Integer> valutazioneDipendentiPassato = gson.fromJson(resultSet.getString("valutazione_dipendenti"), mapType2);
+                  ReportMensile reportPassato = new ReportMensile(resultSet.getFloat("introiti"), resultSet.getFloat("spese"), resultSet.getInt("bottiglie_vendute"), resultSet.getInt("bottiglie_disponibili"), venditePerVinoPassato, valutazioneDipendentiPassato);
+                  //TODO: Completa
+                }
+                else{
+                  //Questo e il primo
+                }
+
+
+                Map<Integer,Integer> venditePerVino = new HashMap();
               }
               message(response, os);
             }
@@ -1019,6 +1067,23 @@ public class ServerThread implements Runnable
     }
     return cliente;
   }
+  private Boolean checkAvability(Map<Integer, Integer> bottiglieList) throws SQLException{
+    Boolean available = true;
+    for (Map.Entry<Integer, Integer> line : bottiglieList.entrySet()) {
+      Integer idVino = line.getKey();
+      Integer quantitaRichiesta = line.getValue();
+      String dbquery = "SELECT * FROM vini where id = ?";
+      ResultSet resultSet = db.executeQuery(dbquery, idVino);
+      Vino vino;
+      if(resultSet.next()){
+        vino = rebuildVinoFromResultSet(resultSet);
+        if(vino.getDisponibilita() < quantitaRichiesta){
+          available = false;
+      }
+    }
+  }
+    return available;
+  }
   private OrdineVendita dbGetOrdineVendita(ResultSet resultSet) throws SQLException{
       int id = 0;
       Cliente cliente = null;
@@ -1039,5 +1104,6 @@ public class ServerThread implements Runnable
         }
       return new OrdineVendita(id,cliente,winelist,dataConsegna, dataCreazione);
     }
+    
 }
 

@@ -18,18 +18,17 @@ public class Amministratore extends Impiegato {
         return res.isSuccess();
     }
 
-    // TODO: Salva nel db il report passato
-    //S: è solo da salvare cosi? o va gestito? se va gestito cosa ci devo fare
     public boolean preparazioneReport(ReportMensile report) {
         Request req = new Request();
-        req.set(0,report,this.AuthCode);
+        req.set(23,report,this.AuthCode);
 
         Response res = client.message(req);
         return res.isSuccess();
     }
+
     public List<String> ricercaImpiegati(){
         Request req = new Request();
-        req.set(0,null,this.AuthCode);
+        req.set(24,null,this.AuthCode);
 
         Response res = client.message(req);
 

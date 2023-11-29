@@ -5,14 +5,12 @@ import java.util.Date;
 import java.util.Map;
 
 public class OrdineAcquisto implements Serializable{
-    private Cliente cliente;
     private PropostaAcquisto propostaAssociata;
     private String indirizzoAzienda;
     private Date dataCreazione;
     private Impiegato impiegato;
 
-    public OrdineAcquisto(Cliente cliente, Impiegato impiegato, PropostaAcquisto propostaAssociata, String indirizzoAzienda, Date dataCreazione) {
-        this.cliente = cliente;
+    public OrdineAcquisto(Impiegato impiegato, PropostaAcquisto propostaAssociata, String indirizzoAzienda, Date dataCreazione) {
         this.impiegato = impiegato;
         this.propostaAssociata = propostaAssociata;
         this.indirizzoAzienda = indirizzoAzienda;
@@ -20,11 +18,7 @@ public class OrdineAcquisto implements Serializable{
     }
 
     public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
+        return this.propostaAssociata.getCliente();
     }
 
     public Map<Vino, Integer> getViniMancanti() {
