@@ -8,10 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -37,6 +35,7 @@ public class ServerThread implements Runnable
 {
   private static final int MAX = 100;
   private static final long SLEEPTIME = 2000;
+  private static final int SOGLIA_VINI = 50;    //Soglia disponibilita vini
 
   private Server server;
   private Socket socket;
@@ -414,12 +413,14 @@ public class ServerThread implements Runnable
                     dbquery = "UPDATE ordini_vendita SET completato = 1 WHERE id = ? AND completato = 0";
                     db.executeUpdate(dbquery, id);
 
+                    //Verifica Soglia disponibilita
+                    verificaSoglia(SOGLIA_VINI);
+
                     response.set(1, ordineVendita, this.connectionAuthCode);
                     response.setSuccess();
                   }
                   else{
-                    //disponibilità cambiate, vini non piu presenti!
-                    //TODO: In questo caso che facciamo?
+                    //disponibilità cambiate, vini non piu presenti!s
                     response.set(0,null,connectionAuthCode);
                   }
                   } else {
@@ -883,14 +884,42 @@ public class ServerThread implements Runnable
                   Type mapType2 = new TypeToken<Map<String, Integer>>() {}.getType();
                   Map<String,Integer> valutazioneDipendentiPassato = gson.fromJson(resultSet.getString("valutazione_dipendenti"), mapType2);
                   ReportMensile reportPassato = new ReportMensile(resultSet.getFloat("introiti"), resultSet.getFloat("spese"), resultSet.getInt("bottiglie_vendute"), resultSet.getInt("bottiglie_disponibili"), venditePerVinoPassato, valutazioneDipendentiPassato);
-                  //TODO: Completa
+                  Map<Integer,Integer> venditePerVino = new HashMap<>();
+                  for (Map.Entry<Integer, Integer> line : reportPassato.getVenditePerVino().entrySet()) {
+                    Integer vinoId = line.getKey();
+                    Integer venditePrecedenti = line.getValue();
+                    query = "SELECT numero_vendite FROM vini WHERE id = ?";
+                    resultSet = db.executeQuery(query, vinoId);
+                    int venditeAttuali = 0;
+                    if(resultSet.next()){
+                      venditeAttuali = resultSet.getInt("numero_vendite");
+                      venditePerVino.put(vinoId, venditeAttuali-venditePrecedenti);
+                    }
+                    else{
+                      //vino non presente
+                      venditeAttuali = 0;
+                    }
+                }
+                reportMensile.setVenditePerVino(venditePerVino);
                 }
                 else{
-                  //Questo e il primo
+                  query = "SELECT * FROM vini";
+                  resultSet = db.executeQuery(query);
+                  Map<Integer,Integer> venditePerVino = new HashMap<>();
+                  while(resultSet.next()){
+                    Vino vino = rebuildVinoFromResultSet(resultSet);
+                    venditePerVino.put(vino.getId(),vino.getNumeroVendite());
+                  }
+                  reportMensile.setVenditePerVino(venditePerVino);
+                }
+                if(dbStoreReportMensile(reportMensile)){
+                  response.set(1,null,connectionAuthCode);
+                  response.setSuccess();
+                }
+                else{
+                  response.set(0,null,connectionAuthCode);
                 }
 
-
-                Map<Integer,Integer> venditePerVino = new HashMap();
               }
               message(response, os);
             }
@@ -953,13 +982,13 @@ public class ServerThread implements Runnable
   private String mapVinoToIdSerialized(Map<Vino,Integer> map){
     Map<Integer,Integer> mapInteger = new HashMap<>();
     Gson gson = new Gson();
-    
+    if(map != null){
     for (Map.Entry<Vino, Integer> line : map.entrySet()){
       int keyOut = line.getKey().getId();
       int valueOut = line.getValue();
       mapInteger.put(keyOut,valueOut);
     }
-    
+  }
     return gson.toJson(mapInteger);
   }
   private Map<Integer,Integer> toMapIntInt(Map<Vino,Integer> mapVino){
@@ -1007,8 +1036,12 @@ public class ServerThread implements Runnable
 
       //String lista_quantita = mapgson.toJson(ordineVendita.getViniAcquistati());
       String lista_quantita = mapVinoToIdSerialized(ordineVendita.getViniAcquistati());
-      java.sql.Date dataConsegna = new java.sql.Date(ordineVendita.getDataConsegna().getTime());
-      java.sql.Date dataCreazione = new java.sql.Date(ordineVendita.getDataCreazione().getTime());
+      java.sql.Date dataCreazione = new java.sql.Date(new Date().getTime());
+      java.sql.Date dataConsegna = new java.sql.Date(new Date().getTime());
+      if(ordineVendita.getDataConsegna() != null && ordineVendita.getDataCreazione() != null){
+      dataConsegna = new java.sql.Date(ordineVendita.getDataConsegna().getTime());
+      dataCreazione = new java.sql.Date(ordineVendita.getDataCreazione().getTime());
+      }
       return db.executeUpdate(dbquery,ordineVendita.getCliente().getEmail(), lista_quantita,ordineVendita.getIndirizzoConsegna(),dataConsegna, dataCreazione, ordineVendita.isCompletato(),ordineVendita.isFirmato());
                     
     }
@@ -1026,7 +1059,24 @@ public class ServerThread implements Runnable
       PropostaAcquisto propostaAcquisto = new PropostaAcquisto(id, cliente, viniProposta, resultSet.getString("indirizzo_consegna"), ordineVendita);
       return propostaAcquisto;
     }
+  private PropostaAcquisto dbGetPropostaAcquistoNotCompleted(int ordineVenditaId) throws SQLException{
+      String query = "SELECT pa.*, ov.*, cl.* FROM proposte_di_acquisto pa INNER JOIN ordini_vendita ov ON pa.ordine_id = ov.id INNER JOIN clienti cl ON pa.cliente_id = cl.email WHERE ov.id = ? AND pa.completato = 0";
+      ResultSet resultSet = db.executeQuery(query, ordineVenditaId);         
+      resultSet.next();
+      Cliente cliente = new Cliente(resultSet.getString("cl.nome"),resultSet.getString("cl.cognome"),null,resultSet.getString("cl.codice_fiscale"),resultSet.getString("cl.email"),resultSet.getString("cl.numero_telefonico"),resultSet.getString("cl.indirizzo_consegna"),false);
+      int id = resultSet.getInt("pa.id");
+      Gson gson = new Gson();
+      Type mapType = new TypeToken<Map<Integer, Integer>>() {}.getType();
+      Map<Integer,Integer> viniOrdineID = gson.fromJson(resultSet.getString("ov.lista_quantita"), mapType);
+      Map<Integer, Integer> viniPropostaID = gson.fromJson(resultSet.getString("pa.lista_quantita"), mapType);
+      Map<Vino,Integer> viniProposta = rebuildFromMapIntInt(viniPropostaID);
+      Map<Vino,Integer> viniOrdine = rebuildFromMapIntInt(viniOrdineID);
+      
 
+      OrdineVendita ordineVendita = new OrdineVendita(cliente,viniOrdine,resultSet.getDate("data_consegna"),resultSet.getDate("data_creazione"));
+      PropostaAcquisto propostaAcquisto = new PropostaAcquisto(id, cliente, viniProposta, resultSet.getString("indirizzo_consegna"), ordineVendita);
+      return propostaAcquisto;
+    }
   private Vino rebuildVinoFromResultSet(ResultSet resultSet)throws SQLException{
     //Build vino object from resultSet
     int id = resultSet.getInt("id");
@@ -1045,7 +1095,7 @@ public class ServerThread implements Runnable
       return vino;
     }
   private Cliente clienteFromID(String id)throws SQLException{
-    String query = "SELECT * from Clienti where id = ?";
+    String query = "SELECT * FROM clienti WHERE email = ?";
     ResultSet resultSet = db.executeQuery(query, id);
     String nome;
     String cognome;
@@ -1060,7 +1110,7 @@ public class ServerThread implements Runnable
       nome = resultSet.getString("nome");
       cognome = resultSet.getString("cognome");
       passwordhash = resultSet.getString("password_hash");
-      codiceFiscale = resultSet.getString("codiceFiscale");
+      codiceFiscale = resultSet.getString("codice_fiscale");
       numeroTelefonico = resultSet.getString("numero_telefonico");
       indirizzoConsegna = resultSet.getString("indirizzo_consegna");
       cliente = new Cliente(nome,cognome,passwordhash,codiceFiscale,email,numeroTelefonico,indirizzoConsegna,false);
@@ -1103,6 +1153,135 @@ public class ServerThread implements Runnable
         winelist = rebuildFromMapIntInt(winelistInt);
         }
       return new OrdineVendita(id,cliente,winelist,dataConsegna, dataCreazione);
+    }
+     private OrdineVendita dbGetOrdineVenditaNext(ResultSet resultSet) throws SQLException{
+      int id = 0;
+      Cliente cliente = null;
+      Date dataConsegna = null;
+      Date dataCreazione = null;
+      Map<Integer, Integer> winelistInt = new HashMap<>();
+      Map<Vino, Integer> winelist = new HashMap<>();
+        id = resultSet.getInt("id");
+        cliente = clienteFromID(resultSet.getString("cliente_id"));
+        dataConsegna = resultSet.getDate("data_consegna");
+        dataCreazione = resultSet.getDate("data_creazione");
+        Gson gson = new Gson();
+        Type mapType = new TypeToken<Map<Integer, Integer>>() {}.getType();
+        winelistInt = gson.fromJson(resultSet.getString("lista_quantita"), mapType);
+        winelist = rebuildFromMapIntInt(winelistInt);
+      return new OrdineVendita(id,cliente,winelist,dataConsegna, dataCreazione);
+    }
+    
+    
+    public OrdineAcquisto buildOrdineAcquistoToReplenish(Map<Vino,Integer> lowVino) throws SQLException{
+
+      //check for entities in db
+      Cliente fakeCl = new Cliente(null, null, null, null, "clientesoglia", null, null, false);
+      String query = "SELECT * FROM clienti WHERE email = ?";     //id of fake cliente for replenishing
+      ResultSet resultSet = db.executeQuery(query,fakeCl.getEmail());
+      if(resultSet.next()){
+        //fake cliente already in db
+        
+      }
+      else{
+        //fake cliente not in db
+        String insertClienteFake = "INSERT INTO clienti (email,nome,cognome,password_hash,codice_fiscale,numero_telefonico,indirizzo_consegna) values (?,'o','o','o','o','o','')";
+        db.executeUpdate(insertClienteFake,fakeCl.getEmail());
+      }
+      //look for fake OrdineVendita
+      query = "SELECT * FROM ordini_vendita WHERE cliente_id = ?";
+      resultSet = db.executeQuery(query, fakeCl.getEmail());
+      OrdineVendita fakeOv;
+      if(resultSet.next()){
+        //fake OrdineVendita gia presente, recupera
+        fakeOv = dbGetOrdineVenditaNext(resultSet);
+      }
+      else{
+        //fake ordineVendita non presente, crea
+        fakeOv = new OrdineVendita(fakeCl, null, null);
+        fakeOv.setIndirizzoConsegna("o");
+        dbStoreOrdineVendita(fakeOv);
+        //get fakeOv id
+        query = "SELECT id FROM ordini_vendita WHERE cliente_id = ?";
+        resultSet = db.executeQuery(query, fakeCl.getEmail());
+        if(resultSet.next()){
+          fakeOv.setId(resultSet.getInt("id"));
+        }
+      }
+
+      //look for pending proposte
+      PropostaAcquisto fakePa;
+      query = "SELECT * FROM proposte_di_acquisto WHERE cliente_id = ? AND completato = 0";
+      resultSet = db.executeQuery(query,fakeCl.getEmail());
+      if(resultSet.next()){
+        //Ce gia una proposta di acquisto per il rifornimento non completata, aggiornala
+        
+        System.out.println("proposta gia presente, aggiorna");
+        fakePa = dbGetPropostaAcquistoNotCompleted(fakeOv.getId());
+        query = "UPDATE proposte_di_acquisto SET lista_quantita = ? WHERE id = ?";
+        db.executeUpdate(query, mapVinoToIdSerialized(lowVino),fakePa.getId());
+        
+      }
+      else{
+        //nessuna proposta per rifornimento pending
+        System.out.println("proposta non presente, nuova");
+        fakePa = new PropostaAcquisto(fakeCl, lowVino, null, null);
+        //store in db
+        query = "INSERT INTO proposte_di_acquisto (cliente_id,ordine_id,lista_quantita,completato) values (?,?,?,0)";
+        db.executeUpdate(query,fakeCl.getEmail(),fakeOv.getId(),mapVinoToIdSerialized(lowVino));
+        query = "SELECT id FROM proposte_di_acquisto WHERE cliente_id = ?";
+        resultSet = db.executeQuery(query, fakeCl.getEmail());
+
+        if(resultSet.next()){
+          fakePa.setId(resultSet.getInt("id"));
+        }
+      }
+      OrdineAcquisto ordineAcquisto = new OrdineAcquisto(null,fakePa,"",new Date());
+      return ordineAcquisto;
+    }
+    
+    public boolean dbStoreReportMensile(ReportMensile report){
+      java.sql.Date dataCreazione = new java.sql.Date(new Date().getTime());
+      String query = "INSERT INTO report (introiti,spese,bottiglie_vendute,bottiglie_disponibili,vendite_per_vini,valutazione_dipendenti,data_creazione) VALUES (?,?,?,?,?,?,?)";
+      try{
+      if(db.executeUpdate(query,report.getIntroiti(),report.getSpese(),report.getBottiglieDisponibili(),report.getBottiglieVendute(),report.getVenditePerVino(),report.getValutazioneDipendenti(),dataCreazione) == 1){
+        return true;
+      }
+      else{
+        return false;
+      }
+    }
+    catch (SQLException e)
+    {
+      return false;
+    }
+    }
+
+    public void verificaSoglia(int threshold) throws SQLException{
+      Boolean underThreshold = true;
+      Map<Vino,Integer> lowMap = new HashMap<>();
+      //recupera vini
+      String dbquery = "SELECT * FROM vini";
+      ResultSet resultSet = db.executeQuery(dbquery);
+      //check soglia
+      while(resultSet.next()){
+        Vino row = rebuildVinoFromResultSet(resultSet);
+        if(row.getDisponibilita() < threshold){
+          underThreshold = true;
+          lowMap.put(row, threshold - row.getDisponibilita());
+        }
+      }
+      if(underThreshold){
+        try{
+          //check if other already in queue
+          OrdineAcquisto replenish = buildOrdineAcquistoToReplenish(lowMap);
+          System.out.println(this.server.popFromOaQueue(replenish));
+          this.server.queuePut(replenish);
+        }
+        catch(InterruptedException e){
+          e.printStackTrace();
+        }
+      }
     }
 
 }

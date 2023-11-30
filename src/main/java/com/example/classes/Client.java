@@ -91,17 +91,18 @@ public class Client implements AutoCloseable{
         examplecliente.login();
         //examplecliente.ClientModificaCredenziali("1234");
         
-        FiltriRicerca fr = new FiltriRicerca(null, null, null, 2012);
+        //FiltriRicerca fr = new FiltriRicerca(null, null, null, 2012);
         //examplecliente.cercaVini(fr);
         Map<Integer, Integer> list = new HashMap();
-        list.put(4,15);
-        //list.put(2,10);
+        //list.put(5,48);
+        list.put(2,5);
         //list.put(6,1);
 
 
-        //examplecliente.acquistaBottiglie(list);
+        examplecliente.acquistaBottiglie(list);
         //examplecliente.proponiAcquisto(true);
         examplecliente.confermaPagamento(true);
+
 
         //Amministratore exampleAdmin = new Amministratore("1234","admin","admin","admin","root@admin.admin","0000","none",true);
          
@@ -128,11 +129,12 @@ public class Client implements AutoCloseable{
         //calendar.set(2023,Calendar.DECEMBER,1);
         //Date Date2 = calendar.getTime();
         //System.out.println(exampleImpiegato.ricercaOrdiniVendita(Date1,Date2));
-        /* 
-        OrdineAcquisto oa = exampleImpiegato.recuperaOrdineAcquisto(10);
-        System.out.println(oa);
-        exampleImpiegato.gestioneOrdineAcquisto(oa);
-        */
+        
+        //Response res = exampleImpiegato.recuperaOrdineAcquisto(10);
+        //OrdineAcquisto oa = (OrdineAcquisto) res.getData();
+        //System.out.println(oa);
+        //exampleImpiegato.gestioneOrdineAcquisto(oa);
+        
         //System.out.println(exampleImpiegato.ricercaOrdiniAcquisto(Date1, Date2));
 
 
