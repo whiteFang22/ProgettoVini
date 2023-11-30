@@ -6,6 +6,7 @@ import java.net.Socket;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.Queue;
 
 import com.example.classes.*;
 
@@ -125,6 +126,32 @@ public class Server
       System.out.println("in ordineacquistoqueue");
 
     }
+  }
+    public OrdineAcquisto popFromOaQueue(OrdineAcquisto lookFor) throws InterruptedException{
+      LinkedBlockingQueue<OrdineAcquisto> tempQueue = new LinkedBlockingQueue<OrdineAcquisto>();
+
+        // Variable to check if the element is found
+        OrdineAcquisto foundOrdineAcquisto = null;
+        while (!this.oaQueue.isEmpty()) {
+            // Dequeue an element
+            OrdineAcquisto currentElement = this.oaQueue.take();
+
+            // Check if the current element is the target
+            if (currentElement.getCliente().getEmail() == lookFor.getCliente().getEmail()) {
+                foundOrdineAcquisto = currentElement;
+                System.out.println("popped");
+            }
+            else{
+               // Enqueue the current element to the temporary queue
+              tempQueue.put(currentElement);
+
+            }
+        }
+
+        while (!tempQueue.isEmpty()) {
+            this.oaQueue.put(tempQueue.take());
+        }
+        return foundOrdineAcquisto;
     
   }
   /**
